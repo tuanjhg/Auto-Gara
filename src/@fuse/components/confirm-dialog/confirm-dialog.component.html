@@ -1,0 +1,16 @@
+  <div mat-dialog-title class="dialog-header flex items-center justify-center">
+    <span class="heading p-4 w-full font-bold">{{title | transloco}}</span>
+  </div>
+
+  <div mat-dialog-content class="dialog-content px-8 py-5 text-center">
+    <div [innerHTML]="message"></div>
+  </div>
+
+  <div mat-dialog-actions class="flex items-center mb-4 mb-0 px-6 py-4 justify-center">
+    <button mat-stroked-button color="primary"  class="mr-2 border-primary" (click)="onDismiss()">
+        {{'cancel' | transloco}}
+    </button>
+    <button mat-flat-button color="primary" (click)="onConfirm()">
+        {{ 'confirm' | transloco }}
+    </button>
+  </div>
