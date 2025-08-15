@@ -5,6 +5,15 @@ export const appRoutes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: '404' },
 
     {
+        path: 'order',
+        component: LayoutComponent,
+        data: {
+            layout: 'classic',
+        },
+        loadChildren: () => import('app/modules/work-order/work-order.module').then(m => m.WorkOrderModule)
+    },
+
+    {
         path: '404',
         component: LayoutComponent,
         data: {
