@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FuseLoadingBarModule } from '@fuse/components/loading-bar';
 import { SharedModule } from 'app/shared/shared.module';
-import { EmptyLayoutComponent } from 'app/layout/layouts/empty/empty.component';
+import { ClassicLayoutComponent } from 'app/layout/layouts/classic/classic.component';
 import { CommonModule } from '@angular/common';
 
 @NgModule({
     declarations: [
-        EmptyLayoutComponent
+        ClassicLayoutComponent
     ],
     imports     : [
         RouterModule,
@@ -16,9 +16,10 @@ import { CommonModule } from '@angular/common';
         CommonModule
     ],
     exports     : [
-        EmptyLayoutComponent
+        ClassicLayoutComponent
     ]
 })
-export class EmptyLayoutModule
+export class ClassicLayoutModule
 {
+    
 }

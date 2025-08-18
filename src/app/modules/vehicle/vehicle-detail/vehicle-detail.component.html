@@ -1,0 +1,98 @@
+
+<div *ngIf="vehicle" class="space-y-6 p-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">{{ vehicle.make }} {{ vehicle.model }}</h1>
+      <p class="text-gray-500">Details for vehicle <span class="font-semibold text-gray-700">{{ vehicle.plate_number }}</span></p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button (click)="editVehicle()" class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200">Edit</button>
+      <button (click)="deleteVehicle()" class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600">Delete</button>
+      <button class="mb-0.5" (click)="close()">
+          <mat-icon svgIcon="exit_to_app"></mat-icon>
+        </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div class="space-y-6 lg:col-span-1">
+      <div class="rounded-lg bg-white p-4 shadow">
+        <img [src]="displayImage" alt="Main Vehicle Image" class="mb-3 h-auto w-full rounded-lg" />
+        <div class="grid grid-cols-3 gap-3">
+          <img *ngFor="let thumb of vehicle.images.thumbnails" 
+               [src]="thumb" 
+               (click)="changeDisplayImage(thumb)"
+               alt="Thumbnail image" 
+               class="cursor-pointer rounded-md hover:border-blue-500"
+               [ngClass]="{'border-2 border-blue-500': thumb === displayImage}" />
+        </div>
+      </div>
+
+      <div class="rounded-lg bg-white p-4 shadow">
+        <h3 class="mb-3 text-lg font-semibold">Key Information</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Owner</span>
+            <span class="font-medium text-gray-800">{{ vehicle.ownerName }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Status</span>
+
+            <span class="rounded-full px-2 py-1 text-xs font-semibold" [ngClass]="getStatusStyle(vehicle.status.style)" >
+              {{ vehicle.status.label }}
+            </span>
+            
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Entry Date</span>
+            <span class="font-medium text-gray-800">{{ vehicle.entryDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">VIN</span>
+            <span class="font-medium text-gray-800">{{ vehicle.vin }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-white p-4 shadow lg:col-span-2">
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-6">
+          <a href="javascript:void(0)" 
+             (click)="selectTab('info')"
+             class="px-1 py-3 text-sm font-medium"
+             [ngClass]="{
+                'border-b-2 border-yellow-400 text-yellow-500': activeTab === 'info', 
+                'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': activeTab !== 'info'
+             }">
+            Vehicle Info
+          </a>
+          <a href="javascript:void(0)"
+             (click)="selectTab('history')"
+             class="px-1 py-3 text-sm font-medium"
+             [ngClass]="{
+                'border-b-2 border-yellow-400 text-yellow-500': activeTab === 'history', 
+                'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': activeTab !== 'history'
+             }">
+             Repair History
+          </a>
+        </nav>
+      </div>
+      
+      <div *ngIf="activeTab === 'info'" class="py-5">
+        <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
+         <div *ngFor="let field of infoFields" 
+          class="flex flex-col" 
+         [ngClass]="field.className"> <span class="text-gray-500">{{ field.label }}</span>
+          <span class="font-semibold">{{ field.value }}</span>
+      </div>
+
+      <div *ngIf="activeTab === 'history'" class="py-5">
+        <p class="text-gray-600">Repair history will be displayed here.</p>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+</div>

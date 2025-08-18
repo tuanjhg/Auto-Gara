@@ -1,10 +1,18 @@
-
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { HeaderComponent } from './components/header/header.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+
 
 @NgModule({
-    declarations: [],
-    imports: [],
-    exports: [],
+    declarations: [
+    HeaderComponent,
+    SidebarComponent
+  ],
+    imports: [CommonModule,RouterModule,MatIconModule],
+    exports: [HeaderComponent,SidebarComponent,MatIconModule,CommonModule],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SharedModule {}

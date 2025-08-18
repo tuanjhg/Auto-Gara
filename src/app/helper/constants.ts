@@ -2,7 +2,7 @@ import { environment } from 'environments/environment';
 
 const BASE_API_URL = environment.apiUrl + '/api/v1';
 
-export enum  HttpErrorMessage {
+export enum HttpErrorMessage {
     zero = 'server.is.currently.offline',
     badRequest = 'bad.request',
     unauthorized = 'unauthorized',
@@ -125,7 +125,8 @@ enum EndPoint {
     product = 'product',
     stamps = 'stamps',
     survey = 'survey',
-    workTime = 'workTime'
+    workTime = 'workTime',
+    garaList = 'tenant'
 }
 export enum LangEnum {
     ALL = 'all',

@@ -1,0 +1,27 @@
+<section class="flex h-full w-full items-center justify-center bg-[#DEE33E] p-16 font-sans">
+  <div class="flex min-h-screen flex-col items-center justify-center p-4">
+    <header class="mb-8 items-center justify-center text-center">
+      <img src="favicon-32x32.png" alt="Garage Auto Logo" class="mb-4 h-12 w-12 mx-auto">
+      <h1 class="text-2xl font-bold text-black">Garage Auto</h1>
+    </header>
+    <main class="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+      <h2 class="mb-8 text-center text-3xl font-bold text-black">Login to your account</h2>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="mb-4">
+          <input type="email" formControlName="email" placeholder="Email" class="w-full rounded-s-md bg-gray-100 p-3 text-gray-700" />
+          <div *ngIf="submitted && form.email.errors" class="text-red-500 text-sm mt-1">
+        <div *ngIf="form.email.errors.required">Email is required.</div>
+        <div *ngIf="form.email.errors.email">Invalid email format.</div>
+          </div>
+        </div>
+        <div class="relative mb-6">
+          <input type="password" formControlName="password" placeholder="Password" class="w-full rounded-s-md bg-gray-100 p-3 text-gray-700" />
+          <div *ngIf="submitted && form.password.errors" class="text-red-500 text-sm mt-1">
+        <div *ngIf="form.password.errors.required">Password is required.</div>
+          </div>
+        </div>
+        <button type="submit" class="hover:bg-opacity-90 w-full rounded-lg bg-[#DEE33E] px-4 py-3 font-semibold transition-colors">Login</button>
+      </form>
+    </main>
+  </div>
+</section>

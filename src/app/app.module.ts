@@ -11,6 +11,8 @@ import { LayoutModule } from 'app/layout/layout.module';
 import { NgModule } from '@angular/core';
 import { appConfig } from 'app/core/config/app.config';
 import { appRoutes } from 'app/app.routing';
+import { HttpClientModule } from '@angular/common/http';
+
 
 const routerConfig: ExtraOptions = {
     preloadingStrategy: PreloadAllModules,
@@ -21,10 +23,12 @@ const routerConfig: ExtraOptions = {
 @NgModule({
     declarations: [
         AppComponent,
+        
     ],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
+        HttpClientModule,
         RouterModule.forRoot(appRoutes, routerConfig),
 
         // Fuse, FuseConfig & FuseMockAPI

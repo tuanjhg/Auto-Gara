@@ -1,0 +1,135 @@
+<div class="p-5">
+  <div class="flex flex-row justify-between">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Add New Vehicle</h1>
+        <p class="text-gray-500">
+          Step {{ currentStep + 1 }} of {{ formSections.length }}: {{ currentSection.title }}
+        </p>
+    </div>
+        <button class="mb-6" (click)="close()">
+          <mat-icon svgIcon="exit_to_app"></mat-icon>
+        </button>
+
+  </div>
+  
+  <div class="mx-auto max-w-4xl rounded-lg bg-white p-8 shadow-lg">
+    <div class="mb-8 flex justify-between">
+      <div *ngFor="let section of formSections; let i = index" class="flex-1">
+        <div 
+          class="w-full py-1"
+          [ngClass]="{
+            'bg-[#DEE33E]': i <= currentStep, 
+            'bg-gray-200': i > currentStep,
+            'rounded-l-full': i === 0,
+            'rounded-r-full': i === formSections.length - 1
+          }"
+        ></div>
+      </div>
+    </div>
+    <form [formGroup]="vehicleForm" (ngSubmit)="onSubmit()" class="space-y-8 h-120 overflow-y-auto">
+
+      <div>
+        <div 
+          class="grid gap-6 text-sm"
+          [ngClass]="
+            currentSection.fields.length <=6 ? 'grid-cols-1': 'grid-cols-1 md:grid-cols-2'
+        ">
+    <ng-container *ngFor="let field of currentSection.fields">
+      <div [ngClass]="field.colspan === 2 ? 'col-span-1 md:col-span-2' : ''">
+          <label [for]="field.name" class="mb-1 block font-medium text-gray-700">
+            {{ field.label }}<span *ngIf="field.required" class="text-red-500"> *</span>
+          </label>
+
+          <ng-container [ngSwitch]="field.type">
+            <input 
+              *ngSwitchCase="'text'" 
+              [id]="field.name" 
+              [type]="field.type" 
+              [placeholder]="field.placeholder" 
+              [formControlName]="field.name"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+            <input
+              *ngSwitchCase="'number'"
+              [id]="field.name"
+              [type]="field.type"
+              [placeholder]="field.placeholder"
+              [formControlName]="field.name"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+            <input
+              *ngSwitchCase="'tel'"
+              [id]="field.name"
+              [type]="field.type"
+              [placeholder]="field.placeholder"
+              [formControlName]="field.name"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+            <select
+              *ngSwitchCase="'select'"
+              [id]="field.name"
+              [formControlName]="field.name"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="" disabled>--Select--</option>
+              <option *ngFor="let option of field.options" [value]="option.value">{{ option.label }}</option>
+            </select>
+            <textarea
+              *ngSwitchCase="'textarea'"
+              [id]="field.name"
+              rows="4"
+              [placeholder]="field.placeholder"
+              [formControlName]="field.name"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            ></textarea>
+          </ng-container>
+
+          <div 
+            *ngIf="vehicleForm.get(field.name)?.invalid && vehicleForm.get(field.name)?.touched" 
+            class="mt-1 text-xs text-red-500"
+          >
+            <span *ngIf="vehicleForm.get(field.name)?.errors?.['required']">
+              {{ field.label }} is required.
+            </span>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+  </div>
+
+
+         <div class="flex justify-between border-t pt-4 ">
+        <div>
+          <button 
+            *ngIf="currentStep > 0"
+            type="button" 
+            (click)="previousStep()" 
+            class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Back
+          </button>
+        </div>
+        <div>
+          <button
+              *ngIf="currentStep < formSections.length - 1"
+              type="button" 
+              (click)="nextStep()" 
+              class="rounded-lg bg-[#DEE33E] px-6 py-2 text-sm font-medium text-white hover:bg-yellow-300 disabled:opacity-50"
+            >
+              Next
+            </button>
+          <button 
+            *ngIf="currentStep === formSections.length - 1"
+            type="submit" 
+            [disabled]="vehicleForm.invalid" 
+            class="rounded-lg bg-[#DEE33E] px-6 py-2 text-sm font-medium text-white hover:bg-yellow-300 disabled:opacity-50"
+          >
+            Save Vehicle
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
