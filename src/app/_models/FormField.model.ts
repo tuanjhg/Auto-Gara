@@ -1,7 +1,7 @@
 export interface FormField {
   name: string;
   label: string;
-  type: 'text' | 'number' | 'tel' | 'select' | 'textarea';
+  type: 'text' | 'number' | 'tel' | 'select' | 'textarea' | 'date';
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];

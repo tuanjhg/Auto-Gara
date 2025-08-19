@@ -1,0 +1,102 @@
+<div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <mat-icon svgIcon="assignment" class="text-yellow-500"></mat-icon>
+        Work Order Detail
+    </h1>
+    <div class="flex items-center gap-3 ">
+    <button *ngIf="!isEditMode"
+            (click)="toggleEdit()"
+            class="rounded-lg bg-[#DEE33E] px-5 py-2 text-base font-semibold text-gray-900 shadow hover:bg-yellow-300 transition">
+      Edit
+    </button>
+    <button (click)="onClose()"
+            class="px-4 py-2 bg-gray-200 rounded-lg shadow hover:bg-gray-300 flex items-center transition">
+      <mat-icon svgIcon="exit_to_app" class="text-xl"></mat-icon>
+    </button>
+    </div>
+  </div>
+  <ng-container *ngIf="isEditMode; else viewMode">
+    <ng-template #editMode>
+      <form>
+        <ng-container *ngFor="let section of orderFormSections">
+          <div class="mb-8">
+            <h2 class="text-lg font-bold mb-4">{{ section.title }}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ng-container *ngFor="let field of section.fields">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">{{ field.label }}</label>
+                  <ng-container [ngSwitch]="field.type">
+                    <ng-template ngSwitchCase="text">
+                      <input class="w-full border rounded px-3 py-2" [placeholder]="field.placeholder" [(ngModel)]="workOrder[field.name]" name="{{field.name}}" />
+                    </ng-template>
+                    <ng-template ngSwitchCase="number">
+                      <input type="number" class="w-full border rounded px-3 py-2" [placeholder]="field.placeholder" [(ngModel)]="workOrder[field.name]" name="{{field.name}}" />
+                    </ng-template>
+                    <ng-template ngSwitchCase="date">
+                      <input type="date" class="w-full border rounded px-3 py-2" [placeholder]="field.placeholder" [(ngModel)]="workOrder[field.name]" name="{{field.name}}" />
+                    </ng-template>
+                    <ng-template ngSwitchCase="textarea">
+                      <textarea class="w-full border rounded px-3 py-2" [placeholder]="field.placeholder" [(ngModel)]="workOrder[field.name]" name="{{field.name}}"></textarea>
+                    </ng-template>
+                    <ng-template ngSwitchCase="select">
+                      <select class="w-full border rounded px-3 py-2" [(ngModel)]="workOrder[field.name]" name="{{field.name}}">
+                        <option *ngFor="let opt of field.options" [value]="opt.value">{{ opt.label }}</option>
+                      </select>
+                    </ng-template>
+                    <ng-template ngSwitchDefault>
+                      <span>{{ workOrder?.[field.name] }}</span>
+                    </ng-template>
+                  </ng-container>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </form>
+      <div class="flex items-center justify-between mt-6">
+      <button *ngIf="isEditMode"
+              (click)="toggleEdit()"
+              class="px-5 py-2 bg-gray-400 text-white rounded-lg font-semibold shadow hover:bg-gray-500 transition">
+        Cancel
+      </button>
+        <button *ngIf="isEditMode"
+          (click)="saveWorkOrder()"
+          class="px-5 py-2 bg-[#DEE33E] text-gray-900 rounded-lg font-semibold shadow hover:bg-yellow-300 transition">
+          Save
+        </button>
+      </div>
+    </ng-template>
+    <ng-container *ngTemplateOutlet="editMode"></ng-container>
+  </ng-container>
+
+  <ng-template #viewMode>
+    <div>
+      <ng-container *ngFor="let section of orderFormSections">
+        <div class="mb-8">
+          <h2 class="text-lg font-bold mb-4">{{ section.title }}</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ng-container *ngFor="let field of section.fields">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">{{ field.label }}</label>
+                <div class="w-full border rounded px-3 py-2 bg-slate-50 text-slate-900">
+                  <ng-container [ngSwitch]="field.type">
+                    <ng-template ngSwitchCase="select">
+                      <span>{{ getSelectLabel(field) }}</span>
+                    </ng-template>
+                    <ng-template ngSwitchCase="date">
+                      <span>{{ workOrder?.[field.name] ? (workOrder?.[field.name] | date:'dd/MM/yyyy') : '—' }}</span>
+                    </ng-template>
+                    <ng-template ngSwitchDefault>
+                      <span>{{ workOrder?.[field.name] ?? '—' }}</span>
+                    </ng-template>
+                  </ng-container>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </ng-template>
+</div>

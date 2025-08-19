@@ -1,3 +1,4 @@
+import { FormField, FormSection } from './FormField.model';
 export type WorkOrderStatus =
   | 'pending'
   | 'waiting_for_approval'
@@ -186,3 +187,51 @@ export const workOrders: WorkOrder[] = [
       final_check_at: null,
     }
   ];
+export const ORDER_STATUS_MAP: { value: WorkOrderStatus; label: string; class: string }[] = [
+  { value: 'pending', label: 'pending', class: 'bg-yellow-100 text-yellow-800' },
+  { value: 'waiting_for_approval', label: 'waiting for approval', class: 'bg-blue-100 text-blue-800' },
+  { value: 'in_progress', label: 'in progress', class: 'bg-orange-100 text-orange-800' },
+  { value: 'ready_for_final_check', label: 'Final check', class: 'bg-green-100 text-green-800' },
+  { value: 'completed', label: 'completed', class: 'bg-green-200 text-green-900' },
+  { value: 'paid', label: 'paid', class: 'bg-gray-200 text-gray-900' },
+  { value: 'paused', label: 'paused', class: 'bg-gray-100 text-gray-800' }
+];
+
+export const orderFormSections: FormSection[] = [
+  {
+    title: 'Order Info',
+    fields: [
+      { name: 'tenant_id', label: 'Garage', type: 'text', required: true, placeholder: 'Select garage', section: 'owner' },
+      { name: 'work_order_code', label: 'Work Order Code', type: 'text', required: true, placeholder: 'Enter code', section: 'status' },
+      { name: 'vehicle_id', label: 'Vehicle', type: 'text', required: true, placeholder: 'Select vehicle', section: 'vehicle' },
+      { name: 'customer_id', label: 'Customer', type: 'text', required: true, placeholder: 'Select customer', section: 'owner' },
+      {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        required: true,
+        options: ORDER_STATUS_MAP,
+        placeholder: 'Select status',
+        section: 'status'
+      },
+    ]
+  },
+  {
+    title: 'Details',
+    fields: [
+      { name: 'initial_notes', label: 'Initial Notes', type: 'textarea', required: false, placeholder: 'Notes from customer', section: 'owner' },
+      { name: 'estimated_completion_date', label: 'Estimated Completion Date', type: 'date', required: false, placeholder: 'mm/dd/yyyy', section: 'status' },
+      { name: 'total_quote_price', label: 'Total Quote Price', type: 'number', required: false, placeholder: 'Total quote price', section: 'status' },
+      { name: 'total_paid_amount', label: 'Total Paid Amount', type: 'number', required: false, placeholder: 'Total paid amount', section: 'status' },
+    ]
+  },
+  {
+    title: 'Finalization',
+    fields: [
+      { name: 'created_by_user_id', label: 'Created By', type: 'text', required: true, placeholder: 'Select user', section: 'owner' },
+      { name: 'completed_at', label: 'Completed At', type: 'date', required: false, placeholder: 'Completed at', section: 'status' },
+      { name: 'final_check_by_user_id', label: 'Final Check By', type: 'text', required: false, placeholder: 'Select user', section: 'owner' },
+      { name: 'final_check_at', label: 'Final Check At', type: 'date', required: false, placeholder: 'Final check at', section: 'status' },
+    ]
+  }
+];
