@@ -4,15 +4,17 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { ConfirmModelComponent } from './components/confirm-model/confirm-model.component';
 
 
 @NgModule({
-    declarations: [
+  declarations: [
     HeaderComponent,
-    SidebarComponent
+    SidebarComponent,
+    ConfirmModelComponent,
   ],
-    imports: [CommonModule,RouterModule,MatIconModule],
-    exports: [HeaderComponent,SidebarComponent,MatIconModule,CommonModule],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [CommonModule, RouterModule, MatIconModule],
+  exports: [ConfirmModelComponent, HeaderComponent, SidebarComponent, MatIconModule, CommonModule],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class SharedModule {}
+export class SharedModule { }
