@@ -1,6 +1,5 @@
 import { LayoutComponent } from 'app/layout/layout.component';
 import { Routes } from '@angular/router';
-import { ClassicLayoutComponent } from '@layout/layouts/classic/classic.component';
 
 export const appRoutes: Routes = [
 
@@ -30,7 +29,7 @@ export const appRoutes: Routes = [
     },
 
     {
-        path: 'order',
+        path :'order',
         component: LayoutComponent,
         data: {
             layout: 'classic',
@@ -39,12 +38,12 @@ export const appRoutes: Routes = [
     },
 
     {
-        path: 'order',
+        path: 'gara',
         component: LayoutComponent,
         data: {
             layout: 'classic',
         },
-        loadChildren: () => import('app/modules/work-order/work-order.module').then(m => m.WorkOrderModule)
+        loadChildren: () => import('app/modules/gara/gara.module').then(m => m.garaModule)
     },
 
     {
@@ -56,14 +55,6 @@ export const appRoutes: Routes = [
         loadChildren: () => import('app/modules/not-found/not-found.module').then(m => m.NotFoundModule),
     },
 
-    {
-        path: 'gara-list',
-        component: ClassicLayoutComponent,
-        data: {
-            layout: 'classic',
-        },
-        loadChildren: () => import('app/modules/gara/gara.module').then(m => m.garaModule),
-    },
     {
         path: '**',
         redirectTo: '/404',

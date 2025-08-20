@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { WorkOrder, WorkOrderStatus, KANBAN_COLUMNS,workOrders } from 'app/_models/work-order.model';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 type SortKey = 'work_order_code' | 'estimated_completion_date' | 'total_quote_price' | 'total_paid_amount';
 
 @Component({
@@ -10,10 +11,12 @@ export class WorkOrderListComponent {
   pageSize: number = 10;
   currentPage: number = 1;
   isAddModalOpen: boolean = false;
+  isDetailModalOpen: boolean = false;
   viewMode: 'kanban' | 'list' = 'kanban';
   showMoreMap: { [key: string]: number } = {};
   searchText = '';
   statusFilter: '' | WorkOrderStatus = '';
+  workOrderId: number | undefined;
   workOrders: WorkOrder[] = workOrders;
   readonly KANBAN_COLUMNS = KANBAN_COLUMNS;
   readonly KANBAN_COLUMN_LIMIT = 3;
@@ -43,6 +46,17 @@ export class WorkOrderListComponent {
     { key: 'amount_due', label: 'Amount Due', className: 'text-right', sortable: false },
     { key: 'actions', label: 'Actions', className: 'text-center', sortable: false }
   ];
+
+  constructor() {
+    const saved = localStorage.getItem('workOrders');
+    if (saved) {
+      try {
+        this.workOrders = JSON.parse(saved);
+      } catch (e) {
+        this.workOrders = workOrders;
+      }
+    }
+  }
 
   get listFiltered(): WorkOrder[] {
     const q = this.searchText.trim().toLowerCase();
@@ -159,13 +173,41 @@ export class WorkOrderListComponent {
     }
   }
 
+  openDetailModal(workOrderId: number ): void {
+    this.isDetailModalOpen = true;
+    this.workOrderId = workOrderId;
+  }
+
   openAddModal(): void {
     this.isAddModalOpen = true;
   }
   closeModal(modalType: 'add' | 'edit'): void {
     if (modalType === 'add') {
       this.isAddModalOpen = false;
+    }else{
+      this.isDetailModalOpen = false;
     }
+  }
+
+  onKanbanDrop(event: CdkDragDrop<WorkOrder[]>, col: string): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      const movedOrder = event.previousContainer.data[event.previousIndex];
+      movedOrder.status = col as WorkOrderStatus;
+      event.previousContainer.data.splice(event.previousIndex, 1);
+      event.container.data.splice(event.currentIndex, 0, movedOrder);
+      this.showStatusChangeToast(movedOrder.work_order_code, col);
+    }
+    this.saveKanbanData();
+  }
+
+  showStatusChangeToast(orderCode: string, newStatus: string): void {
+    window?.alert?.(`Order ${orderCode} moved to ${this.STATUS_LABEL[newStatus as WorkOrderStatus]}`);
+  }
+
+  saveKanbanData(): void {
+    localStorage.setItem('workOrders', JSON.stringify(this.workOrders));
   }
 
 }
