@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-sidebar',
@@ -6,7 +6,8 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
   styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements OnInit {
- @Output() featureSelected = new EventEmitter<string>();
+  @Input() collapsed: boolean = false;
+  @Output() featureSelected = new EventEmitter<string>();
 
 features = [
   { name: 'Dashboard', icon: 'grid_view' },
@@ -26,4 +27,5 @@ features = [
   onFeatureClick(feature: string): void {
     this.featureSelected.emit(feature);
   }
+
 }

@@ -1,20 +1,20 @@
 import { Component, OnInit } from '@angular/core';
+import { SidebarStateService } from 'app/shared/services/sidebar-state.service';
 
 @Component({
   selector: 'classic-layout',
   templateUrl: './classic.component.html',
 })
 export class ClassicLayoutComponent implements OnInit {
+  constructor(public sidebarState: SidebarStateService) { }
 
-  constructor() { }
-
-  ngOnInit(
-  ): void {
-    
+  get isSidebarCollapsed(): boolean {
+    return this.sidebarState.isCollapsed;
   }
-    selectedFeature = 'Vehicle';
 
-  onFeatureChange(feature: string) {
-    this.selectedFeature = feature;
+  ngOnInit(): void {}
+
+  toggleSidebar(): void {
+    this.sidebarState.isCollapsed = !this.sidebarState.isCollapsed;
   }
 }
