@@ -8,18 +8,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GaraListComponent } from './gara-list/gara-list.component';
 import { GaraDetailComponent } from './gara-detail/gara-detail.component';
+import { AddGaraComponent } from './add-gara/add-gara.component';
 
 const routes: Route[] = [
     {
         path: '',
         component: GaraListComponent
 
-    }
+    },
+
 ];
 @NgModule({
     declarations: [
         GaraListComponent,
-        GaraDetailComponent
+        GaraDetailComponent,
+        AddGaraComponent
     ],
     imports: [
         RouterModule.forChild(routes),

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { GaraDetailModel, GaraModel } from '@df_models/gara.model';
+import { AddGaralModel, GaraDetailModel, GaraModel } from '@df_models/gara.model';
 import { Observable, observable } from 'rxjs';
 import { BaseService } from './base.service';
 import { Constants } from 'app/helper/constants';
@@ -25,5 +25,8 @@ export class GaraService extends BaseService {
     }
     updateGara(id: number, updatedGara: GaraDetailModel): Observable<GaraDetailModel> {
         return this.http.put<GaraDetailModel>(`${this.baseUrl}/${this.endPoint}/${id}`, updatedGara);
+    }
+    addGara(newGara: AddGaralModel): Observable<AddGaralModel> {
+        return this.http.post<AddGaralModel>(`${this.baseUrl}/${this.endPoint}`, newGara);
     }
 }

@@ -12,6 +12,7 @@ import { NgModule } from '@angular/core';
 import { appConfig } from 'app/core/config/app.config';
 import { appRoutes } from 'app/app.routing';
 import { HttpClientModule } from '@angular/common/http';
+import { ToastrModule } from 'ngx-toastr';
 
 
 const routerConfig: ExtraOptions = {
@@ -23,11 +24,9 @@ const routerConfig: ExtraOptions = {
 @NgModule({
     declarations: [
         AppComponent,
-        
     ],
     imports: [
         BrowserModule,
-        BrowserAnimationsModule,
         HttpClientModule,
         RouterModule.forRoot(appRoutes, routerConfig),
 
@@ -40,11 +39,19 @@ const routerConfig: ExtraOptions = {
 
         // Layout module of your application
         LayoutModule,
+        //
+        BrowserAnimationsModule,
+        ToastrModule.forRoot({
+            positionClass: 'toast-top-right',
+            timeOut: 3000,
+            progressBar: true,
+            closeButton: true
+        })
     ],
     bootstrap: [
         AppComponent
     ],
-    providers: [{provide: APP_BASE_HREF, useValue: '/'}],
+    providers: [{ provide: APP_BASE_HREF, useValue: '/' }],
 })
 export class AppModule {
 }

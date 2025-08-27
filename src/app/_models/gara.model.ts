@@ -17,6 +17,14 @@ export interface GaraDetailModel {
     ownerUser: string;
     isActive: boolean;
 }
+export interface AddGaralModel {
+    name: string;
+    address: string;
+    phone: number;
+    email: string;
+    ownerUser: string;
+    isActive: boolean;
+}
 export const garaDetailMockData: GaraDetailModel =
 {
     tenantId: 1,
