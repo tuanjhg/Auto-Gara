@@ -1,7 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AddGaralModel, GaraDetailModel, GaraModel, GaraQueryParams, UpdateGaraModel } from '@df_models/gara.model';
-import { Observable, observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BaseService } from './base.service';
 import { Constants } from 'app/helper/constants';
 import { UserModel } from '@df_models/user.model';
