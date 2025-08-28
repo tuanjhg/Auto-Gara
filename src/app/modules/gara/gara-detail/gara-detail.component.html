@@ -1,136 +1,157 @@
-<div *ngIf="open" class="fixed inset-0 z-50 flex items-center justify-center">
-    <div class="absolute inset-0 bg-black/50" (click)="close()"></div>
-    <div class="relative z-10 rounded-lg bg-gray-100 p-6 shadow-xl w-[54vw] max-w-[1000px] max-h-[95vh]"
-        (click)="$event.stopPropagation()">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">{{ gara.name }}</h1>
-                <p class="text-gray-500">Gara Owner: <span class="font-semibold text-gray-700">{{gara.ownerUser}}</span>
-                </p>
+    <div *ngIf="open" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/50" (click)="close()"></div>
+        <div class="relative z-10 rounded-lg bg-gray-100 p-6 shadow-xl w-[54vw] max-w-[1000px] max-h-[95vh]"
+            (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">{{ gara.name }}</h1>
+                    <p class="text-gray-500">Gara Owner: <span class="font-semibold text-gray-700">{{gara.ownerUser}}</span>
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button *ngIf="!isEditMode"
+                        class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200"
+                        (click)="onEditClick()">Edit</button>
+                    <button
+                        class="rounded-lg bg-red-400 px-4 py-2 text-sm font-medium text-black hover:bg-red-400">Delete</button>
+                    <button class="mb-0.5" (click)="close()">
+                        <mat-icon svgIcon="exit_to_app"></mat-icon>
+                    </button>
+                </div>
             </div>
-            <div class="flex items-center space-x-3">
-                <button *ngIf="!isEditMode"
-                    class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200"
-                    (click)="onEditClick()">Edit</button>
-                <button
-                    class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-red-400">Delete</button>
-                <button class="mb-0.5" (click)="close()">
-                    <mat-icon svgIcon="exit_to_app"></mat-icon>
-                </button>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-            <div class="flex flex-col h-full">
-                <div class="rounded-lg bg-white p-4 shadow h-full flex flex-col">
-                    <img [src]="selectedImage" alt="Main image" class="mb-3 w-full rounded-lg object-cover" />
-                    <div class="grid grid-cols-3 gap-3 mt-auto">
-                        <img src="assets/imgs/tn1.jpg" alt="Thumbnail 1" class="cursor-pointer rounded-md border-2"
-                            [ngClass]="{
-                                    'border-blue-500': selectedImage === 'assets/imgs/tn1.jpg',
-                                    'border-white': selectedImage !== 'assets/imgs/tn1.jpg'
-                                }" (click)="changeImage('assets/imgs/tn1.jpg')" />
-                        <img src="assets/imgs/tn2.jpg" alt="Thumbnail 2" class="cursor-pointer rounded-md border-2"
-                            [ngClass]="{
-                                        'border-blue-500': selectedImage === 'assets/imgs/tn2.jpg',
-                                        'border-white': selectedImage !== 'assets/imgs/tn2.jpg'
-                                }" (click)="changeImage('assets/imgs/tn2.jpg')" />
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+                <div class="flex flex-col h-full">
+                    <div class="rounded-lg bg-white p-4 shadow h-full flex flex-col">
+                        <img [src]="selectedImage" alt="Main image" class="mb-3 w-full rounded-lg object-cover" />
+                        <div class="grid grid-cols-3 gap-3 mt-auto">
+                            <img src="assets/imgs/tn1.jpg" alt="Thumbnail 1" class="cursor-pointer rounded-md border-2"
+                                [ngClass]="{
+                                        'border-blue-500': selectedImage === 'assets/imgs/tn1.jpg',
+                                        'border-white': selectedImage !== 'assets/imgs/tn1.jpg'
+                                    }" (click)="changeImage('assets/imgs/tn1.jpg')" />
+                            <img src="assets/imgs/tn2.jpg" alt="Thumbnail 2" class="cursor-pointer rounded-md border-2"
+                                [ngClass]="{
+                                            'border-blue-500': selectedImage === 'assets/imgs/tn2.jpg',
+                                            'border-white': selectedImage !== 'assets/imgs/tn2.jpg'
+                                    }" (click)="changeImage('assets/imgs/tn2.jpg')" />
 
-                        <img src="assets/imgs/tn3.jpg" alt="Thumbnail 3" class="cursor-pointer rounded-md border-2"
-                            [ngClass]="{
-                                        'border-blue-500': selectedImage === 'assets/imgs/tn3.jpg',
-                                        'border-white': selectedImage !== 'assets/imgs/tn3.jpg'
-                                }" (click)="changeImage('assets/imgs/tn3.jpg')" />
+                            <img src="assets/imgs/tn3.jpg" alt="Thumbnail 3" class="cursor-pointer rounded-md border-2"
+                                [ngClass]="{
+                                            'border-blue-500': selectedImage === 'assets/imgs/tn3.jpg',
+                                            'border-white': selectedImage !== 'assets/imgs/tn3.jpg'
+                                    }" (click)="changeImage('assets/imgs/tn3.jpg')" />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="flex flex-col gap-4 lg:col-span-2 h-full">
-                <div class="rounded-lg bg-white shadow flex-1 flex flex-col min-h-0">
-                    <form *ngIf="form" [formGroup]="form" (ngSubmit)="onFormSubmit()">
-                        <div class="border-b border-gray-200 px-4">
-                            <nav class="-mb-px flex items-center justify-between space-x-6 ">
-                                <a class="border-b-2 border-yellow-200 px-1 py-3 text-sm font-medium text-[#DEE33E]">
-                                    Gara Info
-                                </a>
-                                <div *ngIf="isEditMode" class="flex space-x-2">
-                                    <button type="submit" [disabled]="form.invalid"
-                                        class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200">
-                                        Save
-                                    </button>
-                                    <button type="button" (click)="onCancelEdit()"
-                                        class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-gray-400">
-                                        Cancel
-                                    </button>
+                <div class="flex flex-col gap-4 lg:col-span-2 h-full">
+                    <div class="rounded-lg bg-white shadow flex-1 flex flex-col min-h-0">
+                        <form *ngIf="form" [formGroup]="form" (ngSubmit)="onFormSubmit()">
+                            <div class="border-b border-gray-200 px-4">
+                                <nav class="-mb-px flex items-center justify-between space-x-6 ">
+                                    <a class="border-b-2 border-yellow-200 px-1 py-3 text-sm font-medium text-[#DEE33E]">
+                                        Gara Info
+                                    </a>
+                                    <div *ngIf="isEditMode" class="flex space-x-2">
+                                        <button type="submit" [disabled]="form.invalid"
+                                            class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200">
+                                            Save
+                                        </button>
+                                        <button type="button" (click)="onCancelEdit()"
+                                            class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-black hover:bg-gray-400">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </nav>
+                            </div>
+                            <div class=" px-4 py-5 overflow-auto">
+                                <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
+                                    <div *ngFor="let field of fields" class="flex flex-col">
+                                        <label class="text-gray-500">{{field.label}}</label>
+                                        <ng-container *ngIf="!isEditMode; else editField">
+                                            <span class="font-semibold">{{field.value}}</span>
+                                        </ng-container>
+                                        <ng-template #editField>
+                                            <ng-container *ngIf="field.name === 'ownerUser'; else defaultInput">
+                                                <select [formControlName]="field.name"
+                                                    class="form-select border border-gray-300 rounded-xl p-1 font-semibold"
+                                                    [ngClass]="{
+                                                                'border-red-500 focus:ring-red-200': isInvalid(field.name),
+                                                                'border-green-500 focus:ring-green-200': isValid(field.name),
+                                                                'border-gray-300 focus:ring-gray-200': !isInvalid(field.name) && !isValid(field.name)
+                                                                }">
+                                                    <option [ngValue]="null" disabled>-- Select Owner --</option>
+                                                    <option *ngFor="let owner of owners" [ngValue]="owner.id">{{
+                                                        owner.full_name }}</option>
+                                                </select>
+                                                <div class="mt-1 text-xs text-red-600" *ngIf="showError(field.name)">
+                                                    {{ getError(field.name) }}
+                                                </div>
+                                            </ng-container>
+
+                                            <ng-template #defaultInput>
+                                                <input
+                                                    class="form-input border border-gray-300 rounded-xl p-1 font-semibold"
+                                                    [formControlName]="field.name" [type]="field.type" [ngClass]="{
+                                                        'border-red-500 focus:ring-red-200': isInvalid(field.name),
+                                                        'border-green-500 focus:ring-green-200': isValid(field.name),
+                                                        'border-gray-300 focus:ring-gray-200': !isInvalid(field.name) && !isValid(field.name)
+                                                        }" />
+                                                <div class="mt-1 text-xs text-red-600" *ngIf="showError(field.name)">
+                                                    {{ getError(field.name) }}
+                                                </div>
+                                            </ng-template>
+                                        </ng-template>
+                                    </div>
                                 </div>
-                            </nav>
-                        </div>
-                        <div class=" px-4 py-5 overflow-auto">
-                            <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
-                                <div *ngFor="let field of fields" class="flex flex-col">
-                                    <label class="text-gray-500">{{field.label}}</label>
-                                    <ng-container *ngIf="!isEditMode; else editField">
-                                        <span class="font-semibold">{{field.value}}</span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="rounded-lg bg-white shadow" [formGroup]="form">
+                        <div class="px-4 py-5">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold">Status</h3>
+
+                                <span *ngIf="!isEditMode"
+                                    [ngClass]="gara.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                    class="text-sm font-semibold px-2 py-1 rounded">
+                                    {{ gara.is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                                <span *ngIf="isEditMode"
+                                    [ngClass]="form.get('is_active')?.value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                    class="text-sm font-semibold px-2 py-1 rounded">
+                                    {{ form.get('is_active')?.value ? 'Active' : 'Inactive' }}
+                                </span>
+                            </div>
+
+                            <div class="mt-3 space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Availability</span>
+
+                                    <ng-container *ngIf="isEditMode; else viewAvailability">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" formControlName="is_active" class="sr-only peer">
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 transition">
+                                            </div>
+                                            <div
+                                                class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-5">
+                                            </div>
+                                        </label>
                                     </ng-container>
-                                    <ng-template #editField>
-                                        <input class="form-input border border-gray-300 rounded-xl p-1 font-semibold"
-                                            [formControlName]="field.name" [type]="field.type" [ngClass]="{
-                                                             'border-red-500 focus:ring-red-200': isInvalid(field.name),
-                                                             'border-green-500 focus:ring-green-200': isValid(field.name),
-                                                             'border-gray-300 focus:ring-gray-200': !isInvalid(field.name) && !isValid(field.name)
-  }" />
-                                        <div class="mt-1 text-xs text-red-600" *ngIf="showError(field.name)">
-                                            {{ getError(field.name) }}
-                                        </div>
+
+                                    <ng-template #viewAvailability>
+                                        <span
+                                            [ngClass]="gara.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                            class="font-semibold rounded-full px-2 py-1 text-xs">
+                                            {{ gara.is_active ? 'Open' : 'Closed' }}
+                                        </span>
                                     </ng-template>
                                 </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="rounded-lg bg-white shadow" [formGroup]="form">
-                    <div class="px-4 py-5">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold">Status</h3>
 
-                            <span *ngIf="!isEditMode"
-                                [ngClass]="gara.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                class="text-sm font-semibold px-2 py-1 rounded">
-                                {{ gara.isActive ? 'Active' : 'Inactive' }}
-                            </span>
-                            <span *ngIf="isEditMode"
-                                [ngClass]="form.get('isActive')?.value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                class="text-sm font-semibold px-2 py-1 rounded">
-                                {{ form.get('isActive')?.value ? 'Active' : 'Inactive' }}
-                            </span>
-                        </div>
-
-                        <div class="mt-3 space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Availability</span>
-
-                                <ng-container *ngIf="isEditMode; else viewAvailability">
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" formControlName="isActive" class="sr-only peer">
-                                        <div
-                                            class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 transition">
-                                        </div>
-                                        <div
-                                            class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-5">
-                                        </div>
-                                    </label>
-                                </ng-container>
-
-                                <ng-template #viewAvailability>
-                                    <span
-                                        [ngClass]="gara.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                        class="font-semibold rounded-full px-2 py-1 text-xs">
-                                        {{ gara.isActive ? 'Open' : 'Closed' }}
-                                    </span>
-                                </ng-template>
-                            </div>
-
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">operation Start Date</span>
-                                <span class="font-medium text-gray-800">01/08/2025</span>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">operation Start Date</span>
+                                <span class="font-medium text-gray-800">{{gara.createdAt|date:'dd-MM-yyyy'}}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -138,4 +159,3 @@
             </div>
         </div>
     </div>
-</div>

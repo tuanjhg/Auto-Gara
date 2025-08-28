@@ -14,8 +14,17 @@ export interface GaraDetailModel {
     address: string;
     phone: number;
     email: string;
-    ownerUser: string;
-    isActive: boolean;
+    owner_user_id: number;
+    is_active: boolean;
+    createdAt: string;
+}
+export interface UpdateGaraModel {
+    name: string;
+    address: string;
+    phone: number;
+    email: string;
+    owner_user_id: string;
+    is_active: boolean;
 }
 export interface AddGaralModel {
     name: string;
@@ -31,9 +40,10 @@ export const garaDetailMockData: GaraDetailModel =
     name: 'auto gara Cầu Giấy',
     address: 'Giải Phóng',
     email: 'dungtvhe163661@gmail.com',
-    isActive: true,
-    ownerUser: 'Dũngdz',
-    phone: 9881896554
+    is_active: true,
+    owner_user_id: 1,
+    phone: 9881896554,
+    createdAt: '88888'
 };
 
 export const garaListMockData: GaraModel[] = [

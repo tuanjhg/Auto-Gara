@@ -1,7 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { Form, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GaraDetailModel, GaraModel } from '@df_models/gara.model';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { GaraDetailModel, GaraModel, UpdateGaraModel } from '@df_models/gara.model';
+import { UserModel } from '@df_models/user.model';
 import { GaraService } from '@df_services/gara.service';
+import { UserService } from '@df_services/user.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-gara-detail',
@@ -13,10 +16,11 @@ export class GaraDetailComponent implements OnInit, OnChanges {
   @Input() gara: GaraDetailModel;
   @Output() closed = new EventEmitter<void>();
   selectedImage: string;
-  fields: { label: string; name: string; type: string; value: string }[] = [];
+  fields: { label: string; name: string; type: string; value: string | number; options?: { label: string; value: number }[] }[] = [];
   form: FormGroup;
   isEditMode: boolean = false;
   submitted = false;
+  owners: UserModel[] = [];
   readonly errorMessages: Record<string, Record<string, string>> = {
     name: {
       required: 'Name is required.',
@@ -43,7 +47,9 @@ export class GaraDetailComponent implements OnInit, OnChanges {
 
   constructor(
     private fb: FormBuilder,
-    private garaService: GaraService
+    private garaService: GaraService,
+    private toastr: ToastrService,
+    private userService: UserService
   ) {
   }
 
@@ -59,11 +65,33 @@ export class GaraDetailComponent implements OnInit, OnChanges {
         { label: 'Address', name: 'address', type: 'text', value: this.gara.address },
         { label: 'Phone Number', name: 'phone', type: 'text', value: String(this.gara.phone ?? '') },
         { label: 'Email', name: 'email', type: 'email', value: this.gara.email },
-        { label: 'Owner', name: 'ownerUser', type: 'text', value: this.gara.ownerUser },
+        { label: 'Owner', name: 'ownerUser', type: 'select', value: this.gara.owner_user_id, options: [] },
       ];
       this.form = this.editForm();
-
+      this.loadOwners();
     }
+
+  }
+  loadOwners(): void {
+    const currentOwnerId = this.gara?.owner_user_id;
+    this.userService.getUserFilter({ role: 'owner' }).subscribe({
+      next: (res) => {
+        const userList = res.data || [];
+        this.owners = userList.filter(u => u.tenant_id === null || u.id === currentOwnerId);
+        const ownerOptions = this.owners.map(u => ({
+          label: `${u.full_name}`,
+          value: u.id
+        }));
+        this.fields = this.fields.map(f =>
+          f.name === 'owner_user_id' ? { ...f, options: ownerOptions } : f
+        );
+      },
+      error: (err) => {
+        const msg = err.error.errors.join('\n');
+        this.toastr.error(msg, 'Failed!');
+      }
+    });
+
 
   }
   createFormWithData(): void {
@@ -74,7 +102,8 @@ export class GaraDetailComponent implements OnInit, OnChanges {
     return this.form = this.fb.group({
       name: [this.gara?.name, Validators.compose([
         Validators.required,
-        Validators.pattern(/^[\p{L}\s'.-]+$/u)
+        Validators.pattern(/^[\p{L}\p{N}\s,./-]+$/u)
+
       ])],
       address: [this.gara?.address, Validators.compose([
         Validators.required,
@@ -88,11 +117,11 @@ export class GaraDetailComponent implements OnInit, OnChanges {
         Validators.required,
         Validators.email
       ])],
-      ownerUser: [this.gara?.ownerUser, Validators.compose([
-        Validators.required,
-        Validators.pattern(/^[\p{L}\s'.-]+$/u)
+      ownerUser: [this.gara?.owner_user_id != null ? Number(this.gara.owner_user_id) : null, Validators.compose([
+        // Validators.required,
+        // Validators.pattern(/^[\p{L}\p{N}\s,./-]+$/u)ß
       ])],
-      isActive: [this.gara?.isActive ?? false, [Validators.required]],
+      is_active: [this.gara?.is_active ?? false, [Validators.required]],
     });
   }
 
@@ -116,32 +145,28 @@ export class GaraDetailComponent implements OnInit, OnChanges {
   onFormSubmit(): void {
     if (this.form.valid) {
       const updatedData = this.form.value;
-      const requestUpdate: GaraDetailModel = {
-        tenantId: this.gara.tenantId,
+      const requestUpdate: UpdateGaraModel = {
         name: updatedData.name,
         address: updatedData.address,
         phone: updatedData.phone,
         email: updatedData.email,
-        ownerUser: updatedData.ownerUser,
-        isActive: updatedData.isActive,
+        owner_user_id: updatedData.ownerUser ?? null,
+        is_active: updatedData.is_active,
       };
       this.garaService.updateGara(this.gara.tenantId, requestUpdate).subscribe({
         next: (res) => {
           this.gara = res;
+          const toastRef = this.toastr.success('Update information successfully!', 'successfully!');
+          toastRef.onHidden.subscribe(() => {
+            this.close();
+            this.isEditMode = false;
+
+          });
         },
         error: (err) => {
-          console.log(err + 'update fail mock data');
-          this.fields = [
-            { label: 'Name', name: 'name', type: 'text', value: updatedData.name },
-            { label: 'Address', name: 'address', type: 'text', value: updatedData.address },
-            { label: 'Phone Number', name: 'phone', type: 'text', value: String(updatedData.phone ?? '') },
-            { label: 'Email', name: 'email', type: 'email', value: updatedData.email },
-            { label: 'Owner', name: 'ownerUser', type: 'text', value: updatedData.ownerUser },
-          ];
-          this.gara.isActive = updatedData.isActive;
+          this.toastr.error(err.error?.errors, 'failed!');
         }
       });
-      this.isEditMode = false;
     }
   }
   getError(name: string): string | null {
@@ -155,12 +180,21 @@ export class GaraDetailComponent implements OnInit, OnChanges {
   }
   onCancelEdit(): void {
     this.isEditMode = false;
-    this.form.reset(this.gara);
+    this.form.reset();
+    this.form.patchValue({
+      name: this.gara.name,
+      address: this.gara.address,
+      phone: this.gara.phone,
+      email: this.gara.email,
+      ownerUser: this.gara.owner_user_id != null ? Number(this.gara.owner_user_id) : null,
+      is_active: this.gara.is_active ?? false,
+    });
   }
   changeImage(img: string): void {
     this.selectedImage = img;
   }
   close(): void {
+    this.isEditMode = false;
     this.closed.emit();
   }
 }
