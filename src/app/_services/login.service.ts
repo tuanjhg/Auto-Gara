@@ -1,15 +1,15 @@
-import { Observable} from 'rxjs';
-
+import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { BaseService } from './base.service';
 import { Constants } from 'app/helper/constants';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { loginModel } from '@df_models/login.model';
+import { HttpClient } from '@angular/common/http';
+import { LoginResponse, LoginRequest } from '@df_models/login.model';
+import { ApiRequestData } from '../_models/api.model';
 
 @Injectable({
     providedIn: 'root'
 })
-export class LoginService extends BaseService {
+export class LoginService extends BaseService<LoginResponse> {
     constructor(
         protected httpClient: HttpClient
     ) {
@@ -19,10 +19,26 @@ export class LoginService extends BaseService {
             Constants.END_POINT.auth,
         );
     }
-    login(email: string, password: string): Observable<loginModel> {
-       let params = new HttpParams()
-            .set('email', email)
-            .set('password', password);
-        return this.httpClient.post<loginModel>(`${this.baseUrl}/${this.endPoint}/login`, params);
+
+
+    login(email: string, password: string): Observable<LoginResponse> {
+        const loginData: LoginRequest = {
+            email,
+            password
+        };
+
+        const requestData: ApiRequestData = {
+            body: loginData
+        };
+
+        return this.call<LoginResponse>('POST', requestData, 'login');
+}
+
+     refreshToken(): Observable<{ accessToken: string }> {
+        const refreshToken = localStorage.getItem('refreshToken') || '';
+        return this.httpClient.post<{ accessToken: string }>(
+            `${this.baseUrl}/${this.endPoint}/refresh-token`,
+            { refreshToken }
+        );
     }
 }
