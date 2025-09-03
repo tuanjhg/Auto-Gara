@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './login.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SharedModule } from '@shared/shared.module';
 
 const routes: Routes = [
   { path: '', component: LoginComponent }
@@ -10,6 +11,6 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [LoginComponent],
-  imports: [CommonModule,ReactiveFormsModule,RouterModule.forChild(routes)]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes), SharedModule]
 })
 export class LoginModule {}

@@ -1,5 +1,6 @@
 import { LayoutComponent } from 'app/layout/layout.component';
 import { Routes } from '@angular/router';
+import { AuthGuard } from '@core/authGuard/authGuard';
 
 export const appRoutes: Routes = [
 
@@ -16,6 +17,7 @@ export const appRoutes: Routes = [
         data: {
             layout: 'classic',
         },
+        canActivate: [AuthGuard],
         loadChildren: () => import('app/modules/vehicle/vehicle.module').then(m => m.VehicleModule)
     },
 
@@ -25,6 +27,7 @@ export const appRoutes: Routes = [
         data: {
             layout: 'classic',
         },
+        canActivate: [AuthGuard],
         loadChildren: () => import('app/modules/dashboard/dashboard.module').then(m => m.DashboardModule)
     },
 
@@ -34,6 +37,7 @@ export const appRoutes: Routes = [
         data: {
             layout: 'classic',
         },
+        canActivate: [AuthGuard],
         loadChildren: () => import('app/modules/work-order/work-order.module').then(m => m.WorkOrderModule)
     },
 
@@ -43,6 +47,7 @@ export const appRoutes: Routes = [
         data: {
             layout: 'classic',
         },
+        canActivate: [AuthGuard],
         loadChildren: () => import('app/modules/gara/gara.module').then(m => m.garaModule)
     },
 
