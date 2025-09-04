@@ -65,11 +65,12 @@ export class GaraDetailComponent implements OnInit, OnChanges {
         { label: 'Address', name: 'address', type: 'text', value: this.gara.address },
         { label: 'Phone Number', name: 'phone', type: 'text', value: String(this.gara.phone ?? '') },
         { label: 'Email', name: 'email', type: 'email', value: this.gara.email },
-        { label: 'Owner', name: 'ownerUser', type: 'select', value: this.gara.owner_user_id, options: [] },
+        { label: 'Owner', name: 'ownerUser', type: 'select', value: this.gara.owner?.full_name, options: [] },
       ];
       this.form = this.editForm();
       this.loadOwners();
     }
+
 
   }
   loadOwners(): void {
@@ -86,10 +87,6 @@ export class GaraDetailComponent implements OnInit, OnChanges {
           f.name === 'owner_user_id' ? { ...f, options: ownerOptions } : f
         );
       },
-      error: (err) => {
-        const msg = err.error.errors.join('\n');
-        this.toastr.error(msg, 'Failed!');
-      }
     });
 
 
@@ -153,7 +150,7 @@ export class GaraDetailComponent implements OnInit, OnChanges {
         owner_user_id: updatedData.ownerUser ?? null,
         is_active: updatedData.is_active,
       };
-      this.garaService.updateGara(this.gara.tenantId, requestUpdate).subscribe({
+      this.garaService.updateGara(this.gara.tenant_id, requestUpdate).subscribe({
         next: (res) => {
           this.gara = res;
           const toastRef = this.toastr.success('Update information successfully!', 'successfully!');

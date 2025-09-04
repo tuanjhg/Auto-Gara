@@ -37,7 +37,7 @@ export interface GaraQueryParams {
     order?: 'asc' | 'desc';
 }
 export interface GaraDetailModel {
-    tenantId: number;
+    tenant_id: number;
     name: string;
     address: string;
     phone: number;
@@ -45,6 +45,8 @@ export interface GaraDetailModel {
     owner_user_id: number;
     is_active: boolean;
     createdAt: string;
+    owner: GaraUserApi;
+
 }
 export interface UpdateGaraModel {
     name: string;

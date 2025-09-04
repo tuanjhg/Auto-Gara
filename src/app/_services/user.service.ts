@@ -25,7 +25,7 @@ export class UserService extends BaseService {
     return this.http.get<{ data: UserModel[] }>(`${this.baseUrl}/${this.endPoint}`,{ headers });
   }
   getUserFilter(params?: UserQueryParams): Observable<{ data: UserModel[] }> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     const headers = {
       Authorization: `Bearer ${token}`
     };
