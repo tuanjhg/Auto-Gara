@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GaraApiItem, GaraDetailModel, GaraModel } from '@df_models/gara.model';
 import { GaraService } from '@df_services/gara.service';
+import { LoadingService } from '@shared/services/loading.service';
 
 @Component({
   selector: 'app-gara-list',
@@ -31,6 +32,7 @@ export class GaraListComponent implements OnInit {
 
   constructor(
     private garaService: GaraService,
+    public loadingService: LoadingService
 
   ) { }
   get totalPages(): number {
@@ -51,15 +53,18 @@ export class GaraListComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
   }
-    loadData(): void {
+  loadData(): void {
+    this.loadingService.show();
     this.garaService.getAllGara({
-    pageNumber: this.currentPage,
-    rowsPerPage: this.pageSize,
-    sort: this.sortColumn,
-    order: this.sortDirection}).subscribe({
+      pageNumber: this.currentPage,
+      rowsPerPage: this.pageSize,
+      sort: this.sortColumn,
+      order: this.sortDirection
+    }).subscribe({
       next: (res) => {
         this.garas = res.data;
         this.totalItems = res.totalCount;
+        this.loadingService.hide();
       }, error: (err) => {
       }
     });
@@ -119,10 +124,10 @@ export class GaraListComponent implements OnInit {
     const total = this.totalPages;
     if (page >= 1 && page <= total) {
       this.currentPage = page;
-       this.loadData();
+      this.loadData();
     }
   }
-    openAdd(): void {
+  openAdd(): void {
     this.addOpen = true;
   }
   onAddClosed(): void {

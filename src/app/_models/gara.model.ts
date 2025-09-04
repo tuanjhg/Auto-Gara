@@ -27,7 +27,7 @@ export interface GaraApiItem {
     is_active: boolean;
     createdAt: string;
     updatedAt: string;
-    users: GaraUserApi[];
+    owner: GaraUserApi;
 }
 export interface GaraQueryParams {
     pageNumber?: number;

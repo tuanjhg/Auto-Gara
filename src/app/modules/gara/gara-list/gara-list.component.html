@@ -75,7 +75,7 @@
               <span class="pl-3 font-semibold text-slate-900">
                 {{ row.name }}
               </span>
-              <mat-icon svgIcon="circle" class="absolute -top-1 -right-5 leading-none"
+              <mat-icon svgIcon="circle" class="absolute leading-none"
                 [ngClass]="row.is_active ? 'text-green-500' : 'text-red-500'" style="transform: scale(0.3);"
                 [attr.title]="row.is_active ? 'Active' : 'Inactive'">
               </mat-icon>
@@ -83,7 +83,7 @@
           </td>
           <td class="px-4 py-2 text-base text-left"><span>{{row.address}}</span></td>
           <td class="px-4 py-2 text-base text-left"><span>{{row.email}}</span></td>
-          <td class="px-4 py-2 text-base text-left"><span>{{row.users[0]?.full_name || 'None' }}</span></td>
+          <td class="px-4 py-2 text-base text-left"><span>{{row.owner?.full_name||'None'}}</span></td>
           <td class="px-4 py-2 text-base text-center"><a (click)="openDetail(row.tenant_id)"
               class=" hover:text-yellow-500 text-yellow-300 underline cursor-pointer">Detail</a>
           </td>
@@ -130,3 +130,4 @@
 </app-gara-detail>
 <app-add-gara *ngIf="addOpen" (closed)="onAddClosed()">
 </app-add-gara>
+<app-loading *ngIf="loadingService.loading$ | async" class="z-[10000]"></app-loading>

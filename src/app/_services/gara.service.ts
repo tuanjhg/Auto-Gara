@@ -4,11 +4,12 @@ import { AddGaralModel, GaraDetailModel, GaraListApiResponse, GaraModel, GaraQue
 import { Observable } from 'rxjs';
 import { BaseService } from './base.service';
 import { Constants } from 'app/helper/constants';
+import { QueryParams } from '@df_models/api.model';
 
 @Injectable({
     providedIn: 'root'
 })
-export class GaraService extends BaseService {
+export class GaraService extends BaseService{
 
     constructor(private http: HttpClient) {
         super(
