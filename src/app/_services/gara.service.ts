@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AddGaralModel, GaraDetailModel, GaraModel, UpdateGaraModel } from '@df_models/gara.model';
-import { Observable, observable } from 'rxjs';
+import { AddGaralModel, GaraDetailModel, GaraListApiResponse, GaraModel, GaraQueryParams, UpdateGaraModel } from '@df_models/gara.model';
+import { Observable } from 'rxjs';
 import { BaseService } from './base.service';
 import { Constants } from 'app/helper/constants';
 
@@ -17,13 +17,32 @@ export class GaraService extends BaseService {
             Constants.END_POINT.garaList,
         );
     }
-    getAllGara(): Observable<GaraModel[]> {
-        return this.http.get<GaraModel[]>(`${this.baseUrl}/${this.endPoint}`);
+    getAllGara(params?: GaraQueryParams): Observable<GaraListApiResponse> {
+        let httpParams = new HttpParams();
+        if (params) {
+            if (params.pageNumber !== undefined && params.pageNumber !== null) {
+                httpParams = httpParams.set('pageNumber', String(params.pageNumber));
+            }
+            if (params.rowsPerPage !== undefined && params.rowsPerPage !== null) {
+                httpParams = httpParams.set('rowsPerPage', String(params.rowsPerPage));
+            }
+            if (params.search) {
+                httpParams = httpParams.set('search', params.search);
+            }
+            if (params.sort) {
+                httpParams = httpParams.set('sort', params.sort);
+            }
+            if (params.order) {
+                httpParams = httpParams.set('order', params.order);
+            }
+        }
+
+        return this.http.get<GaraListApiResponse>(`${this.baseUrl}/${this.endPoint}`, { params: httpParams });
     }
-    getGaraById(id: string): Observable<GaraDetailModel> {
+    getGaraById(id: number): Observable<GaraDetailModel> {
         return this.http.get<GaraDetailModel>(`${this.baseUrl}/${this.endPoint}/${id}`);
     }
-updateGara(id: number, updatedGara: UpdateGaraModel): Observable<GaraDetailModel> {
+    updateGara(id: number, updatedGara: UpdateGaraModel): Observable<GaraDetailModel> {
         return this.http.put<GaraDetailModel>(`${this.baseUrl}/${this.endPoint}/${id}`, updatedGara);
     }
     addGara(newGara: AddGaralModel): Observable<AddGaralModel> {

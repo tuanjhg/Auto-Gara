@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { garaDetailMockData, GaraDetailModel, garaListMockData, GaraModel } from '@df_models/gara.model';
+import { GaraApiItem, GaraDetailModel, GaraModel } from '@df_models/gara.model';
 import { GaraService } from '@df_services/gara.service';
 
 @Component({
@@ -9,21 +9,24 @@ import { GaraService } from '@df_services/gara.service';
 })
 export class GaraListComponent implements OnInit {
   searchTerm: string = '';
-  headers: string[] = ['Gara Name', 'Address', 'Email'];
+  headers: string[] = ['Gara Name', 'Address', 'Email', 'Owner'];
 
-  garas: GaraModel[] = [];
-  filterGaras: GaraModel[] = [];
+  garas: GaraApiItem[] = [];
+  filterGaras: GaraApiItem[] = [];
 
   isFilterOpen: boolean = false;
   selectedField: string = '';
-  sortDirection: 'none' | 'asc' | 'desc' = 'none';
-  sortColumn: keyof GaraModel | '' = '';
+  sortDirection: 'asc' | 'desc';
+  sortColumn: keyof GaraApiItem | '' = 'createdAt';
 
   pageSize: number = 10;
   currentPage: number = 1;
+  totalItems: number = 0;
 
   detailOpen = false;
   selectedGara: GaraDetailModel;
+
+  addOpen = false;
 
 
   constructor(
@@ -31,12 +34,7 @@ export class GaraListComponent implements OnInit {
 
   ) { }
   get totalPages(): number {
-    return Math.ceil(this.filterGaras.length / this.pageSize);
-  }
-  get paginatedGaras(): GaraModel[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + +this.pageSize;
-    return this.filterGaras.slice(start, end);
+    return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
   }
   get paginationArray(): number[] {
     const total = this.totalPages;
@@ -51,14 +49,18 @@ export class GaraListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.garaService.getAllGara().subscribe({
-      next: (data: GaraModel[]) => {
-        this.garas = data;
-        this.filterGaras = [...this.garas];
+    this.loadData();
+  }
+    loadData(): void {
+    this.garaService.getAllGara({
+    pageNumber: this.currentPage,
+    rowsPerPage: this.pageSize,
+    sort: this.sortColumn,
+    order: this.sortDirection}).subscribe({
+      next: (res) => {
+        this.garas = res.data;
+        this.totalItems = res.totalCount;
       }, error: (err) => {
-        console.error('Lỗi khi gọi API getAllGara:', err);
-        this.garas = garaListMockData;
-        this.filterGaras = [...this.garas];
       }
     });
   }
@@ -90,8 +92,8 @@ export class GaraListComponent implements OnInit {
     this.isFilterOpen = false;
     this.filterData();
   }
-  getSortKey(header: string): keyof GaraModel {
-    const map: { [key: string]: keyof GaraModel } = {
+  getSortKey(header: string): keyof GaraApiItem {
+    const map: { [key: string]: keyof GaraApiItem } = {
       'Gara Name': 'name',
       'Address': 'address',
       'Email': 'email'
@@ -100,37 +102,15 @@ export class GaraListComponent implements OnInit {
     return map[header] || 'name';
   }
   sortBy(header: string): void {
-    const column = this.getSortKey(header);
-    if (this.sortColumn === column) {
-      this.toggleSortDirection();
+    const col = this.getSortKey(header);
+    if (this.sortColumn === col) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
-      this.sortColumn = column;
+      this.sortColumn = col;
       this.sortDirection = 'asc';
     }
-    this.applySortAfterFilter();
-  }
-  toggleSortDirection(): void {
-    if (this.sortDirection === 'asc') {
-      this.sortDirection = 'desc';
-    } else if (this.sortDirection === 'desc') {
-      this.sortDirection = 'none';
-    } else {
-      this.sortDirection = 'asc';
-    }
-  }
-  applySortAfterFilter(): void {
-    if (this.sortDirection === 'none') {
-      this.filterData();
-      return;
-    }
-    const list = [...this.filterGaras];
-    this.filterGaras = list.sort((a, b) => {
-      const valA = a[this.sortColumn]?.toLowerCase() || '';
-      const valB = b[this.sortColumn]?.toLowerCase() || '';
-      return this.sortDirection === 'asc'
-        ? valA.localeCompare(valB)
-        : valB.localeCompare(valA);
-    });
+    this.currentPage = 1;
+    this.loadData();
   }
 
 
@@ -139,17 +119,23 @@ export class GaraListComponent implements OnInit {
     const total = this.totalPages;
     if (page >= 1 && page <= total) {
       this.currentPage = page;
+       this.loadData();
     }
   }
-  openDetail(id: string): void {
+    openAdd(): void {
+    this.addOpen = true;
+  }
+  onAddClosed(): void {
+    this.addOpen = false;
+    this.loadData();
+  }
+  openDetail(id: number): void {
     this.detailOpen = true;
     this.garaService.getGaraById(id).subscribe({
       next: (g) => {
         this.selectedGara = g;
       },
       error: (err) => {
-        console.error('Lỗi khi lấy dữ liệu gara:', err);
-        this.selectedGara = garaDetailMockData;
       }
     });
   }
@@ -157,5 +143,6 @@ export class GaraListComponent implements OnInit {
   onDetailClosed(): void {
     this.detailOpen = false;
     this.selectedGara = null;
+    this.loadData();
   }
 }

@@ -5,7 +5,7 @@
       <span class="text-base">All part</span>
       <mat-icon svgIcon="arrow_drop_down"></mat-icon>
     </div>
-    <button
+    <button (click)="openAdd()"
       class="flex items-center justify-center w-2/12 h-11 bg-white text-sm font-medium text-gray-700  shadow-sm hover:bg-gray-50">
       <mat-icon svgIcon="add"></mat-icon>
       <span class="text-base">Add new tenant</span>
@@ -46,12 +46,11 @@
     <table class="min-w-full boder border-double ">
       <thead class="sticky top-0 z-10 bg-white border border-gray-100 shadow ">
         <tr>
-          <th class="h-13 px-4 py-2 text-base text-center text-gray-700">STT</th>
           <th *ngFor="let header of headers" (click)="sortBy(header)"
-            class="text-center px-4 py-2 text-base text-gray-700">
-            <div class="flex items-center justify-center cursor-pointer">
+            class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+            <div class="flex items-center justify-start cursor-pointer ">
               <span>{{header}}</span>
-              <ng-container>
+              <ng-container *ngIf="header !== 'Owner'">
                 <ng-container *ngIf="getSortKey(header) === sortColumn; else defaultSortIcon">
                   <ng-container [ngSwitch]="sortDirection">
                     <span *ngSwitchCase="'asc'"> <mat-icon svgIcon="arrow_drop_up"></mat-icon></span>
@@ -65,18 +64,28 @@
               </ng-container>
             </div>
           </th>
-          <th class="px-4 py-2 text-base text-center text-gray-700">Action</th>
+          <th class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-center bg-gray-50">Action</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100 bg-white text-base text-black text-center  ">
-        <tr *ngFor="let row of paginatedGaras; let i = index" class="relative">
-          <td class="h-13 px-6 py-2 text-base cursor-pointer"><span>{{ (currentPage - 1) * pageSize + i + 1 }}</span>
+      <tbody class="divide-y divide-gray-100 bg-white text-base text-black   ">
+        <tr *ngFor="let row of garas; let i = index" class="relative">
+          <td class="px-4 py-2 text-base">
+            <div class="relative inline-block">
+
+              <span class="pl-3 font-semibold text-slate-900">
+                {{ row.name }}
+              </span>
+              <mat-icon svgIcon="circle" class="absolute -top-1 -right-5 leading-none"
+                [ngClass]="row.is_active ? 'text-green-500' : 'text-red-500'" style="transform: scale(0.3);"
+                [attr.title]="row.is_active ? 'Active' : 'Inactive'">
+              </mat-icon>
+            </div>
           </td>
-          <td class="px-4 py-2 text-base"><span>{{row.name}}</span></td>
-          <td class="px-4 py-2 text-base"><span>{{row.address}}</span></td>
-          <td class="px-4 py-2 text-base"><span>{{row.email}}</span></td>
-          <td class="px-4 py-2 text-base "><a (click)="openDetail(row.tenantId)"
-              class=" hover:text-yellow-300 underline cursor-pointer">Detail</a>
+          <td class="px-4 py-2 text-base text-left"><span>{{row.address}}</span></td>
+          <td class="px-4 py-2 text-base text-left"><span>{{row.email}}</span></td>
+          <td class="px-4 py-2 text-base text-left"><span>{{row.users[0]?.full_name || 'None' }}</span></td>
+          <td class="px-4 py-2 text-base text-center"><a (click)="openDetail(row.tenant_id)"
+              class=" hover:text-yellow-500 text-yellow-300 underline cursor-pointer">Detail</a>
           </td>
         </tr>
       </tbody>
@@ -119,3 +128,5 @@
 </div>
 <app-gara-detail [open]="detailOpen" [gara]="selectedGara" (closed)="onDetailClosed()">
 </app-gara-detail>
+<app-add-gara *ngIf="addOpen" (closed)="onAddClosed()">
+</app-add-gara>
