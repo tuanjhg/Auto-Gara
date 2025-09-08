@@ -57,9 +57,9 @@ export class AddGaraComponent implements OnInit {
     this.loadOwners();
   }
   loadOwners(): void {
-    this.userService.getAllUser().subscribe({
-      next: (res) => {
-        const userList = res.data || [];
+    this.userService.getAll({ role: 'owner' }).subscribe({
+      next: (res: UserModel[]) => {
+        const userList = res;
         this.owners = userList.filter(u => u.tenant_id === null);
         const ownerOptions = this.owners.map(u => ({
           label: `${u.full_name}`,
@@ -74,10 +74,7 @@ export class AddGaraComponent implements OnInit {
           this.toastr.error(msg, 'Failed!');
       }
     });
-
-
   }
-
   showError(name: string): boolean {
     const c = this.formAdd?.get(name);
     return !!c && c.invalid && (c.dirty || c.touched);
@@ -118,7 +115,7 @@ export class AddGaraComponent implements OnInit {
   onSubmit(): void {
     if (this.formAdd.valid) {
       const addGaraRequest: AddGaralModel = this.formAdd.getRawValue();
-      this.garaServive.addGara(addGaraRequest).subscribe({
+      this.garaServive.create(addGaraRequest).subscribe({
         next: () => {
           const toastRef = this.toastr.success('Add new gara successfully!', 'Successfully!');
           toastRef.onHidden.subscribe(() => {
