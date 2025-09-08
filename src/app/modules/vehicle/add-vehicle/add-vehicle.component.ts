@@ -105,7 +105,7 @@ export class AddVehicleComponent implements OnInit {
 
     const vehicleData = this.vehicleForm.value;
 
-    this.vehicleService.addVehicle(vehicleData).subscribe({
+    this.vehicleService.create(vehicleData).subscribe({
       next: (response) => {
         this.vehicleAdded.emit(response);
         this.close();

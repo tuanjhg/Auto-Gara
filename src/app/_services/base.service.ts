@@ -177,56 +177,39 @@ export class BaseService<T = unknown> {
 
     protected extractData<U>(response: ApiResponse<U> | U): U {
         if (response && typeof response === 'object' && 'data' in response) {
+            if ('totalCount' in response) {
+                return response as U;
+            }
             return (response as ApiResponse<U>).data;
         }
         return response as U;
     }
 
     protected normalizePaginatedResponse<U>(response: any): PaginatedResponse<U> {
-        if (response && response.pagination) {
+        if (response) {
             return {
                 data: response.data || [],
-                pagination: {
-                    currentPage: response.pagination.currentPage || 0,
-                    totalPages: response.pagination.totalPages || 0,
-                    totalItems: response.pagination.totalItems || 0,
-                    itemsPerPage: response.pagination.itemsPerPage || 0
-                }
+                totalCount: response.totalCount || 0
             };
         }
 
         if (response && Array.isArray(response.data)) {
             return {
                 data: response.data,
-                pagination: {
-                    currentPage: response.page || response.currentPage || 1,
-                    totalPages: response.totalPages || 1,
-                    totalItems: response.total || response.totalItems || response.data.length,
-                    itemsPerPage: response.limit || response.itemsPerPage || response.data.length
-                }
+                totalCount: response.totalCount || 0
             };
         }
 
         if (Array.isArray(response)) {
             return {
                 data: response,
-                pagination: {
-                    currentPage: 1,
-                    totalPages: 1,
-                    totalItems: response.length,
-                    itemsPerPage: response.length
-                }
+                totalCount: response.length
             };
         }
 
         return {
             data: [],
-            pagination: {
-                currentPage: 0,
-                totalPages: 0,
-                totalItems: 0,
-                itemsPerPage: 0
-            }
+            totalCount: 0
         };
     }
 

@@ -1,62 +1,98 @@
+<!-- Delete Confirm Modal -->
+<app-confirm-model
+  [open]="showDeleteConfirm"
+  title="Delete Vehicle?"
+  message="Are you sure you want to delete this vehicle? This action cannot be undone."
+  confirmText="Delete"
+  cancelText="Cancel"
+  confirmClass="bg-red-500 hover:bg-red-600 text-white"
+  cancelClass="bg-gray-200 hover:bg-gray-300 text-gray-900"
+  (confirmed)="confirmDelete()"
+  (cancelled)="cancelDelete()">
+</app-confirm-model>
+<app-loading *ngIf="loadingService.loading$ | async" class="z-[10000]"></app-loading>
 <div class="flex flex-col min-w-full ">
     <div class="flex flex-col  ">
       <div class="flex flex-row justify-between">
-        <div class="flex items-center justify-center bg-white py-2 px-4 ">Show: <span class="font-bold">All </span> 
-        <button class="hover:bg-gray-200 w-5 h-6">
+        <div class="flex items-center justify-center bg-white py-2 px-4 rounded-lg">Show: <span class="font-bold">All </span> 
+        <button class="hover:bg-gray-200 w-5 h-6 ">
             <mat-icon svgIcon="arrow_drop_down"></mat-icon>
         </button>
         </div>
-        <button (click)="openCreateModal()" class="w-full sm:w-auto bg-white  font-semibold py-2 px-4  shadow-sm hover:bg-gray-200 flex items-center justify-center gap-2">
+        <button (click)="openCreateModal()" class="w-full sm:w-auto bg-white rounded-lg  font-semibold py-2 px-4  shadow-sm hover:bg-gray-200 flex items-center justify-center gap-2">
             <mat-icon svgIcon="add"></mat-icon>
-                Add new Vehicle
+                Add Vehicle
                 </button>
       </div>
     </div>
-    <div class="flex flex-col h-screen bg-white mb-4 mt-4  max-h-[70vh]">
+  <div class="flex flex-col bg-white mb-4 mt-4">
       <div class="mb-4 p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 ">
-            <div class="md:col-span-2">
-                <div class="relative ">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <mat-icon svgIcon="search"></mat-icon>
-                    </div>
-                    <input type="text"
-                    placeholder="Tìm theo biển số, chủ xe, số VIN..."
-                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    [ngModel]="searchText"
-                    (ngModelChange)="onSearchChange($event)"
-                    >
-                </div>
+        <div class="flex items-center gap-4 mb-4">
+    <div class="flex-grow">
+        <div class="relative">
+            <div class="absolute p-1 inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <mat-icon svgIcon="search"></mat-icon>
             </div>
-            <div class="relative">
-              <button (click)="isFilterMenuOpen = !isFilterMenuOpen" class="w-full bg-white border border-gray-300 text-gray-700 font-medium py-1.5 px-4 rounded-lg shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2">
-                  <mat-icon svgIcon="filter_alt"></mat-icon>
-                  Lọc theo: <span class="font-bold">{{ filterColumnLabel }}</span>
-              </button>
-
-              <div *ngIf="isFilterMenuOpen" class="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
-                  <div *ngFor="let option of tableColumns;let i = index"  class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                      <a *ngIf="i < tableColumns.length - 1"
-                        (click)="selectFilter(option)"
-                        href="javascript:void(0)"
-                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" 
-                        role="menuitem">
-                        {{ option.label }}
-                      </a>
-                  </div>
-              </div>
+            <input type="text"
+                placeholder="Search by license plate, car owner, Vin ,... "
+                class="h-12 w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-200 bg-[#F5F8FA]"
+                [ngModel]="searchText"
+                (ngModelChange)="onSearchChange($event)"
+            >
+        </div>
+    </div>
+    <div class="relative">
+        <button (click)="isFilterMenuOpen = !isFilterMenuOpen"
+            class="flex items-center justify-center h-12 min-w-[110px] px-4 py-2 text-base text-gray-600 border border-gray-200 rounded-xl bg-[#F5F8FA] hover:bg-gray-100">
+            <mat-icon class="w-5 h-5 mr-2" svgIcon="filter_alt"></mat-icon>
+            <span>Filter: <span class="font-bold">{{ filterColumnLabel }}</span></span>
+        </button>
+        <div *ngIf="isFilterMenuOpen" 
+            class="absolute right-0 top-full mt-2 w-32 bg-white border rounded-xl border-gray-200 shadow-lg z-20"
+            style="transition: opacity 0.3s ease-in-out;"
+            [ngClass]="{'opacity-0 pointer-events-none': !isFilterMenuOpen, 'opacity-100': isFilterMenuOpen}"
+        >
+            <div *ngFor="let option of tableColumns;let i = index" class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                <a *ngIf="i < tableColumns.length - 1"
+                    (click)="selectFilter(option)"
+                    href="javascript:void(0)"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    role="menuitem">
+                    {{ option.label }}
+                </a>
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow overflow-y-auto max-h-[50vh] mb-4 ">
-          <table class="w-full ">
+    </div>
+</div>
+      <div class="bg-white rounded-lg shadow overflow-y-auto mb-4">
+          <div style="overflow-x:auto;">
+              <table class="w-full min-w-[600px] bg-white rounded-lg">
             <thead class="sticky top-0 z-10 bg-gray-50">
                <ng-container *ngFor="let col of tableColumns">
-                <th *ngIf="col.key !== 'all'"
-                    class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    [ngClass]="col.className || 'text-left'">
-                  {{ col.label }}
+        <th *ngIf="col.key !== 'all' && col.key !== 'actions'"
+          class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
+          [ngClass]="col.className || 'text-left'"
+          [class.cursor-pointer]="col.key === 'plate_number' || col.key === 'model'"
+          [class.select-none]="col.key === 'plate_number' || col.key === 'model'"
+          (click)="(col.key === 'plate_number' || col.key === 'model') && changeSort(col.key)"
+        >
+                  <span class="flex items-center gap-1">
+                    {{ col.label }}
+                    <ng-container *ngIf="sortColumn === col.key">
+                      <mat-icon svgIcon="arrow_upward" *ngIf="sortOrder === 'asc'" class="inline text-xs"></mat-icon>
+                      <mat-icon svgIcon="arrow_downward" *ngIf="sortOrder === 'desc'" class="inline text-xs"></mat-icon>
+                    </ng-container>
+                    <ng-container *ngIf="sortColumn !== col.key">
+                      <mat-icon svgIcon="swap_vert" class="inline text-xs text-gray-300"></mat-icon>
+                    </ng-container>
+                  </span>
                 </th>
-                <th *ngIf="col.key === 'all'" class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th *ngIf="col.key === 'actions'" 
+                [ngClass]="col.className "
+                class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                 {{ col.label }}
+                </th>
+                <th *ngIf="col.key === 'all'" class=" text-xs font-medium text-gray-500 uppercase tracking-wider">
                 </th>
               </ng-container>
             </thead>
@@ -66,7 +102,12 @@
                   <ng-container [ngSwitch]="col.key">
                     
                     <div *ngSwitchCase="'actions'">
-                      <button (click)="openDetailModal(row.id)" class="text-[#DEE33E] hover:text-yellow-300 font-medium">Detail</button>
+                      <div class="inline-flex items-center gap-2">
+                        <button (click)="openDetailModal(row.vehicle_id)" class="!text-yellow-500 hover:!text-yellow-600 focus:!text-yellow-700">
+                          <mat-icon style="transform: scale(0.9); color: #eab308 !important;" svgIcon="create"></mat-icon></button>
+                        <button (click)="openConfirmModel(row.vehicle_id)" class="!text-red-500 hover:!text-red-600 focus:!text-red-700">
+                          <mat-icon style="transform: scale(0.9); color: #ef4444 !important;" svgIcon="delete_forever"></mat-icon></button>
+                      </div>
                     </div>
 
                     <span *ngSwitchCase="'entryDate'">
@@ -81,50 +122,46 @@
                 </td>
               </tr>
             </tbody>
-          </table>
-        </div>
-      <div class="flex items-center justify-between p-4 min-w-full bg-white">
-        <div class="text-sm text-gray-600">
-          Show result:
-          <select [(ngModel)]="pageSize" (change)="changePage(1)"
-            class="ml-2 border border-gray-300 rounded px-2 py-1 text-sm">
-            <option *ngFor="let size of [5,10,15]" [value]="size">{{ size }}</option>
-          </select>
-        </div>
+            </table>
+          </div>
+           <div class="flex items-center justify-between p-4 min-w-full bg-white">
+    <div class="text-sm text-gray-600">
+      Show result:
+      <select [(ngModel)]="pageSize" (change)="changePage(1)"
+        class="ml-2 border border-gray-300 rounded px-2 py-1 text-sm">
+        <option *ngFor="let size of [5,10,15]" [value]="size">{{ size }}</option>
+      </select>
+    </div>
+    <div class="flex items-center space-x-1">
+      <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1"
+        class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
+        <mat-icon svgIcon="arrow_left"></mat-icon>
+      </button>
+      <ng-container *ngFor="let page of paginationArray">
+        <button (click)="changePage(page)" [ngClass]="{
+                'bg-black text-white': currentPage === page,
+                'text-gray-600 hover:bg-gray-200': currentPage !== page
+              }" class="w-8 h-8 flex items-center justify-center border rounded-xl text-sm font-medium">
+          {{ page }}
+        </button>
+      </ng-container>
+      <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+        class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
+        <mat-icon svgIcon="arrow_right"></mat-icon>
+      </button>
+    </div>
+  </div>
+            </div>
 
-        <div class="flex items-center space-x-1">
-          <button (click)="changePage(currentPage - 1) " [disabled]="currentPage === 1"
-            class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
-            <mat-icon svgIcon="arrow_left"></mat-icon>
-
-          </button>
-
-          <ng-container *ngFor="let page of paginationArray">
-            <button (click)="changePage(page)" [ngClass]="{
-                    'bg-black text-white': currentPage === page,
-                    'text-gray-600 hover:bg-gray-200': currentPage !== page
-                  }" class="w-8 h-8 flex items-center justify-center border rounded-xl text-sm font-medium">
-              {{ page }}
-            </button>
-          </ng-container>
-
-          <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
-            class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
-            <mat-icon svgIcon="arrow_right"></mat-icon>
-
-          </button>
-        </div>
-      </div>
-      <div *ngIf="isCreateModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-2xl max-h-[120vh] ">
+      <div *ngIf="isCreateModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal('create')">
+        <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-2xl max-h-[120vh] " (click)="$event.stopPropagation()">
           <app-add-vehicle (closeModalRequest)="closeModal('create')"></app-add-vehicle>
         </div>
       </div>
-      <div *ngIf="isDetailModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-2xl max-h-[120vh] ">
-          <app-vehicle-detail (closeModalRequest)="closeModal('detail')" [vehicleId]="passVehicleId" ></app-vehicle-detail>
+      <div *ngIf="isDetailModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal('detail')">
+        <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-2xl max-h-[120vh] " (click)="$event.stopPropagation()">
+          <app-vehicle-detail (closeModalRequest)="closeModal('detail')" (editRequest)="onVehicleEdited($event)" [vehicleId]="passVehicleId"></app-vehicle-detail>
         </div>
       </div>
     </div>
 </div>
-

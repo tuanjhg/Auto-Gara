@@ -126,7 +126,8 @@ enum EndPoint {
     stamps = 'stamps',
     survey = 'survey',
     workTime = 'workTime',
-    garaList = 'tenant'
+    garaList = 'tenant',
+    customer = 'customer',
 }
 export enum LangEnum {
     ALL = 'all',

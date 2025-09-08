@@ -9,7 +9,7 @@ import { VehicleDetailComponent } from './vehicle-detail/vehicle-detail.componen
 const routes: Route[] = [
     {
         path     : '',
-        component: VehicleListComponent 
+        component: VehicleListComponent
     }
 ];
 

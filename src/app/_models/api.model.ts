@@ -7,12 +7,7 @@ export interface ApiResponse<T> {
 
 export interface PaginatedResponse<T> {
     data: T[];
-    pagination: {
-        currentPage: number;
-        totalPages: number;
-        totalItems: number;
-        itemsPerPage: number;
-    };
+    totalCount: number;
 }
 
 export interface QueryParams {
@@ -33,4 +28,12 @@ export interface ApiRequestData {
     body?: unknown;
     params?: QueryParams;
     query?: QueryParams;
+}
+
+export interface GetParamRequest extends QueryParams {
+    pageNumber?: number;
+    rowsPerPage?: number;
+    search?: string;
+    sort?: string;
+    order?: 'asc' | 'desc';
 }

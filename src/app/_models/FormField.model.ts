@@ -1,11 +1,12 @@
 export interface FormField {
   name: string;
+  controlName?: string;
   label: string;
   type: 'text' | 'number' | 'tel' | 'select' | 'textarea' | 'date';
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
-  colspan?: number; 
+  colspan?: number;
   section: 'vehicle' | 'owner' | 'status';
 }
 export interface FormSection {
@@ -13,7 +14,7 @@ export interface FormSection {
   fields: FormField[];
 }
 export interface TableColumn {
-  key: string;      
-  label: string;    
-  className?: string; 
+  key: string;
+  label: string;
+  className?: string;
 }

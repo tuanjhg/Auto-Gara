@@ -22,34 +22,8 @@ export class VehicleService extends BaseService {
     );
   }
 
-  getVehicles(): Observable<vehicleModel[]> {
-    return this.httpClient.get<vehicleModel[]>(
-      `${this.baseUrl}/${this.endPoint}`
-    );
-  }
-
-  addVehicle(vehicle: vehicleModel): Observable<vehicleModel> {
-    return this.httpClient.post<vehicleModel>(
-      `${this.baseUrl}/${this.endPoint}`,
-      vehicle
-    );
-  }
-
   getVehicleDetail(vehicleId: number): Observable<vehicleModel> {
     return this.httpClient.get<vehicleModel>(
-      `${this.baseUrl}/${this.endPoint}/${vehicleId}`
-    );
-  }
-
-  updateVehicle(vehicleId: number, vehicle: vehicleModel): Observable<vehicleModel> {
-    return this.httpClient.put<vehicleModel>(
-      `${this.baseUrl}/${this.endPoint}/${vehicleId}`,
-      vehicle
-    );
-  }
-
-  deleteVehicle(vehicleId: number): Observable<any> {
-    return this.httpClient.delete<any>(
       `${this.baseUrl}/${this.endPoint}/${vehicleId}`
     );
   }
@@ -61,7 +35,7 @@ export class VehicleService extends BaseService {
       status: { title: 'Initial Status', fields: [] as FormField[] },
     };
 
-    fields.forEach(field => {
+    fields.forEach((field) => {
       if (field.name && sectionConfig.hasOwnProperty(field.section)) {
         (sectionConfig as any)[field.section].fields.push(field);
       }
@@ -69,4 +43,5 @@ export class VehicleService extends BaseService {
 
     return Object.values(sectionConfig);
   }
+
 }

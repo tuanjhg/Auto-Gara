@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { TableColumn} from '../../../_models/FormField.model';
 import { VehicleDisplayRow,vehicleModel} from '../../../_models/vehicle.model';
 import { VehicleService } from '@df_services/vehicle.service';
+import { GetParamRequest, PaginatedResponse } from 'app/_models/api.model';
 import { Subject} from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-
-const customersFromApi = [
-  { id: 101, fullName: 'Nguyễn Văn An', tenant_id: 1 },
-  { id: 102, fullName: 'Trần Thị Bích', tenant_id: 2 },
-  { id: 103, fullName: 'Lê Minh Long', tenant_id: 3 },
-];
+import { LoadingService } from 'app/shared/services/loading.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-vehicle',
@@ -23,117 +20,134 @@ export class VehicleListComponent implements OnInit {
   searchText = '';
   isFilterMenuOpen = false;
   filterColumn: keyof VehicleDisplayRow | 'all' = 'all';
-  filterColumnLabel: string = 'Tất cả';
-  passVehicleId;
+  filterColumnLabel: string = 'All';
+  passVehicleId: number;
+  showDeleteConfirm = false;
 
   tableColumns: TableColumn[] = [
-    { key: 'plateNumber', label: 'Biển số', className: 'text-left' },
-    { key: 'vehicleInfo', label: 'Hãng xe & Mẫu xe', className: 'text-left' },
-    { key: 'ownerName',   label: 'Chủ sở hữu', className: 'text-left' },
+    { key: 'plate_number', label: 'PlateNumber', className: 'text-left' },
+    { key: 'model', label: 'Model', className: 'text-left' },
+    { key: 'ownerName',   label: 'Owner', className: 'text-left' },
     { key:'tenantName', label:'Gara', className: 'text-left' },
-    { key: 'entryDate',   label: 'Ngày vào xưởng', className: 'text-left' },
-    { key: 'all', label: 'Tất cả', className: 'text-right' },
-    { key: 'actions',     label: 'Hành động', className: 'text-right' }
+    { key: 'entryDate',   label: 'EntryDate', className: 'text-left' },
+    { key: 'all', label: 'All', className: 'text-right' },
+    { key: 'actions',     label: 'Actions', className: 'text-right' }
   ];
 
-  activeData: VehicleDisplayRow[] = [];
-  displayData: VehicleDisplayRow[] = [];
-  filteredData = [];
   pageSize = 5;
-  paginationArray: number[] = [];
   currentPage = 1;
   totalItems = 0;
   totalPages = 0;
-  private allData: VehicleDisplayRow[] = [];
-
-  constructor(private vehicleService: VehicleService) { }
+  paginationArray: number[] = [];
+  sortColumn: string = 'createdAt';
+  sortOrder: 'asc' | 'desc' = 'asc';
+  displayData: VehicleDisplayRow[] = [];
+  constructor(
+    private vehicleService: VehicleService,
+    public loadingService: LoadingService,
+    private cdr: ChangeDetectorRef,
+    public toastr: ToastrService
+  ) { }
 
   ngOnInit(): void {
     this.loadVehicles();
-    this.searchSubject.pipe(debounceTime(300)).subscribe((search) => {
-        this.filterData(search);
+    this.searchSubject.pipe(debounceTime(1000)).subscribe((search) => {
+      this.currentPage = 1;
+      this.loadVehicles();
     });
   }
 
   loadVehicles(): void {
-   this.vehicleService.getVehicles().subscribe({
-      next: (res: vehicleModel[]) => {
-
-        const processedData = res.map((vehicle) => {
-          const owner = customersFromApi.find(c => c.id === vehicle.customer_id);
-          const tenant = customersFromApi.find(c => c.id === vehicle.tenant_id);
-          return {
-            id: vehicle.id,
-            plateNumber: vehicle.plate_number,
-            vehicleInfo: `${vehicle.make} ${vehicle.model}`,
-            ownerName: owner ? owner.fullName : 'Không rõ',
-            tenantName: tenant ? tenant.fullName : 'Không rõ',
-            entryDate: vehicle.created_at as Date
-          };
-        });
-        this.allData = processedData;
-        this.activeData = processedData;
-        this.totalItems = this.activeData.length;
-        this.changePage(1);
+    this.loadingService.show();
+    const params: GetParamRequest = {
+      pageNumber: this.currentPage,
+      rowsPerPage: this.pageSize,
+      sort: this.sortColumn,
+      order: this.sortOrder,
+      search: this.searchText.trim() || undefined
+    };
+    this.vehicleService.getPaginated(params).subscribe({
+      next: (res: PaginatedResponse<vehicleModel>) => {
+        this.loadingService.hide();
+        this.totalItems = res.totalCount;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+        this.displayData = res.data.map(vehicle => ({
+          vehicle_id: vehicle.vehicle_id,
+          plate_number: vehicle.plate_number,
+          model: `${vehicle.make} ${vehicle.model}`,
+          ownerName: vehicle.customers?.full_name || 'Không rõ',
+          tenantName: vehicle.tenant?.name || 'Không rõ',
+          entryDate: new Date(vehicle.createdAt)
+        }));
+        this.updatePaginationArray();
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.allData = [];
+        this.loadingService.hide();
+        this.displayData = [];
         this.totalItems = 0;
-        this.changePage(1);
+        this.totalPages = 0;
+        this.updatePaginationArray();
+        this.cdr.detectChanges();
       }
     });
   }
 
-    filterData(search: string): void {
-      const lowerCaseSearch = search.toLowerCase().trim();
+    onVehicleEdited(vehicleId: number): void {
+      this.loadVehicles();
+    }
 
-      if (!lowerCaseSearch) {
-        this.activeData = this.allData;
-      } else {
-
-        this.activeData = this.allData.filter((item) => {
-           if (this.filterColumn === 'all') {
-                    return item.plateNumber.toLowerCase().includes(lowerCaseSearch) ||
-                        item.vehicleInfo.toLowerCase().includes(lowerCaseSearch) ||
-                        item.ownerName.toLowerCase().includes(lowerCaseSearch);
-                }
-                else {
-                    const cellValue = item[this.filterColumn];
-                    if (typeof cellValue === 'string') {
-                        return cellValue.toLowerCase().includes(lowerCaseSearch);
-                    }
-                    return false;
-                }
-      });
-      }
-
-      this.totalItems = this.activeData.length;
-      this.changePage(1);
+  changePage(page: number): void {
+    if (page < 1) { page = 1; }
+    if (page > this.totalPages) { page = this.totalPages; }
+    this.currentPage = page;
+    this.loadVehicles();
   }
 
-   selectFilter(option: { key: keyof VehicleDisplayRow | 'all'; label: string }): void {
-        this.filterColumn = option.key;
-        this.filterColumnLabel = option.label;
-        this.isFilterMenuOpen = false;
-        this.filterData(this.searchText);
-    };
-
-   changePage(page: number): void {
-    this.totalItems = this.activeData.length;
-    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-
-    if (page < 1 && this.totalPages > 0) {
-      page = 1;
+  changeSort(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortOrder = 'asc';
     }
-    if (page > this.totalPages) {
-      page = this.totalPages;
+    this.currentPage = 1;
+    this.loadVehicles();
+  }
+
+  onSearchChange(search: string): void {
+    this.searchText = search;
+    this.searchSubject.next(search);
+  }
+
+ openConfirmModel(vehicleId: number): void {
+    this.passVehicleId = vehicleId;
+    this.showDeleteConfirm = true;
+    this.cdr.detectChanges();
+  }
+
+  confirmDelete(): void {
+    if (!this.passVehicleId) {
+      return;
     }
-    this.currentPage = page;
+    this.vehicleService.delete(this.passVehicleId).subscribe({
+      next: () => {
+        this.showDeleteConfirm = false;
+        this.passVehicleId = null;
+        this.toastr.success('Delete vehicle successfully!', 'Success');
+        this.loadVehicles();
+      },
+      error: () => {
+        this.showDeleteConfirm = false;
+        this.passVehicleId = null;
+      }
+    });
+  }
 
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    this.displayData = this.activeData.slice(startIndex, startIndex + this.pageSize);
-
-    this.updatePaginationArray();
+  cancelDelete(): void {
+    this.showDeleteConfirm = false;
+    this.passVehicleId = null;
+    this.cdr.detectChanges();
   }
 
   updatePaginationArray(): void {
@@ -141,14 +155,12 @@ export class VehicleListComponent implements OnInit {
     const pages: number[] = [];
     let startPage: number;
     let endPage: number;
-
     if (this.totalPages <= maxPagesToShow) {
       startPage = 1;
       endPage = this.totalPages;
     } else {
       const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2);
       const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1;
-
       if (this.currentPage <= maxPagesBeforeCurrent) {
         startPage = 1;
         endPage = maxPagesToShow;
@@ -160,7 +172,6 @@ export class VehicleListComponent implements OnInit {
         endPage = this.currentPage + maxPagesAfterCurrent;
       }
     }
-
     for (let i = startPage; i <= endPage; i++) {
       if (i > 0 && i <= this.totalPages) {
         pages.push(i);
@@ -170,16 +181,18 @@ export class VehicleListComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    this.isCreateModalOpen = true;
+    setTimeout(() => {
+      this.isCreateModalOpen = true;
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   openDetailModal(vehicleId: number): void {
-    this.isDetailModalOpen = true;
-    this.passVehicleId = vehicleId;
-  }
-
-  onSearchChange(search: string): void {
-    this.searchSubject.next(search);
+    setTimeout(() => {
+      this.isDetailModalOpen = true;
+      this.passVehicleId = vehicleId;
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   closeModal(type: 'create' | 'detail'): void {
@@ -189,4 +202,13 @@ export class VehicleListComponent implements OnInit {
       this.isDetailModalOpen = false;
     }
   }
+
+  selectFilter(option: { key: keyof VehicleDisplayRow | 'all'; label: string }): void {
+    this.filterColumn = option.key;
+    this.filterColumnLabel = option.label;
+    this.isFilterMenuOpen = false;
+    this.currentPage = 1;
+    this.loadVehicles();
+  }
+
 }
