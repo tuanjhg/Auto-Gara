@@ -6,16 +6,18 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ConfirmModelComponent } from './components/confirm-model/confirm-model.component';
 import { LoadingComponent } from './components/loading/loading.component';
+import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
 
 @NgModule({
   declarations: [
     HeaderComponent,
     SidebarComponent,
     ConfirmModelComponent,
-    LoadingComponent
+    LoadingComponent,
+    ImageGalleryComponent
   ],
   imports: [CommonModule, RouterModule, MatIconModule],
-  exports: [LoadingComponent,ConfirmModelComponent, HeaderComponent, SidebarComponent, MatIconModule, CommonModule],
+  exports: [LoadingComponent, ConfirmModelComponent, ImageGalleryComponent, HeaderComponent, SidebarComponent, MatIconModule, CommonModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SharedModule { }

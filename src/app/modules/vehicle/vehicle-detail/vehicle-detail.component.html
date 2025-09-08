@@ -1,98 +1,196 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center">
+  <div class="absolute inset-0 bg-black/50" (click)="close()"></div>
+  <div class="relative z-10 rounded-lg bg-gray-100 p-2 sm:p-6 shadow-xl w-full sm:w-[54vw] max-w-full sm:max-w-[1000px] max-h-[100vh] sm:max-h-[95vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    
+    <app-loading *ngIf="isLoading"></app-loading>
 
-<div *ngIf="vehicle" class="space-y-6 p-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-800">{{ vehicle.make }} {{ vehicle.model }}</h1>
-      <p class="text-gray-500">Details for vehicle <span class="font-semibold text-gray-700">{{ vehicle.plate_number }}</span></p>
+    <div *ngIf="errorMessage" class="absolute top-4 right-4 z-30 rounded-lg bg-red-100 border border-red-400 px-4 py-3 text-red-700 shadow-lg">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button (click)="errorMessage = ''" class="ml-2 text-red-500 hover:text-red-700">
+          <mat-icon class="h-4 w-4">exit_to_app</mat-icon>
+        </button>
+      </div>
     </div>
-    <div class="flex items-center space-x-3">
-      <button (click)="editVehicle()" class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200">Edit</button>
-      <button (click)="deleteVehicle()" class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600">Delete</button>
-      <button class="mb-0.5" (click)="close()">
+
+    <div *ngIf="successMessage" class="absolute top-4 right-4 z-30 rounded-lg bg-green-100 border border-green-400 px-4 py-3 text-green-700 shadow-lg">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button (click)="successMessage = ''" class="ml-2 text-green-500 hover:text-green-700">
+          <mat-icon class="h-4 w-4">close</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6" [class.opacity-50]="isLoading">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">
+          {{ vehicle?.make || 'Loading...' }} {{ vehicle?.model || '' }}
+        </h1>
+        <p class="text-gray-500">
+          Details for vehicle 
+          <span class="font-semibold text-gray-700">
+            {{ vehicle?.plate_number || 'Loading...' }}
+          </span>
+        </p>
+      </div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mt-4 sm:mt-0">
+        <button *ngIf="!isEditMode && vehicle" 
+                (click)="toggleEditMode()" 
+                class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200 disabled:opacity-50"
+                [disabled]="isLoading">
+          Edit
+        </button>
+        <button *ngIf="!isEditMode && vehicle" 
+                (click)="confirmDelete()" 
+                class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+                [disabled]="isLoading || isDeleting">
+          <span *ngIf="isDeleting" class="flex items-center">
+            <div class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+            Deleting...
+          </span>
+          <span *ngIf="!isDeleting">Delete</span>
+        </button>
+        <button class="mb-0.5 self-end sm:self-auto" (click)="close()">
           <mat-icon svgIcon="exit_to_app"></mat-icon>
         </button>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-    <div class="space-y-6 lg:col-span-1">
-      <div class="rounded-lg bg-white p-4 shadow">
-        <img [src]="displayImage" alt="Main Vehicle Image" class="mb-3 h-auto w-full rounded-lg" />
-        <div class="grid grid-cols-3 gap-3">
-          <img *ngFor="let thumb of vehicle.images.thumbnails" 
-               [src]="thumb" 
-               (click)="changeDisplayImage(thumb)"
-               alt="Thumbnail image" 
-               class="cursor-pointer rounded-md hover:border-blue-500"
-               [ngClass]="{'border-2 border-blue-500': thumb === displayImage}" />
-        </div>
-      </div>
-
-      <div class="rounded-lg bg-white p-4 shadow">
-        <h3 class="mb-3 text-lg font-semibold">Key Information</h3>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between">
-            <span class="text-gray-500">Owner</span>
-            <span class="font-medium text-gray-800">{{ vehicle.ownerName }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">Status</span>
-
-            <span class="rounded-full px-2 py-1 text-xs font-semibold" [ngClass]="getStatusStyle(vehicle.status.style)" >
-              {{ vehicle.status.label }}
-            </span>
-            
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">Entry Date</span>
-            <span class="font-medium text-gray-800">{{ vehicle.entryDate | date:'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">VIN</span>
-            <span class="font-medium text-gray-800">{{ vehicle.vin }}</span>
-          </div>
-        </div>
       </div>
     </div>
 
-    <div class="rounded-lg bg-white p-4 shadow lg:col-span-2">
-      <div class="border-b border-gray-200">
-        <nav class="-mb-px flex space-x-6">
-          <a href="javascript:void(0)" 
-             (click)="selectTab('info')"
-             class="px-1 py-3 text-sm font-medium"
-             [ngClass]="{
-                'border-b-2 border-yellow-400 text-yellow-500': activeTab === 'info', 
-                'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': activeTab !== 'info'
-             }">
-            Vehicle Info
-          </a>
-          <a href="javascript:void(0)"
-             (click)="selectTab('history')"
-             class="px-1 py-3 text-sm font-medium"
-             [ngClass]="{
-                'border-b-2 border-yellow-400 text-yellow-500': activeTab === 'history', 
-                'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700': activeTab !== 'history'
-             }">
-             Repair History
-          </a>
-        </nav>
-      </div>
+    <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch" [class.opacity-50]="isLoading">
       
-      <div *ngIf="activeTab === 'info'" class="py-5">
-        <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
-         <div *ngFor="let field of infoFields" 
-          class="flex flex-col" 
-         [ngClass]="field.className"> <span class="text-gray-500">{{ field.label }}</span>
-          <span class="font-semibold">{{ field.value }}</span>
-      </div>
+      <app-image-gallery
+        [images]="vehicle?.images"
+        [isEditMode]="isEditMode"
+        [isLoading]="isLoading"
+        [validationErrors]="validationErrors"
+        [defaultImage]="defaultImage"
+        (imageSelected)="onImageSelected($event)"
+        (imageUpload)="onImageUpload($event)">
+      </app-image-gallery>
 
-      <div *ngIf="activeTab === 'history'" class="py-5">
-        <p class="text-gray-600">Repair history will be displayed here.</p>
+      <div class="flex flex-col gap-4 lg:col-span-2 h-full">
+        <div class="rounded-lg bg-white shadow flex-1 flex flex-col min-h-0">
+          <div *ngIf="isLoading && !form" class="p-4">
+            <div class="border-b border-gray-200 px-4 pb-4 mb-4">
+              <div class="h-6 bg-gray-200 rounded animate-pulse w-32"></div>
+            </div>
+            <div class="px-4 py-5">
+              <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
+                <div *ngFor="let item of [1,2,3,4,5,6]" class="flex flex-col">
+                  <div class="h-4 bg-gray-200 rounded animate-pulse w-24 mb-2"></div>
+                  <div class="h-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <form *ngIf="form" [formGroup]="form" (ngSubmit)="saveChanges()" [class.opacity-50]="isLoading">
+            <div class="border-b border-gray-200 px-4">
+              <nav class="-mb-px flex items-center justify-between space-x-6">
+                <div class="flex space-x-6">
+                  <button type="button" 
+                          class="border-b-2 border-yellow-200 px-1 py-3 text-sm font-medium text-[#DEE33E]">
+                    Vehicle Info
+                  </button>
+                </div>
+                
+                <div *ngIf="isEditMode" class="flex space-x-2">
+                  <button type="submit" 
+                          [disabled]=" isSaving"
+                          class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200 disabled:opacity-50">
+                    <span *ngIf="isSaving" class="flex items-center">
+                      <div class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+                      Saving...
+                    </span>
+                    <span *ngIf="!isSaving">Save</span>
+                  </button>
+                  <button type="button" 
+                          (click)="cancelEdit()"
+                          class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-black hover:bg-gray-400 disabled:opacity-50"
+                          [disabled]="isSaving">
+                    Cancel
+                  </button>
+                </div>
+              </nav>
+            </div>
+
+            <div class="px-4 py-5 overflow-auto flex-1">
+              
+              <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
+                <div *ngFor="let field of formFields" class="flex flex-col">
+                  <label class="text-gray-500 mb-1">{{ field.label }}</label>
+
+
+                  <ng-container *ngIf="!isEditMode">
+                    <span class="font-semibold transition-opacity duration-200" [class.opacity-50]="isLoading">
+                      <ng-container *ngIf="field.name === 'customer_id'">
+                        {{ owners && owners.length > 0 ? owners[0].full_name : (vehicle?.customer_id || 'N/A') }}
+                      </ng-container>
+                      <ng-container *ngIf="field.name === 'tenant_id'">
+                        {{ tenants && tenants.length > 0 ? tenants[0].name : (vehicle?.tenant_id || 'N/A') }}
+                      </ng-container>
+                      <ng-container *ngIf="field.name !== 'customer_id' && field.name !== 'tenant_id'">
+                        {{ field.type === 'date' ? (vehicle?.[field.name] | date:'dd/MM/yyyy') : (vehicle?.[field.name] || (isLoading ? 'Loading...' : 'N/A')) }}
+                      </ng-container>
+                    </span>
+                  </ng-container>
+
+                  <ng-container *ngIf="isEditMode">
+                    <ng-container *ngIf="field.name === 'customer_id'">
+                      <span class="font-semibold transition-opacity duration-200" [class.opacity-50]="isLoading">
+                        {{ owners && owners.length > 0 ? owners[0].full_name : (vehicle?.customer_id || 'N/A') }}
+                      </span>
+                    </ng-container>
+                    <ng-container *ngIf="field.name === 'tenant_id'">
+                      <span class="font-semibold transition-opacity duration-200" [class.opacity-50]="isLoading">
+                        {{ tenants && tenants.length > 0 ? tenants[0].name : (vehicle?.tenant_id || 'N/A') }}
+                      </span>
+                    </ng-container>
+                    <ng-container *ngIf="field.name !== 'customer_id' && field.name !== 'tenant_id'">
+                      <input class="form-input border border-gray-300 rounded-xl p-2 font-semibold"
+                             [formControlName]="field.controlName || field.name"
+                             [type]="field.type || 'text'"
+                             [ngClass]="{
+                               'border-red-500 focus:ring-red-200': isInvalid(field.controlName || field.name),
+                               'border-green-500 focus:ring-green-200': isValid(field.controlName || field.name),
+                               'border-gray-300 focus:ring-gray-200': !isInvalid(field.controlName || field.name) && !isValid(field.controlName || field.name)
+                             }" />
+                    </ng-container>
+                    <div *ngIf="validationErrors[field.controlName || field.name]" class="mt-1 text-xs text-red-600">
+                      {{ validationErrors[field.controlName || field.name] }}
+                    </div>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
-
+      </div>
     </div>
   </div>
 </div>
 
-</div>
+<app-confirm-model
+  [open]="showConfirmSave"
+  title="Confirm Save Changes"
+  message="Are you sure you want to save the changes to this vehicle?"
+  confirmText="Save Changes"
+  cancelText="Cancel"
+  confirmClass="bg-[#DEE33E] hover:bg-yellow-200 text-black"
+  cancelClass="bg-gray-200 hover:bg-gray-300 text-gray-900"
+  (confirmed)="confirmSave()"
+  (cancelled)="showConfirmSave = false">
+</app-confirm-model>
+
+<app-confirm-model
+  [open]="showConfirmDelete"
+  title="Confirm Delete Vehicle"
+  [message]="'Are you sure you want to delete ' + (vehicle?.make || '') + ' ' + (vehicle?.model || '') + '? This action cannot be undone.'"
+  confirmText="Delete Vehicle"
+  cancelText="Cancel"
+  confirmClass="bg-red-500 hover:bg-red-600 text-white"
+  cancelClass="bg-gray-200 hover:bg-gray-300 text-gray-900"
+  (confirmed)="deleteVehicle()"
+  (cancelled)="showConfirmDelete = false">
+</app-confirm-model>

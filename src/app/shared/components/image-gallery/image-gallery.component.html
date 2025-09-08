@@ -1,0 +1,49 @@
+
+<div class="rounded-lg bg-white p-4 shadow h-full flex flex-col">
+  <div class="mb-3">
+    <div *ngIf="isLoading && !images" class="w-full h-64 rounded-lg bg-gray-200 animate-pulse flex items-center justify-center">
+      <mat-icon class="text-gray-400 h-12 w-12">image</mat-icon>
+    </div>
+    <img *ngIf="!isLoading || images" 
+         [src]="displayImage" 
+         alt="Main Image" 
+         class="w-full h-64 rounded-lg object-cover transition-opacity duration-200"
+         [class.opacity-50]="isLoading"
+         (error)="onImageError()" />
+  </div>
+  
+  <div *ngIf="isEditMode" class="mb-3">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Upload Images</label>
+    <input type="file" 
+           multiple 
+           accept="image/*"
+           (change)="onImageUpload($event)"
+           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#DEE33E] file:text-black hover:file:bg-yellow-200" />
+    <div *ngIf="validationErrors['images']" class="mt-1 text-xs text-red-600">
+      {{ validationErrors['images'] }}
+    </div>
+  </div>
+  
+  <div class="grid grid-cols-3 gap-3 mt-auto" *ngIf="images?.thumbnails?.length && images.thumbnails.length > 0">
+    <img *ngFor="let thumb of images.thumbnails; let i = index" 
+         [src]="thumb" 
+         [alt]="'Thumbnail ' + (i + 1)" 
+         class="cursor-pointer rounded-md border-2 h-16 object-cover transition-all duration-200"
+         [ngClass]="{
+           'border-blue-500': selectedImageIndex === i,
+           'border-white': selectedImageIndex !== i,
+           'opacity-50': isLoading
+         }"
+         (click)="selectImage(i)" />
+  </div>
+  
+  <div *ngIf="isLoading && !images?.thumbnails?.length" class="grid grid-cols-3 gap-3 mt-auto">
+    <div *ngFor="let item of [1,2,3]" class="h-16 rounded-md bg-gray-200 animate-pulse"></div>
+  </div>
+  
+
+  <div *ngIf="!isLoading && !images?.thumbnails?.length" class="text-center text-gray-500 mt-auto">
+    <mat-icon class="h-12 w-12 mx-auto mb-2">image</mat-icon>
+    <p class="text-sm">No additional images</p>
+  </div>
+</div>

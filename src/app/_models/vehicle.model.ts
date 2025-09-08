@@ -95,6 +95,14 @@ export const vehicleFormFields: FormField[] = [
     section: 'vehicle',
   },
     {
+    name: 'entryDate',
+    controlName: 'entryDate',
+    label: 'Entry Date',
+    type: 'date',
+    section: 'owner',
+    required: true,
+  },
+    {
     name: 'tenant_id',
     controlName: 'tenant',
     label: 'Tenant',
@@ -110,15 +118,7 @@ export const vehicleFormFields: FormField[] = [
     placeholder: 'Select customer',
     required: true,
     section: 'owner',
-  },
-  {
-    name: 'entryDate',
-    controlName: 'entryDate',
-    label: 'Entry Date',
-    type: 'date',
-    section: 'owner',
-    required: true,
-  },
+  }
 
 ];
 export interface VehicleDetail extends vehicleModel {
@@ -129,7 +129,7 @@ export interface VehicleDetail extends vehicleModel {
   plate_number: string;
   vin_number: string;
   color: string;
-  mileage: string;
+  last_mileage: number;
   ownerName: string;
   entryDate: Date;
   status: {

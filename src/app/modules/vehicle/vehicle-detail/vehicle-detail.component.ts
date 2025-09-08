@@ -346,12 +346,11 @@ export class VehicleDetailComponent implements OnChanges, OnInit {
       year: apiVehicle.year ?? new Date().getFullYear(),
       color: apiVehicle.color ?? '',
       vin_number: apiVehicle.vin_number ?? '',
-      last_mileage: apiVehicle.last_mileage ?? 0,
       status: apiVehicle.status ?? { label: 'Unknown', style: 'info' },
       images: apiVehicle.images ?? { main: this.defaultImage, thumbnails: [] },
       ownerName: apiVehicle.customers?.full_name ?? 'Unknown Owner',
       entryDate: apiVehicle.createdAt ? new Date(apiVehicle.createdAt) : new Date(),
-      mileage: apiVehicle.last_mileage ? `${apiVehicle.last_mileage} km` : '0 km',
+      last_mileage: apiVehicle.last_mileage ? Number(apiVehicle.last_mileage) : 0,
     };
   }
 
