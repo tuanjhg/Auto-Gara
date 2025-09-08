@@ -64,7 +64,8 @@
               </ng-container>
             </div>
           </th>
-          <th class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-center bg-gray-50">Action</th>
+          <th class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-center bg-gray-50">Action
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100 bg-white text-base text-black   ">
@@ -84,8 +85,13 @@
           <td class="px-4 py-2 text-base text-left"><span>{{row.address}}</span></td>
           <td class="px-4 py-2 text-base text-left"><span>{{row.email}}</span></td>
           <td class="px-4 py-2 text-base text-left"><span>{{row.owner?.full_name||'None'}}</span></td>
-          <td class="px-4 py-2 text-base text-center"><a (click)="openDetail(row.tenant_id)"
-              class=" hover:text-yellow-500 text-yellow-300 underline cursor-pointer">Detail</a>
+          <td class="px-4 py-2 text-base text-center">
+            <div class="inline-flex items-center gap-2">
+              <button (click)="openDetail(row.tenant_id)" class="text-yellow-500">
+                <mat-icon style="transform: scale(0.9);" svgIcon="create"></mat-icon></button>
+              <button (click)="openConfirmModel(row.tenant_id)" class="text-red-500">
+                <mat-icon style="transform: scale(0.9);" svgIcon="delete_forever"></mat-icon></button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -131,3 +137,7 @@
 <app-add-gara *ngIf="addOpen" (closed)="onAddClosed()">
 </app-add-gara>
 <app-loading *ngIf="loadingService.loading$ | async" class="z-[10000]"></app-loading>
+<app-confirm-model [open]="openDelete" [title]="'Delete'" [message]="'Bạn có chắc chắn muốn xoá gara này không?'"
+  [confirmText]="'Xoá'" [cancelText]="'Huỷ'" (confirmed)="onConfirmDelete()" (cancelled)="onCancelDelete()">
+
+</app-confirm-model>

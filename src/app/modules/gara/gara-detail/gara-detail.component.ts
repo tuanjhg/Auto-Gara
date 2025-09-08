@@ -20,6 +20,8 @@ export class GaraDetailComponent implements OnInit, OnChanges {
   form: FormGroup;
   isEditMode: boolean = false;
   submitted = false;
+  openDelete: boolean = false;
+  isDeleting: boolean = false;
   owners: UserModel[] = [];
   readonly errorMessages: Record<string, Record<string, string>> = {
     name: {
@@ -193,5 +195,27 @@ export class GaraDetailComponent implements OnInit, OnChanges {
   close(): void {
     this.isEditMode = false;
     this.closed.emit();
+  }
+  openConfirmModel(): void {
+    this.openDelete = true;
+  }
+  onCancelDelete(): void{
+    if(this.isDeleting) {return;}
+    this.openDelete =false;
+  }
+  onConfirmDelete(): void{
+    this.isDeleting =true;
+    this.garaService.delete(this.gara.tenant_id).subscribe({
+      next: () =>{
+        this.isDeleting =false;
+        this.openDelete =false;
+        this.toastr.success('Xoá gara thành công!','successfully!');
+        this.closed.emit();
+      },
+      error:() =>{
+        this.isDeleting =false;
+        this.toastr.error('Xoá gara thất bại!','failed!');
+      }
+    });
   }
 }

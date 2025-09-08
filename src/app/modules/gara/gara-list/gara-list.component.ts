@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { GaraApiItem, GaraDetailModel, GaraModel } from '@df_models/gara.model';
 import { GaraService } from '@df_services/gara.service';
 import { LoadingService } from '@shared/services/loading.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-gara-list',
@@ -27,11 +28,16 @@ export class GaraListComponent implements OnInit {
   detailOpen = false;
   selectedGara: GaraDetailModel;
 
+  openDelete: boolean = false;
+  isDeleting: boolean = false;
+  selectedToDelete: number;
+
   addOpen = false;
 
 
   constructor(
     private garaService: GaraService,
+    private toastr: ToastrService,
     public loadingService: LoadingService
 
   ) { }
@@ -149,5 +155,28 @@ export class GaraListComponent implements OnInit {
     this.detailOpen = false;
     this.selectedGara = null;
     this.loadData();
+  }
+  openConfirmModel(id: number): void {
+    this.selectedToDelete = id;
+    this.openDelete = true;
+  }
+  onCancelDelete(): void {
+    if (this.isDeleting) { return; }
+    this.openDelete = false;
+  }
+  onConfirmDelete(): void {
+    this.isDeleting = true;
+    this.garaService.delete(this.selectedToDelete).subscribe({
+      next: () => {
+        this.isDeleting = false;
+        this.openDelete = false;
+        this.toastr.success('Xoá gara thành công!', 'successfully!');
+        this.loadData();
+      },
+      error: () => {
+        this.isDeleting = false;
+        this.toastr.error('Xoá gara thất bại!', 'failed!');
+      }
+    });
   }
 }
