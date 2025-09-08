@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { GaraApiItem, GaraDetailModel, GaraModel } from '@df_models/gara.model';
+import { GaraApiItem, GaraDetailModel, GaraListApiResponse, GaraModel } from '@df_models/gara.model';
 import { GaraService } from '@df_services/gara.service';
 import { LoadingService } from '@shared/services/loading.service';
 import { ToastrService } from 'ngx-toastr';
+import { debounceTime, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-gara-list',
@@ -11,7 +12,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class GaraListComponent implements OnInit {
   searchTerm: string = '';
-  headers: string[] = ['Gara Name', 'Address', 'Email', 'Owner'];
+  headers: string[] = ['Gara Name', 'Address', 'Email','phone', 'Owner'];
 
   garas: GaraApiItem[] = [];
   filterGaras: GaraApiItem[] = [];
@@ -33,6 +34,7 @@ export class GaraListComponent implements OnInit {
   selectedToDelete: number;
 
   addOpen = false;
+  private search$ = new Subject<string>();
 
 
   constructor(
@@ -57,45 +59,42 @@ export class GaraListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.search$.pipe(debounceTime(1500)).subscribe(() => this.filterData());
     this.loadData();
   }
   loadData(): void {
     this.loadingService.show();
-    this.garaService.getAllGara({
+    this.garaService.getPaginated({
       pageNumber: this.currentPage,
       rowsPerPage: this.pageSize,
       sort: this.sortColumn,
-      order: this.sortDirection
+      order: this.sortDirection,
+      search: this.searchTerm
     }).subscribe({
-      next: (res) => {
+      next: (res: GaraListApiResponse) => {
+        const data = res.data;
+        const total = res.totalCount;
+        if (data.length == 0 && total > 0 && this.currentPage > 1) {
+          this.currentPage = this.currentPage - 1;
+          this.loadData();
+          return;
+        }
         this.garas = res.data;
         this.totalItems = res.totalCount;
         this.loadingService.hide();
-      }, error: (err) => {
+      }, error: () => {
       }
     });
   }
   filterData(): void {
     const term = this.searchTerm.trim().toLowerCase();
-    if (!term) {
-      this.filterGaras = [...this.garas];
-      return;
+    if (term.valueOf) {
+      this.currentPage = 1;
+      this.loadData();
     }
-    this.filterGaras = this.garas.filter((gara) => {
-      if (this.selectedField === 'name') {
-        return gara.name?.toLowerCase().includes(term);
-      } else if (this.selectedField === 'address') {
-        return gara.address?.toLowerCase().includes(term);
-      } else if (this.selectedField === 'email') {
-        return gara.email?.toLowerCase().includes(term);
-      } else {
-        return (
-          gara.name?.toLowerCase().includes(term) ||
-          gara.address?.toLowerCase().includes(term) ||
-          gara.email?.toLowerCase().includes(term)
-        );
-      }
-    });
+  }
+  onSearchChange(search: string): void {
+    this.search$.next(search);
   }
 
   selectField(field: string): void {
@@ -142,9 +141,9 @@ export class GaraListComponent implements OnInit {
   }
   openDetail(id: number): void {
     this.detailOpen = true;
-    this.garaService.getGaraById(id).subscribe({
-      next: (g) => {
-        this.selectedGara = g;
+    this.garaService.getById(id).subscribe({
+      next: (res: GaraDetailModel) => {
+        this.selectedGara = res;
       },
       error: (err) => {
       }

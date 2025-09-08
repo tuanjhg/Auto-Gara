@@ -13,7 +13,7 @@
   </div>
   <div class="flex items-center justify-between p-4 bg-white ">
     <div class="relative w-11/12">
-      <input type="text" [(ngModel)]="searchTerm" (input)="filterData()"
+      <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)"
         placeholder="Search by name, email, or others..."
         class="h-12 w-full pl-10 pr-4 py-2 border border-gray-300 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-blue-300 bg-gray-100" />
       <mat-icon svgIcon="search" class="absolute left-3 top-2.5 w-4 h-9"></mat-icon>
@@ -84,13 +84,14 @@
           </td>
           <td class="px-4 py-2 text-base text-left"><span>{{row.address}}</span></td>
           <td class="px-4 py-2 text-base text-left"><span>{{row.email}}</span></td>
+          <td class="px-4 py-2 text-base text-left"><span>{{row.phone}}</span></td>
           <td class="px-4 py-2 text-base text-left"><span>{{row.owner?.full_name||'None'}}</span></td>
           <td class="px-4 py-2 text-base text-center">
             <div class="inline-flex items-center gap-2">
-              <button (click)="openDetail(row.tenant_id)" class="text-yellow-500">
-                <mat-icon style="transform: scale(0.9);" svgIcon="create"></mat-icon></button>
-              <button (click)="openConfirmModel(row.tenant_id)" class="text-red-500">
-                <mat-icon style="transform: scale(0.9);" svgIcon="delete_forever"></mat-icon></button>
+              <button (click)="openDetail(row.tenant_id)" class="!text-yellow-500 hover:!text-yellow-600 focus:!text-yellow-700">
+                <mat-icon style="transform: scale(0.9); color: #eab308 !important;" svgIcon="create"></mat-icon></button>
+              <button (click)="openConfirmModel(row.tenant_id)" class="!text-red-500 hover:!text-red-600 focus:!text-red-700">
+                <mat-icon style="transform: scale(0.9); color: #ef4444 !important;" svgIcon="delete_forever"></mat-icon></button>
             </div>
           </td>
         </tr>
