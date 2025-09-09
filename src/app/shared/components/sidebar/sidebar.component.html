@@ -18,4 +18,10 @@
       </li>
       </ul>
   </nav>
+  <div>
+    <button (click)="onLogout()" class="flex items-center p-3 text-base font-normal text-black-600 rounded-lg hover:bg-[#DEE33E] hover:font-bold group w-full">
+      <mat-icon svgIcon="logout"></mat-icon>
+      <span *ngIf="!collapsed" class="ml-3">Logout</span>
+    </button>
+  </div>
 </aside>

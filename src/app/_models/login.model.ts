@@ -5,15 +5,13 @@ export interface LoginRequest {
 
 
 export interface LoginResponse {
-    accessToken: string;
-    user?: {
-        id: number;
-        email: string;
-        name?: string;
-        role?: string;
-    };
+    id: number;
+    email: string;
+    name?: string;
+    role: string;
     message?: string;
     success?: boolean;
+    accessToken: string;
     refreshToken?: string;
 }
 

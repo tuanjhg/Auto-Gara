@@ -1,4 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
+import { LoginService } from 'app/_services/login.service';
+import { LoadingService } from 'app/shared/services/loading.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,14 +15,16 @@ export class SidebarComponent implements OnInit {
 features = [
   { name: 'Dashboard', icon: 'grid_view' },
   { name: 'Inventory', icon: 'inventory_2' },
-  { name: 'Customers', icon: 'people' },
+  { name: 'Customer', icon: 'people' },
   { name: 'Vehicle', icon: 'car_repair' },
   { name: 'Order', icon: 'assignment' },
   { name: 'Gara', icon: 'garage' },
   { name: 'User', icon: 'person' }
 ];
-
-  constructor() {}
+  constructor(private loginService: LoginService,
+    private router: Router,
+    private loadingService: LoadingService
+    ) {}
 
   ngOnInit(): void {
   }
@@ -28,4 +33,11 @@ features = [
     this.featureSelected.emit(feature);
   }
 
+  onLogout(): void {
+    this.loginService.logout();
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('role');
+    this.router.navigate(['/login']);
+  }
 }

@@ -41,4 +41,11 @@ export class LoginService extends BaseService<LoginResponse> {
             { refreshToken }
         );
     }
+    logout(): void {
+        const refreshToken = localStorage.getItem('refreshToken') || '';
+        if(!refreshToken){
+            return;
+        }
+        this.httpClient.post(`${this.baseUrl}/${this.endPoint}/logout`, {refreshToken});
+    }
 }

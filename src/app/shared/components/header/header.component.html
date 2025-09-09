@@ -22,16 +22,17 @@
 
     <div class="h-8 w-px bg-gray-200"></div>
     
-    <button class="flex items-center space-x-3">
-    <button class="relative text-gray-600 hover:bg-gray-200 rounded-full ">
-      <img [src]="userAvatarUrl" alt="User Avatar" class="w-10 h-10 rounded-full">
+    <div class="relative">
+      <button class="relative text-gray-600 hover:bg-gray-200 rounded-full " (click)="isDropdownOpen = !isDropdownOpen">
+        <img [src]="userAvatarUrl" alt="User Avatar" class="w-10 h-10 rounded-full">
       </button>
-      <div class="text-left">
-        <div class="font-semibold text-sm text-gray-800">{{ userName }}</div>
-        <div class="text-xs text-gray-500">{{ userRole }}</div>
+      <div *ngIf="isDropdownOpen" class="absolute right-0 mt-2 w-30 bg-white border rounded-xl shadow-lg z-50">
       </div>
-    </button>
-    
+    </div>
+    <div class="text-left">
+      <div class="font-semibold text-sm text-gray-800">{{ userName }}</div>
+      <div class="text-xs text-gray-500">{{ userRole }}</div>
+    </div>
   </div>
 
 </header>

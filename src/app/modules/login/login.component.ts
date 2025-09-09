@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   submitted = false;
   serverMessage: string;
+  isSubmitting = false;
   constructor(
     private formbuilder: FormBuilder,
     private router: Router,
@@ -25,7 +26,16 @@ export class LoginComponent implements OnInit, OnDestroy {
 
    ngOnInit(): void {
     this.loginForm = this.formbuilder.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.email,
+          Validators.pattern(
+            /^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(".+"))@(([^<>()[\]\\.,;:\s@\"]+\.)+([a-zA-Z]{2,6}))$/
+          )
+        ]
+      ],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -43,23 +53,26 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.serverMessage = '';
 
     this.loginService.login(email, password).subscribe({
+
+
       next: (response: LoginResponse) => {
         localStorage.setItem('accessToken', response.accessToken);
         localStorage.setItem('refreshToken', response.refreshToken);
+        localStorage.setItem('role',response.role);
         this.loadingService.hide();
-
-        if (response.user) {
-          localStorage.setItem('iduser', response.user.id.toString());
-          if (response.user.name) {
-            localStorage.setItem('username', response.user.name);
-          }
-        }
-
+        this.submitted = false;
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.loadingService.hide();
-        this.serverMessage = error.userMessage || 'Login failed. Please try again.';
+        this.submitted = false;
+        if (Array.isArray(error?.errors)) {
+          this.serverMessage = error.errors.join(', ');
+        } else if (typeof error?.errors === 'string') {
+          this.serverMessage = error.errors;
+        } else {
+          this.serverMessage = error?.userMessage || 'Login failed. Please try again.';
+        }
         this.toastr.error(this.serverMessage, 'Failed!');
       }
     });

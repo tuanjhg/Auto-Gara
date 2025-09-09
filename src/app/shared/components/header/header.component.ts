@@ -11,9 +11,10 @@ export class HeaderComponent implements OnInit {
   @Output() toggleSidebar = new EventEmitter<void>();
   userName: string = 'Cody Fisher';
   userRole: string = 'Owner';
-  userAvatarUrl: string = 'assets/images/Avatar.png';
+  userAvatarUrl: string = 'favicon-16x16.png';
   headerTitle: string = '';
   headerSubtitle: string = '';
+  isDropdownOpen: boolean = false;
 
   constructor(private router: Router) {}
 
@@ -46,4 +47,5 @@ export class HeaderComponent implements OnInit {
       this.headerSubtitle = 'Let\'s check your Garage today';
     }
   }
+
 }
