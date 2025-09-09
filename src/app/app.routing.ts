@@ -32,7 +32,7 @@ export const appRoutes: Routes = [
     },
 
     {
-        path :'order',
+        path: 'order',
         component: LayoutComponent,
         data: {
             layout: 'classic',
@@ -49,6 +49,15 @@ export const appRoutes: Routes = [
         },
         canActivate: [AuthGuard],
         loadChildren: () => import('app/modules/gara/gara.module').then(m => m.garaModule)
+    },
+    {
+        path: 'part',
+        component: LayoutComponent,
+        data: {
+            layout: 'classic',
+        },
+        canActivate: [AuthGuard],
+        loadChildren: () => import('app/modules/part/part.module').then(m => m.PartModule)
     },
 
     {

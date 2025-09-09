@@ -14,8 +14,8 @@ export class SidebarComponent implements OnInit {
 
 features = [
   { name: 'Dashboard', icon: 'grid_view' },
-  { name: 'Inventory', icon: 'inventory_2' },
-  { name: 'Customer', icon: 'people' },
+  { name: 'part', icon: 'inventory_2' },
+  { name: 'Customers', icon: 'people' },
   { name: 'Vehicle', icon: 'car_repair' },
   { name: 'Order', icon: 'assignment' },
   { name: 'Gara', icon: 'garage' },

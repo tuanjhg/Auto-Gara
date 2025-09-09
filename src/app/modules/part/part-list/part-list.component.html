@@ -1,0 +1,128 @@
+<div class="w-full">
+    <div class=" flex items-center justify-between pb-4 bg-gray-100">
+        <div class="relative bg-white w-1/6 h-11 flex items-center justify-center">
+            <span class="text-base">Show:</span>
+            <span class="text-base">All part</span>
+            <mat-icon svgIcon="arrow_drop_down"></mat-icon>
+        </div>
+        <button
+            class="flex items-center justify-center w-2/12 h-11 bg-white text-sm font-medium text-gray-700  shadow-sm hover:bg-gray-50">
+            <mat-icon svgIcon="add"></mat-icon>
+            <span class="text-base">Add new part</span>
+        </button>
+    </div>
+    <div class="flex items-center justify-between p-4 bg-white ">
+        <div class="relative w-11/12">
+            <input [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" type="text" placeholder="Search by name, email, or others..."
+                class="h-12 w-full pl-10 pr-4 py-2 border border-gray-300 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-blue-300 bg-gray-100" />
+            <mat-icon svgIcon="search" class="absolute left-3 top-2.5 w-4 h-9"></mat-icon>
+        </div>
+
+        <div class="relative ">
+            <button
+                class="flex items-center justify-center h-12 w-30 ml-4 px-4 py-2 text-base text-gray-600 border border-gray-300 rounded-2xl bg-gray-100 hover:bg-gray-300">
+                <mat-icon class="w-4 h-4" svgIcon="tune"></mat-icon>
+                <span> filter</span>
+
+            </button>
+
+        </div>
+    </div>
+    <div class="overflow-y-auto max-h-[calc(94vh-300px)]">
+        <table class="min-w-full boder border-double ">
+            <thead class="sticky top-0 z-10 bg-white border border-gray-100 shadow ">
+                <tr>
+                    <th *ngFor="let header of headers" (click)="sortBy(header)"
+                        class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
+                        <div class="flex items-center justify-start cursor-pointer ">
+                            <span>{{header}}</span>
+                            <ng-container *ngIf="header !== 'Gara'">
+                                <ng-container>
+                                    <ng-container [ngSwitch]="sortDirection"  *ngIf="getSortKey(header) === sortColumn; else defaultSortIcon">
+                                        <span *ngSwitchCase="'asc'"> <mat-icon
+                                                svgIcon="arrow_drop_up"></mat-icon></span>
+                                        <span *ngSwitchCase="'desc'"><mat-icon
+                                                svgIcon="arrow_drop_down"></mat-icon></span>
+                                        <span *ngSwitchDefault> <mat-icon svgIcon="swap_vert"></mat-icon></span>
+                                    </ng-container>
+                                </ng-container>
+                                <ng-template #defaultSortIcon>
+                                    <mat-icon svgIcon="swap_vert"></mat-icon>
+                                </ng-template>
+                            </ng-container>
+                        </div>
+                    </th>
+                    <th
+                        class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-center bg-gray-50">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white text-base text-black   ">
+                <tr *ngFor="let row of parts; let i = index" class="relative">
+                    <td class="px-4 py-2 text-base text-left"><span>{{row.part_number}}</span></td>
+                    <td class="px-4 py-2 text-base">
+                        <div class="relative inline-block">
+
+                            <span class="pl-3 font-semibold text-slate-900">
+                                {{ row.name }}
+                            </span>
+                            <mat-icon svgIcon="circle" class="absolute leading-none"
+                                [ngClass]="row.is_active ? 'text-green-500' : 'text-red-500'"
+                                style="transform: scale(0.3);" [attr.title]="row.is_active ? 'Active' : 'Inactive'">
+                            </mat-icon>
+                        </div>
+                    </td>
+                    <td class="px-4 py-2 text-base text-left"><span>{{row.supplier}}</span></td>
+                    <td class="px-4 py-2 text-base text-left"><span>{{row.tenant?.name||'None'}}</span></td>
+                    <td class="px-4 py-2 text-base text-left"><span>{{row.default_price}}</span></td>
+
+                    <td class="px-4 py-2 text-base text-center">
+                        <div class="inline-flex items-center gap-2">
+                            <button (click)="openDetail(row.tenant_id)"
+                                class="!text-yellow-500 hover:!text-yellow-600 focus:!text-yellow-700">
+                                <mat-icon style="transform: scale(0.9); color: #eab308 !important;"
+                                    svgIcon="create"></mat-icon></button>
+                            <button (click)="openConfirmModel(row.tenant_id)"
+                                class="!text-red-500 hover:!text-red-600 focus:!text-red-700">
+                                <mat-icon style="transform: scale(0.9); color: #ef4444 !important;"
+                                    svgIcon="delete_forever"></mat-icon></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="flex items-center justify-between p-4 min-w-full bg-white">
+        <div class="text-sm text-gray-600">
+            Show result:
+            <select [(ngModel)]="pageSize" (change)="changePage(1)"
+             class="ml-2 border border-gray-300 rounded px-2 py-1 text-sm">
+                <option *ngFor="let size of [5,10,15]" [value]="size">{{ size }}</option>
+            </select>
+        </div>
+        <div class="flex items-center space-x-1">
+            <button (click)="changePage(currentPage - 1)"
+                class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
+                <mat-icon svgIcon="arrow_left"></mat-icon>
+
+            </button>
+
+            <ng-container *ngFor="let page of paginationArray">
+                <button (click)="changePage(page)" [ngClass]="{
+                'bg-black text-white': currentPage === page,
+                'text-gray-600 hover:bg-gray-200': currentPage !== page
+              }" class="w-8 h-8 flex items-center justify-center border rounded-xl text-sm font-medium">
+                    {{ page }}
+                </button>
+            </ng-container>
+
+            <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
+                <mat-icon svgIcon="arrow_right"></mat-icon>
+
+            </button>
+        </div>
+    </div>
+</div>
+<app-loading *ngIf="loadingService.loading$ | async" class="z-[10000]"></app-loading>
