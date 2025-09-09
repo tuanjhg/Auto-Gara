@@ -152,15 +152,13 @@ export class GaraDetailComponent implements OnInit, OnChanges {
         owner_user_id: updatedData.ownerUser ?? null,
         is_active: updatedData.is_active,
       };
-      this.garaService.updateGara(this.gara.tenant_id, requestUpdate).subscribe({
-        next: (res) => {
+      this.garaService.update(this.gara.tenant_id, requestUpdate).subscribe({
+        next: (res: GaraDetailModel) => {
           this.gara = res;
-          const toastRef = this.toastr.success('Update information successfully!', 'successfully!');
-          toastRef.onHidden.subscribe(() => {
-            this.close();
-            this.isEditMode = false;
+          this.toastr.success('Update information successfully!', 'successfully!');
+          this.isEditMode = false;
+          this.close();
 
-          });
         },
         error: (err) => {
           this.toastr.error(err.error?.errors, 'failed!');
@@ -199,22 +197,22 @@ export class GaraDetailComponent implements OnInit, OnChanges {
   openConfirmModel(): void {
     this.openDelete = true;
   }
-  onCancelDelete(): void{
-    if(this.isDeleting) {return;}
-    this.openDelete =false;
+  onCancelDelete(): void {
+    if (this.isDeleting) { return; }
+    this.openDelete = false;
   }
-  onConfirmDelete(): void{
-    this.isDeleting =true;
+  onConfirmDelete(): void {
+    this.isDeleting = true;
     this.garaService.delete(this.gara.tenant_id).subscribe({
-      next: () =>{
-        this.isDeleting =false;
-        this.openDelete =false;
-        this.toastr.success('Xoá gara thành công!','successfully!');
+      next: () => {
+        this.isDeleting = false;
+        this.openDelete = false;
+        this.toastr.success('Xoá gara thành công!', 'successfully!');
         this.closed.emit();
       },
-      error:() =>{
-        this.isDeleting =false;
-        this.toastr.error('Xoá gara thất bại!','failed!');
+      error: () => {
+        this.isDeleting = false;
+        this.toastr.error('Xoá gara thất bại!', 'failed!');
       }
     });
   }
