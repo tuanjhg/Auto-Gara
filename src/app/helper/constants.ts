@@ -128,6 +128,7 @@ enum EndPoint {
     workTime = 'workTime',
     garaList = 'tenant',
     customer = 'customer',
+    part = 'part'
 }
 export enum LangEnum {
     ALL = 'all',
