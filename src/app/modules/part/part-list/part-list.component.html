@@ -79,11 +79,11 @@
 
                     <td class="px-4 py-2 text-base text-center">
                         <div class="inline-flex items-center gap-2">
-                            <button (click)="openDetail(row.tenant_id)"
+                            <button (click)="openDetail(row.part_id)"
                                 class="!text-yellow-500 hover:!text-yellow-600 focus:!text-yellow-700">
                                 <mat-icon style="transform: scale(0.9); color: #eab308 !important;"
                                     svgIcon="create"></mat-icon></button>
-                            <button (click)="openConfirmModel(row.tenant_id)"
+                            <button (click)="openConfirmModel(row.part_id)"
                                 class="!text-red-500 hover:!text-red-600 focus:!text-red-700">
                                 <mat-icon style="transform: scale(0.9); color: #ef4444 !important;"
                                     svgIcon="delete_forever"></mat-icon></button>
@@ -98,7 +98,7 @@
             Show result:
             <select [(ngModel)]="pageSize" (change)="changePage(1)"
              class="ml-2 border border-gray-300 rounded px-2 py-1 text-sm">
-                <option *ngFor="let size of [5,10,15]" [value]="size">{{ size }}</option>
+                <option *ngFor="let size of [5,10,15]" [ngValue]="size">{{ size }}</option>
             </select>
         </div>
         <div class="flex items-center space-x-1">
@@ -126,3 +126,7 @@
     </div>
 </div>
 <app-loading *ngIf="loadingService.loading$ | async" class="z-[10000]"></app-loading>
+<app-confirm-model [open]="openDelete" [title]="'Delete'" [message]="'Are you sure you want to delete this part?'"
+  [confirmText]="'Delete'" [cancelText]="'Cancel'" (confirmed)="onConfirmDelete()" (cancelled)="onCancelDelete()">
+</app-confirm-model>
+<app-part-detail [open]="isOpenDetail" [id]="idSelected" (closed)="onDetailClose()" ></app-part-detail>

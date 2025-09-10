@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { PartApiItem, PartListApiResponse } from '@df_models/part.model';
 import { PartService } from '@df_services/part.service';
 import { LoadingService } from '@shared/services/loading.service';
+import { Toast, ToastrService } from 'ngx-toastr';
 import { debounceTime, Subject } from 'rxjs';
 
 @Component({
@@ -19,10 +20,14 @@ export class PartListComponent implements OnInit {
   searchTerm: string = '';
   sortColumn: string;
   sortDirection: 'asc' | 'desc';
+  openDelete: boolean = false;
+  idSelected: number = 0;
 
   constructor(
     private partService: PartService,
-    public loadingService: LoadingService) { }
+    public loadingService: LoadingService,
+    private toastrService: ToastrService
+  ) { }
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalPartRecord / this.pageSize));
   }
@@ -103,6 +108,30 @@ export class PartListComponent implements OnInit {
     }
     this.currentPage = 1;
     this.loadData();
+  }
+  openConfirmModel(id: number): void {
+    this.idSelected = id;
+    this.openDelete = true;
+  }
+  onCancelDelete(): void {
+    this.openDelete = false;
+  }
+
+  onConfirmDelete(): void {
+    this.partService.delete(this.idSelected).subscribe(
+      {
+        next: () => {
+          this.openDelete = false;
+          this.toastrService.success('Delete part successfully!', 'successfully');
+          this.loadData();
+        },
+        error: (err) => {
+          this.openDelete = false;
+          this.toastrService.error('Delete part failed!', 'failed!');
+        }
+
+      }
+    );
   }
 
 
