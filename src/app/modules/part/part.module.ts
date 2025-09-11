@@ -7,6 +7,7 @@ import { SharedModule } from '@shared/shared.module';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PartListComponent } from './part-list/part-list.component';
+import { PartDetailComponent } from './part-detail/part-detail.component';
 
 const routes: Route[] = [
     {
@@ -18,7 +19,8 @@ const routes: Route[] = [
 ];
 @NgModule({
     declarations: [
-        PartListComponent
+        PartListComponent,
+        PartDetailComponent
     ],
     imports: [
         RouterModule.forChild(routes),
