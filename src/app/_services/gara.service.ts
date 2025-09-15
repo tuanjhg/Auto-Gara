@@ -18,4 +18,7 @@ export class GaraService extends BaseService{
             Constants.END_POINT.garaList,
         );
     }
+    getAllGara(): Observable<GaraListApiResponse> {
+        return this.http.get<GaraListApiResponse>(`${this.baseUrl}/${this.endPoint}`);
+    }
 }

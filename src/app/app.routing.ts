@@ -61,6 +61,16 @@ export const appRoutes: Routes = [
     },
 
     {
+        path: 'customer',
+        component: LayoutComponent,
+        data: {
+            layout: 'classic',
+        },
+        canActivate: [AuthGuard],
+        loadChildren: () => import('app/modules/customer/customer.module').then(m => m.CustomerModule)
+    },
+
+    {
         path: '404',
         component: LayoutComponent,
         data: {

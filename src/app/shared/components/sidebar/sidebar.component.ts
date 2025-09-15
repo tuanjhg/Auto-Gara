@@ -15,7 +15,7 @@ export class SidebarComponent implements OnInit {
 features = [
   { name: 'Dashboard', icon: 'grid_view' },
   { name: 'part', icon: 'inventory_2' },
-  { name: 'Customers', icon: 'people' },
+  { name: 'Customer', icon: 'people' },
   { name: 'Vehicle', icon: 'car_repair' },
   { name: 'Order', icon: 'assignment' },
   { name: 'Gara', icon: 'garage' },
@@ -23,7 +23,6 @@ features = [
 ];
   constructor(private loginService: LoginService,
     private router: Router,
-    private loadingService: LoadingService
     ) {}
 
   ngOnInit(): void {

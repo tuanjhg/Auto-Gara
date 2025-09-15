@@ -1,0 +1,12 @@
+<div class="flex items-center gap-2" [class.text-sm]="dense">
+  <span class="text-slate-600">Garage:</span>
+  <select
+    class="border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-500"
+    [ngModel]="value ?? (showAll ? 'all' : null)"
+    (ngModelChange)="onChange($event)">
+    <option *ngIf="showAll" value="all">All Garages</option>
+    <option *ngFor="let gara of tenants; trackBy: trackByTenant" [value]="gara.tenant_id">
+      {{ gara.name }}
+    </option>
+  </select>
+</div>

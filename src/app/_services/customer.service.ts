@@ -17,6 +17,12 @@ export class CustomerService extends BaseService {
         );
     }
     getCustomersByTenant(tenantId: number): Observable<Customer[]> {
+        if (!tenantId || Number.isNaN(tenantId)) {
+            return new Observable<Customer[]>((subscriber) => {
+                subscriber.next([]);
+                subscriber.complete();
+            });
+        }
         const params = { tenant_id: tenantId };
         return this.httpClient.get<Customer[]>(
             `${this.baseUrl}/${this.endPoint}`,

@@ -7,6 +7,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { ConfirmModelComponent } from './components/confirm-model/confirm-model.component';
 import { LoadingComponent } from './components/loading/loading.component';
 import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
+import { GarageSelectorComponent } from './components/garage-selector/garage-selector.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -14,10 +16,11 @@ import { ImageGalleryComponent } from './components/image-gallery/image-gallery.
     SidebarComponent,
     ConfirmModelComponent,
     LoadingComponent,
-    ImageGalleryComponent
+    ImageGalleryComponent,
+    GarageSelectorComponent
   ],
-  imports: [CommonModule, RouterModule, MatIconModule],
-  exports: [LoadingComponent, ConfirmModelComponent, ImageGalleryComponent, HeaderComponent, SidebarComponent, MatIconModule, CommonModule],
+  imports: [CommonModule, RouterModule, MatIconModule,FormsModule],
+  exports: [LoadingComponent, ConfirmModelComponent, ImageGalleryComponent, HeaderComponent, SidebarComponent, MatIconModule, CommonModule, GarageSelectorComponent, FormsModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SharedModule { }
