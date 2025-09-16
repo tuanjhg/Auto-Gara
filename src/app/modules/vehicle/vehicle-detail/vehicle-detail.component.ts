@@ -11,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
   selector: 'app-vehicle-detail',
   templateUrl: './vehicle-detail.component.html',
 })
-export class VehicleDetailComponent implements OnChanges, OnInit {
+export class VehicleDetailComponent implements OnInit {
 
   @Input() vehicleId: number ;
 
@@ -54,14 +54,6 @@ export class VehicleDetailComponent implements OnChanges, OnInit {
     this.loadInitialData();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['vehicleId'] && changes['vehicleId'].currentValue && changes['vehicleId'].currentValue !== changes['vehicleId'].previousValue) {
-      this.isInitialized = false;
-      this.vehicle = null;
-      this.originalVehicle = null;
-      this.loadInitialData();
-    }
-  }
 
   onImageSelected(index: number): void {
   }

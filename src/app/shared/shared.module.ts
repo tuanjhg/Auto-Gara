@@ -9,6 +9,8 @@ import { LoadingComponent } from './components/loading/loading.component';
 import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
 import { GarageSelectorComponent } from './components/garage-selector/garage-selector.component';
 import { FormsModule } from '@angular/forms';
+import { CommonTableComponent } from './components/common-table/common-table.component';
+import { CommonFilterBarComponent } from './components/common-filter-bar/common-filter-bar.component';
 
 @NgModule({
   declarations: [
@@ -17,10 +19,24 @@ import { FormsModule } from '@angular/forms';
     ConfirmModelComponent,
     LoadingComponent,
     ImageGalleryComponent,
-    GarageSelectorComponent
+    GarageSelectorComponent,
+    CommonTableComponent,
+    CommonFilterBarComponent
   ],
-  imports: [CommonModule, RouterModule, MatIconModule,FormsModule],
-  exports: [LoadingComponent, ConfirmModelComponent, ImageGalleryComponent, HeaderComponent, SidebarComponent, MatIconModule, CommonModule, GarageSelectorComponent, FormsModule],
+  imports: [CommonModule, RouterModule, MatIconModule, FormsModule],
+  exports: [
+    LoadingComponent,
+    ConfirmModelComponent,
+    ImageGalleryComponent,
+    HeaderComponent,
+    SidebarComponent,
+    MatIconModule,
+    CommonModule,
+    GarageSelectorComponent,
+    FormsModule,
+    CommonTableComponent,
+    CommonFilterBarComponent
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SharedModule { }

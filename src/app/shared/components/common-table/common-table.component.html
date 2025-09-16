@@ -1,0 +1,83 @@
+<div class="bg-white rounded-lg shadow overflow-y-auto mb-4">
+  <div style="overflow-x:auto;">
+    <table class="w-full min-w-[600px] bg-white rounded-lg">
+      <thead class="sticky top-0 z-10 bg-gray-50">
+        <ng-container *ngFor="let col of columns">
+          <th *ngIf="col.key !== 'all' && col.key !== 'actions'"
+              class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
+              [ngClass]="col.className || 'text-left'"
+              [class.cursor-pointer]="col.key !== 'actions' && col.key !== 'all'"
+              (click)="onSort(col.key)">
+            <span class="flex items-center gap-1">
+              {{ col.label }}
+              <ng-container *ngIf="sortColumn === col.key">
+                <mat-icon svgIcon="arrow_upward" *ngIf="sortOrder === 'asc'" class="inline text-xs"></mat-icon>
+                <mat-icon svgIcon="arrow_downward" *ngIf="sortOrder === 'desc'" class="inline text-xs"></mat-icon>
+              </ng-container>
+              <ng-container *ngIf="sortColumn !== col.key">
+                <mat-icon svgIcon="swap_vert" class="inline text-xs text-gray-300"></mat-icon>
+              </ng-container>
+            </span>
+          </th>
+          <th *ngIf="col.key === 'actions'" [ngClass]="col.className" class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
+            {{ col.label }}
+          </th>
+          <th *ngIf="col.key === 'all'" class="text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+        </ng-container>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <tr *ngFor="let row of data" class="hover:bg-gray-50 cursor-pointer">
+          <td *ngFor="let col of columns" class="py-4 px-6" [ngClass]="col.className || 'text-left'">
+            <ng-container [ngSwitch]="col.key">
+              <div *ngSwitchCase="'actions'">
+                <div class="inline-flex items-center gap-2">
+                  <button (click)="onAction('edit', row)" class="!text-yellow-500 hover:!text-yellow-600 focus:!text-yellow-700">
+                    <mat-icon style="transform: scale(0.9); color: #eab308 !important;" svgIcon="create"></mat-icon>
+                  </button>
+                  <button (click)="onAction('delete', row)" class="!text-red-500 hover:!text-red-600 focus:!text-red-700">
+                    <mat-icon style="transform: scale(0.9); color: #ef4444 !important;" svgIcon="delete_forever"></mat-icon>
+                  </button>
+                </div>
+              </div>
+              <span *ngSwitchDefault class="font-sans text-gray-900">
+                <ng-container *ngIf="col.key === 'entryDate'; else defaultCell">
+                  {{ row[col.key] | date:'dd/MM/yyyy':'UTC' }}
+                </ng-container>
+                <ng-template #defaultCell>
+                  {{ row[col.key] }}
+                </ng-template>
+              </span>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="flex items-center justify-between p-4 min-w-full bg-white">
+    <div class="text-sm text-gray-600">
+      Show result:
+      <select [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)"
+        class="ml-2 border border-gray-300 rounded px-2 py-1 text-sm">
+        <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+      </select>
+    </div>
+    <div class="flex items-center space-x-1">
+      <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1"
+        class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
+        <mat-icon svgIcon="arrow_left"></mat-icon>
+      </button>
+      <ng-container *ngFor="let page of paginationArray">
+        <button (click)="onPageChange(page)" [ngClass]="{
+                'bg-black text-white': currentPage === page,
+                'text-gray-600 hover:bg-gray-200': currentPage !== page
+              }" class="w-8 h-8 flex items-center justify-center border rounded-xl text-sm font-medium">
+          {{ page }}
+        </button>
+      </ng-container>
+      <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages"
+        class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
+        <mat-icon svgIcon="arrow_right"></mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

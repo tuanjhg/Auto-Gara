@@ -32,7 +32,7 @@ export interface VehicleDisplayRow {
   model: string;
   ownerName: string;
   tenantName: string;
-  entryDate: Date;
+  entryDate: string;
 }
 export const vehicleFormFields: FormField[] = [
   {

@@ -1,0 +1,36 @@
+<div class="flex items-center gap-4 mb-4">
+  <div class="flex-grow">
+    <div class="relative">
+      <div class="absolute p-1 inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <mat-icon svgIcon="search"></mat-icon>
+      </div>
+      <input type="text"
+        placeholder="Search..."
+        class="h-12 w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-blue-200 bg-[#F5F8FA]"
+        [ngModel]="searchText"
+        (ngModelChange)="onSearchChange($event)"
+      >
+    </div>
+  </div>
+  <div class="relative">
+    <button (click)="isFilterMenuOpen = !isFilterMenuOpen"
+      class="flex items-center justify-center h-12 min-w-[110px] px-4 py-2 text-base text-gray-600 border border-gray-200 rounded-xl bg-[#F5F8FA] hover:bg-gray-100">
+      <mat-icon class="w-5 h-5 mr-2" svgIcon="filter_alt"></mat-icon>
+      <span>Filter: <span class="font-bold">{{ filterColumnLabel }}</span></span>
+    </button>
+    <div *ngIf="isFilterMenuOpen" 
+      class="absolute right-0 top-full mt-2 w-32 bg-white border rounded-xl border-gray-200 shadow-lg z-20"
+      style="transition: opacity 0.3s ease-in-out;"
+      [ngClass]="{'opacity-0 pointer-events-none': !isFilterMenuOpen, 'opacity-100': isFilterMenuOpen}"
+    >
+      <div *ngFor="let option of filterOptions" class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+        <a (click)="onFilterChange(option); isFilterMenuOpen = false"
+          href="javascript:void(0)"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+          role="menuitem">
+          {{ option.label }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

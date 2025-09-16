@@ -23,7 +23,7 @@ export abstract class BaseListComponent<T> {
   sortOrder: 'asc' | 'desc' = 'desc';
 
   displayData: T[] = [];
-  passItemId!: number;
+  selectedId: number;
 
   protected destroy$ = new Subject<void>();
 
