@@ -38,6 +38,6 @@ export interface PartField {
     name: string;
     type: string;
     value: string | number | boolean;
-    options?: { label: string; value: number };
+    options?: { label: string; value: number }[];
 
 }

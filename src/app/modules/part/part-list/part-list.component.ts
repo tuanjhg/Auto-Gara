@@ -135,6 +135,7 @@ export class PartListComponent implements OnInit {
         this.isOpenDetail = true;
     }
     onDetailClose(): void {
+        this.loadData();
         this.isOpenDetail = false;
     }
 }
