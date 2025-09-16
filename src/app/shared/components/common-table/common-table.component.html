@@ -6,16 +6,18 @@
           <th *ngIf="col.key !== 'all' && col.key !== 'actions'"
               class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
               [ngClass]="col.className || 'text-left'"
-              [class.cursor-pointer]="col.key !== 'actions' && col.key !== 'all'"
-              (click)="onSort(col.key)">
+              [class.cursor-pointer]="col.sortable"
+              (click)="col.sortable && onSort(col.key)">
             <span class="flex items-center gap-1">
               {{ col.label }}
-              <ng-container *ngIf="sortColumn === col.key">
-                <mat-icon svgIcon="arrow_upward" *ngIf="sortOrder === 'asc'" class="inline text-xs"></mat-icon>
-                <mat-icon svgIcon="arrow_downward" *ngIf="sortOrder === 'desc'" class="inline text-xs"></mat-icon>
-              </ng-container>
-              <ng-container *ngIf="sortColumn !== col.key">
-                <mat-icon svgIcon="swap_vert" class="inline text-xs text-gray-300"></mat-icon>
+              <ng-container *ngIf="col.sortable">
+                <ng-container *ngIf="sortColumn === col.key">
+                  <mat-icon svgIcon="arrow_upward" *ngIf="sortOrder === 'asc'" class="inline text-xs"></mat-icon>
+                  <mat-icon svgIcon="arrow_downward" *ngIf="sortOrder === 'desc'" class="inline text-xs"></mat-icon>
+                </ng-container>
+                <ng-container *ngIf="sortColumn !== col.key">
+                  <mat-icon svgIcon="swap_vert" class="inline text-xs text-gray-300"></mat-icon>
+                </ng-container>
               </ng-container>
             </span>
           </th>

@@ -14,11 +14,11 @@ import { BaseListComponent } from 'app/shared/components/base-list.component';
 })
 export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> implements OnInit {
   tableColumns: TableColumn[] = [
-    { key: 'plate_number', label: 'PlateNumber', className: 'text-left' },
-    { key: 'model', label: 'Model', className: 'text-left' },
+    { key: 'plate_number', label: 'PlateNumber', className: 'text-left', sortable: true },
+    { key: 'model', label: 'Model', className: 'text-left', sortable: true },
     { key: 'ownerName', label: 'Owner', className: 'text-left' },
     { key: 'tenantName', label: 'Gara', className: 'text-left' },
-    { key: 'entryDate', label: 'EntryDate', className: 'text-left' },
+    { key: 'entryDate', label: 'EntryDate', className: 'text-left', sortable: true },
     { key: 'all', label: 'All', className: 'text-right' },
     { key: 'actions', label: 'Actions', className: 'text-right' }
   ];
