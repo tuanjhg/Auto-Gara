@@ -42,11 +42,16 @@
                 </div>
               </div>
               <span *ngSwitchDefault class="font-sans text-gray-900">
-                <ng-container *ngIf="col.key === 'entryDate'; else defaultCell">
-                  {{ row[col.key] | date:'dd/MM/yyyy':'UTC' }}
+                <ng-container *ngIf="cellTemplates && cellTemplates[col.key]; else defaultCell">
+                  <ng-container *ngTemplateOutlet="cellTemplates[col.key]; context: { $implicit: row, col: col }"></ng-container>
                 </ng-container>
                 <ng-template #defaultCell>
-                  {{ row[col.key] }}
+                  <ng-container *ngIf="col.key === 'entryDate'; else plainCell">
+                    {{ row[col.key] | date:'dd/MM/yyyy':'UTC' }}
+                  </ng-container>
+                  <ng-template #plainCell>
+                    {{ row[col.key] }}
+                  </ng-template>
                 </ng-template>
               </span>
             </ng-container>

@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CustomerDisplayRow } from '../../../_models/customer.model';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, TemplateRef, AfterViewInit } from '@angular/core';
+import { Customer, CustomerDisplayRow } from '../../../_models/customer.model';
 import { CustomerService } from 'app/_services/customer.service';
 import { GaraService } from 'app/_services/gara.service';
 import { GaraApiItem, GaraListApiResponse } from '../../../_models/gara.model';
@@ -13,12 +13,20 @@ import { BaseListComponent } from '@shared/components/base-list.component';
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html',
 })
-export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow> implements OnInit {
+export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow> implements OnInit, AfterViewInit {
+  @ViewChild('fullNameCell', { static: true }) fullNameCell: TemplateRef<unknown>;
+  cellTemplates: { [key: string]: TemplateRef<unknown> } = {};
   garas: GaraApiItem[] = [];
   selectedGarage: string | number = 'all';
   isGarageMenuOpen = false;
-  isColumnMenuOpen = false;
-  passCustomerId: number;
+  tableColumns = [
+      { key: 'full_name',   label: 'Full Name',   className: 'text-left', sortable: true },
+      { key: 'phone_number',label: 'Phone Number',className: 'text-left', sortable: true },
+      { key: 'email',       label: 'Email',       className: 'text-left' },
+      { key: 'address',     label: 'Address',     className: 'text-left' },
+      { key: 'all',         label: 'All',         className: 'text-right' },
+      { key: 'actions',     label: 'Actions',     className: 'text-right' }
+    ];
 
   constructor(
     private customerService: CustomerService,
@@ -29,14 +37,6 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
     private selectedTenant: SelectedTenantService
   ) {
     super(cdr);
-    this.tableColumns = [
-      { key: 'full_name',   label: 'Full Name',   className: 'text-left' },
-      { key: 'phone_number',label: 'Phone Number',className: 'text-left' },
-      { key: 'email',       label: 'Email',       className: 'text-left' },
-      { key: 'address',     label: 'Address',     className: 'text-left' },
-      { key: 'all',         label: 'All',         className: 'text-right' },
-      { key: 'actions',     label: 'Actions',     className: 'text-right' }
-    ];
   }
 
   get selectedGarageLabel(): string {
@@ -46,7 +46,6 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
     const found = this.garas.find(g => g.tenant_id === this.selectedGarage);
     return found ? found.name : 'All';
   }
-
 
   ngOnInit(): void {
     this.loadGaras();
@@ -102,7 +101,7 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
         this.loadingService.hide();
         this.totalItems = res.totalCount;
         this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        const customers = (res.data || []) as any[];
+        const customers = (res.data || []) as Customer[];
         this.displayData = customers.map(customer => ({
           id: customer.customer_id,
           full_name: customer.full_name,
@@ -129,33 +128,37 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
     this.loadData();
   }
 
+  ngAfterViewInit(): void {
+    this.cellTemplates = { full_name: this.fullNameCell };
+  }
+
   openConfirmModel(customerId: number): void {
-    this.passCustomerId = customerId;
+    this.selectedId = customerId;
     this.showDeleteConfirm = true;
     this.cdr.detectChanges();
   }
 
   confirmDelete(): void {
-    if (!this.passCustomerId) {
+    if (!this.selectedId) {
       return;
     }
-    this.customerService.delete(this.passCustomerId).subscribe({
+    this.customerService.delete(this.selectedId).subscribe({
       next: () => {
         this.showDeleteConfirm = false;
-        this.passCustomerId = null;
+        this.selectedId = null;
         this.toastr.success('Delete customer successfully!', 'Success');
         this.loadData();
       },
       error: () => {
         this.showDeleteConfirm = false;
-        this.passCustomerId = null;
+        this.selectedId = null;
       }
     });
   }
 
   cancelDelete(): void {
     this.showDeleteConfirm = false;
-    this.passCustomerId = null;
+    this.selectedId = null;
     this.cdr.detectChanges();
   }
 
@@ -169,7 +172,7 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
   openDetailModal(customerId: number): void {
     setTimeout(() => {
       this.isDetailModalOpen = true;
-      this.passCustomerId = customerId;
+      this.selectedId = customerId;
       this.cdr.detectChanges();
     }, 0);
   }
@@ -182,4 +185,21 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
     }
     this.cdr.detectChanges();
   }
+
+  selectFilter(option: { key: keyof CustomerDisplayRow | 'all'; label: string }): void {
+    this.filterColumn = option.key;
+    this.filterColumnLabel = option.label;
+    this.isFilterMenuOpen = false;
+    this.currentPage = 1;
+    this.loadData();
+  }
+
+  handleTableAction(event: { type: string; row: CustomerDisplayRow }): void {
+    if (event.type === 'edit') {
+      this.openDetailModal(event.row.id);
+    } else if (event.type === 'delete') {
+      this.openConfirmModel(event.row.id);
+    }
+  }
+
 }

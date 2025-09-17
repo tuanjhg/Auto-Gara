@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, TemplateRef } from '@angular/core';
 
 @Component({
   selector: 'app-common-table',
@@ -6,6 +6,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   styleUrls: ['./common-table.component.scss']
 })
 export class CommonTableComponent<T = unknown> {
+  @Input() cellTemplates: { [key: string]: TemplateRef<unknown> } = {};
   @Input() columns: { key: string; label: string; className?: string }[] = [];
   @Input() data: T[] = [];
   @Input() sortColumn = '';
