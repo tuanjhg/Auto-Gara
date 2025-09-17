@@ -39,5 +39,21 @@ export interface PartField {
     type: string;
     value: string | number | boolean;
     options?: { label: string; value: number }[];
-
+}
+export interface PartAddField {
+    label: string;
+    name: string;
+    type: string;
+    placeholder: string;
+    options?: { label: string; value: number }[];
+}
+export interface CreatePart {
+    tenant_id: number;
+    name: string;
+    part_number: number;
+    default_price: number;
+    stock_quantity: number;
+    unit: string;
+    supplier: string;
+    is_active: boolean;
 }

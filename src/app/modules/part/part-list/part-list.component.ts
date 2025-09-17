@@ -23,6 +23,7 @@ export class PartListComponent implements OnInit {
     openDelete: boolean = false;
     idSelected: number = 1;
     isOpenDetail: boolean = false;
+    addOpen: boolean = false;
 
     constructor(private partService: PartService, public loadingService: LoadingService, private toastrService: ToastrService) {}
     get totalPages(): number {
@@ -137,5 +138,12 @@ export class PartListComponent implements OnInit {
     onDetailClose(): void {
         this.loadData();
         this.isOpenDetail = false;
+    }
+    openAdd(): void {
+        this.addOpen = true;
+    }
+    onAddClosed(): void {
+        this.addOpen = false;
+        this.loadData();
     }
 }

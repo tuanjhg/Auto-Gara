@@ -8,30 +8,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PartListComponent } from './part-list/part-list.component';
 import { PartDetailComponent } from './part-detail/part-detail.component';
+import { AddPartComponent } from './add-part/add-part.component';
 
 const routes: Route[] = [
     {
         path: '',
-        component: PartListComponent
-
+        component: PartListComponent,
     },
-
 ];
 @NgModule({
-    declarations: [
-        PartListComponent,
-        PartDetailComponent
-    ],
-    imports: [
-        RouterModule.forChild(routes),
-        FuseCardModule,
-        CommonModule,
-        TranslocoModule,
-        SharedModule,
-        MatIconModule,
-        FormsModule,
-        ReactiveFormsModule,
-    ]
+    declarations: [PartListComponent, PartDetailComponent, AddPartComponent],
+    imports: [RouterModule.forChild(routes), FuseCardModule, CommonModule, TranslocoModule, SharedModule, MatIconModule, FormsModule, ReactiveFormsModule],
 })
-export class PartModule {
-}
+export class PartModule {}
