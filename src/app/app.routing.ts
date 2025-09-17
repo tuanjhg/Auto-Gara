@@ -51,6 +51,15 @@ export const appRoutes: Routes = [
         loadChildren: () => import('app/modules/gara/gara.module').then(m => m.garaModule)
     },
     {
+        path: 'user',
+        component: LayoutComponent,
+        data: {
+            layout: 'classic',
+        },
+        canActivate: [AuthGuard],
+        loadChildren: () => import('app/modules/user/user.module').then(m => m.UserModule)
+    },
+    {
         path: 'part',
         component: LayoutComponent,
         data: {
