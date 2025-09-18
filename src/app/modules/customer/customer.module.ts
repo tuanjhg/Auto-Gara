@@ -3,6 +3,7 @@ import { SharedModule } from 'app/shared/shared.module';
 import { CustomerListComponent } from './customer-list/customer-list.component';
 import { Route, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CustomerDetailComponent } from './customer-detail/customer-detail.component';
 
 const routes: Route[] = [
     {
@@ -14,6 +15,7 @@ const routes: Route[] = [
 @NgModule({
   declarations: [
     CustomerListComponent,
+    CustomerDetailComponent
   ],
   imports: [
     RouterModule.forChild(routes),

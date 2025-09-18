@@ -178,6 +178,7 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
   }
 
   closeModal(type: 'create' | 'detail'): void {
+    this.loadData();
     if (type === 'create') {
       this.isCreateModalOpen = false;
     } else if (type === 'detail') {
