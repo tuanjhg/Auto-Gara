@@ -11,7 +11,7 @@
 
         <form [formGroup]="formAdd" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div *ngFor="let field of fields" class="flex flex-col">
-                <label class="text-sm font-medium text-gray-600 mb-1">{{ field.label }}</label>
+                <label class="text-sm font-medium text-gray-600 mb-1">{{ field.label }} <span *ngIf="field.require" class="text-red-500"> *</span></label>
                 <input *ngIf="field.type === 'text' || field.type === 'number'" [formControlName]="field.name"
                     [placeholder]="field.placeholder"
                     class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"

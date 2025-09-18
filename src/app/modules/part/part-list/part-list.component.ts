@@ -21,7 +21,7 @@ export class PartListComponent implements OnInit {
     sortColumn: string;
     sortDirection: 'asc' | 'desc';
     openDelete: boolean = false;
-    idSelected: number = 1;
+    idSelected: number ;
     isOpenDetail: boolean = false;
     addOpen: boolean = false;
 

@@ -26,15 +26,15 @@ export class AddPartComponent implements OnInit {
     ngOnInit(): void {
         this.formAdd = buildFormGroup(this.formBuilder, createPartSchema);
         this.fields = [
-            { label: 'Part Name', name: 'name', type: 'text', placeholder: 'Enter Part Name' },
-            { label: 'Part Code', name: 'part_number', type: 'number', placeholder: 'Enter Part Code' },
-            { label: 'Price', name: 'default_price', type: 'number', placeholder: 'Enter Price' },
-            { label: 'Cost price', name: 'cost_price', type: 'number', placeholder: 'Enter Cost Price' },
-            { label: 'Available', name: 'stock_quantity', type: 'number', placeholder: 'Enter Inventory Quantity' },
-            { label: 'Unit', name: 'unit', type: 'text', placeholder: 'Enter Unit' },
-            { label: 'Supplier', name: 'supplier', type: 'text', placeholder: 'Enter Supplier' },
-            { label: 'Gara', name: 'tenant_id', type: 'select', placeholder: 'Select Gara' },
-            { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Choose Status' },
+            { label: 'Part Name', name: 'name', type: 'text', placeholder: 'Enter Part Name',require: true },
+            { label: 'Part Code', name: 'part_number', type: 'number', placeholder: 'Enter Part Code',require: true },
+            { label: 'Price', name: 'default_price', type: 'number', placeholder: 'Enter Price',require: true },
+            { label: 'Cost price', name: 'cost_price', type: 'number', placeholder: 'Enter Cost Price',require: true },
+            { label: 'Available', name: 'stock_quantity', type: 'number', placeholder: 'Enter Inventory Quantity',require: true },
+            { label: 'Unit', name: 'unit', type: 'text', placeholder: 'Enter Unit',require: true },
+            { label: 'Supplier', name: 'supplier', type: 'text', placeholder: 'Enter Supplier',require: true },
+            { label: 'Gara', name: 'tenant_id', type: 'select', placeholder: 'Select Gara',require: true },
+            { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Choose Status',require: true },
         ];
         this.loadgara();
     }

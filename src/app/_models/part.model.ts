@@ -46,6 +46,7 @@ export interface PartAddField {
     type: string;
     placeholder: string;
     options?: { label: string; value: number }[];
+    require?: boolean;
 }
 export interface CreatePart {
     tenant_id: number;
