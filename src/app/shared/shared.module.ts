@@ -11,6 +11,8 @@ import { GarageSelectorComponent } from './components/garage-selector/garage-sel
 import { FormsModule } from '@angular/forms';
 import { CommonTableComponent } from './components/common-table/common-table.component';
 import { CommonFilterBarComponent } from './components/common-filter-bar/common-filter-bar.component';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
 
 @NgModule({
   declarations: [
@@ -35,7 +37,9 @@ import { CommonFilterBarComponent } from './components/common-filter-bar/common-
     GarageSelectorComponent,
     FormsModule,
     CommonTableComponent,
-    CommonFilterBarComponent
+    CommonFilterBarComponent,
+    MatDatepickerModule,
+    MatMomentDateModule, 
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

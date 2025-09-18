@@ -75,7 +75,7 @@
 
       <div *ngIf="isCreateModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal('create')">
         <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-2xl max-h-[120vh]" (click)="$event.stopPropagation()">
-          <app-add-customer (closeModalRequest)="closeModal('create')" (customerAdded)="loadCustomers()"></app-add-customer>
+          <app-add-customer (closed)="closeModal('create')"></app-add-customer>
         </div>
       </div>
 
