@@ -7,6 +7,8 @@ export interface ValidationStringOpts {
 }
 export interface ValidationNumberOpts {
     required?: boolean;
+    min?: number;
+    max?: number;
     minLength?: number;
     maxLength?: number;
     integer?: boolean;

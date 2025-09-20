@@ -51,14 +51,14 @@ export class PartDetailComponent implements OnInit, OnChanges {
             next: (res: PartApiItem) => {
                 this.partSelected = res;
                 this.fields = [
-                    { label: 'Part Name', name: 'name', type: 'text', value: this.partSelected.name },
-                    { label: 'Part Code', name: 'part_number', type: 'number', value: this.partSelected.part_number },
-                    { label: 'Price', name: 'default_price', type: 'number', value: this.partSelected.default_price },
-                    { label: 'Cost price', name: 'cost_price', type: 'number', value: this.partSelected.name },
-                    { label: 'Available', name: 'stock_quantity', type: 'number', value: this.partSelected.stock_quantity },
-                    { label: 'Unit', name: 'unit', type: 'text', value: this.partSelected.unit },
-                    { label: 'Supplier', name: 'supplier', type: 'text', value: this.partSelected.supplier },
-                    { label: 'Gara', name: 'tenant', type: 'select', value: this.partSelected.tenant.name, options: [] },
+                    { label: 'Part Name', name: 'name', type: 'text', value: this.partSelected.name, require: true },
+                    { label: 'Part Code', name: 'part_number', type: 'number', value: this.partSelected.part_number, require: true },
+                    { label: 'Price', name: 'default_price', type: 'number', value: this.partSelected.default_price, require: true },
+                    { label: 'Cost price', name: 'cost_price', type: 'number', value: this.partSelected.cost_price, require: true },
+                    { label: 'Available', name: 'stock_quantity', type: 'number', value: this.partSelected.stock_quantity, require: true },
+                    { label: 'Unit', name: 'unit', type: 'text', value: this.partSelected.unit, require: true },
+                    { label: 'Supplier', name: 'supplier', type: 'text', value: this.partSelected.supplier, require: true },
+                    { label: 'Gara', name: 'tenant', type: 'select', value: this.partSelected.tenant.name, options: [], require: true },
                     { label: 'Status', name: 'is_active', type: 'boolean', value: this.partSelected.is_active },
                 ];
                 this.form.reset(this.mapPartToForm(res), { emitEvent: false });
@@ -115,11 +115,13 @@ export class PartDetailComponent implements OnInit, OnChanges {
             this.partService.update(this.id, partUpdateRequest).subscribe({
                 next: (res) => {
                     this.toastrService.success('Update part successfully!', 'successfully!');
+                    this.isEditMode = false;
                     this.closed.emit();
                 },
                 error: (err) => {
                     const msg = err.error.error.join('\n');
                     this.toastrService.error(msg, 'Failed!');
+                    this.isEditMode = false;
                     this.closed.emit();
                 },
             });
@@ -138,9 +140,11 @@ export class PartDetailComponent implements OnInit, OnChanges {
     }
     onEditClick(): void {
         this.isEditMode = true;
+        this.form.markAllAsTouched();
     }
     onCancelEdit(): void {
         this.isEditMode = false;
+        this.loadPartDetail();
     }
     openConfirmModel(): void {
         this.openConfirm = true;

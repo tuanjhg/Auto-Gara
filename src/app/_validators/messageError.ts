@@ -12,6 +12,12 @@ export function getErrorMessage(nameControl: AbstractControl, label: string): st
     if (errors['email']) {
         return `${label} is invalid.`;
     }
+    if (errors['min']) {
+        return `${label} must greater than ${errors['min'].min}.`;
+    }
+    if (errors['max']) {
+        return `${label} must less than ${errors['max'].max}.`;
+    }
     if (errors['minlength']) {
         return `${label} must greater than ${errors['minlength'].requiredLength} characters.`;
     }

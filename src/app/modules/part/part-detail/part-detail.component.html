@@ -32,7 +32,8 @@
                 <div class="px-4 py-5 overflow-auto">
                     <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
                         <div *ngFor="let field of fields" class="flex flex-col">
-                            <label class="text-gray-500">{{ field.label }}</label>
+                            <label class="text-gray-500">{{ field.label }} <ng-container *ngIf="isEditMode"><span *ngIf="field.require"
+                            class="text-red-500"> *</span></ng-container></label>
                             <ng-container *ngIf="!isEditMode; else editField">
                                 <ng-container *ngIf="field.name === 'is_active'; else normalView">
                                     <div class="flex items-center gap-6">

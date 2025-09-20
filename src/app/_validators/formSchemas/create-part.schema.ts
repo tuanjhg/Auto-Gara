@@ -16,13 +16,13 @@ export const createPartSchema: FormSchema = {
         validators: validationString({ required: true, minLength: 2, maxLength: 50, pattern: LETTERS_NUM_CODE }),
     },
     default_price: {
-        validators: validationNumber({ required: true, realNumber: true }),
+        validators: validationNumber({ required: true, realNumber: true, min: 0, max: 1000000000 }),
     },
     cost_price: {
-        validators: validationNumber({ required: true, realNumber: true }),
+        validators: validationNumber({ required: true, realNumber: true, min: 0, max: 1000000000}),
     },
     stock_quantity: {
-        validators: validationNumber({ required: true, integer: true }),
+        validators: validationNumber({ required: true, integer: true, min: 0, max: 1000000000 }),
     },
     unit: {
         validators: validationString({ required: true, minLength: 2, maxLength: 50, pattern: LETTERS_NUM_SPACE }),

@@ -39,6 +39,7 @@ export interface PartField {
     type: string;
     value: string | number | boolean;
     options?: { label: string; value: number }[];
+    require?: boolean;
 }
 export interface PartAddField {
     label: string;

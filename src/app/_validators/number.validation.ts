@@ -3,21 +3,27 @@ import { ValidationNumberOpts } from '@df_models/validation.model';
 import { INTEGER_NUMBER, REAL_NUMBER } from './patterns.validation';
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function validationNumber(otps: ValidationNumberOpts): ValidatorFn[] {
+export function validationNumber(opts: ValidationNumberOpts): ValidatorFn[] {
     const validation: ValidatorFn[] = [];
-    if (otps.required) {
+    if (opts.required) {
         validation.push(Validators.required);
     }
-    if (otps.minLength) {
-        validation.push(Validators.minLength(otps.minLength));
+    if (opts.min != null) {
+        validation.push(Validators.min(opts.min));
     }
-    if (otps.maxLength) {
-        validation.push(Validators.maxLength(otps.maxLength));
+    if (opts.max) {
+        validation.push(Validators.max(opts.max));
     }
-    if (otps.integer) {
+    if (opts.minLength) {
+        validation.push(Validators.minLength(opts.minLength));
+    }
+    if (opts.maxLength) {
+        validation.push(Validators.maxLength(opts.maxLength));
+    }
+    if (opts.integer) {
         validation.push(Validators.pattern(INTEGER_NUMBER));
     }
-    if (otps.realNumber) {
+    if (opts.realNumber) {
         validation.push(Validators.pattern(REAL_NUMBER));
     }
     return validation;
