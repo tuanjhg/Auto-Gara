@@ -25,7 +25,14 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
     CommonTableComponent,
     CommonFilterBarComponent
   ],
-  imports: [CommonModule, RouterModule, MatIconModule, FormsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    FormsModule,
+    MatDatepickerModule,
+    MatMomentDateModule
+  ],
   exports: [
     LoadingComponent,
     ConfirmModelComponent,
@@ -39,7 +46,7 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
     CommonTableComponent,
     CommonFilterBarComponent,
     MatDatepickerModule,
-    MatMomentDateModule, 
+    MatMomentDateModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

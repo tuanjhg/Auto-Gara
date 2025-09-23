@@ -1,7 +1,7 @@
 export interface UserModel {
     id: number;
     tenant_id: number;
-    username?: string; // Add username field
+    username?: string;
     full_name: string;
     phone_number: string;
     email: string;
@@ -38,10 +38,8 @@ export interface UserDetail extends UserModel {
 export interface UserFormField {
     name: string;
     label: string;
-    type: 'text' | 'password' | 'email' | 'tel' | 'select' | 'checkbox';
+    type: 'text' | 'password' | 'email' | 'tel' | 'select' | 'checkbox' | 'boolean';
     required: boolean;
-    section: 'basic' | 'personal' | 'system';
-    validators?: string[];
     options?: { value: string; label: string }[];
     defaultValue?: string | boolean;
     placeholder?: string;
@@ -52,78 +50,61 @@ export const userFormFields: UserFormField[] = [
         name: 'username',
         label: 'Username',
         type: 'text',
-        required: true,
-        section: 'basic',
-        validators: ['required', 'minLength:3']
+        required: true
     },
     {
         name: 'password',
         label: 'Password',
         type: 'password',
-        required: true,
-        section: 'basic',
-        validators: ['required', 'minLength:6']
+        required: true
     },
     {
         name: 'confirmPassword',
         label: 'Confirm Password',
         type: 'password',
-        required: true,
-        section: 'basic',
-        validators: ['required']
+        required: true
     },
     {
         name: 'full_name',
         label: 'Full Name',
         type: 'text',
-        required: true,
-        section: 'personal',
-        validators: ['required']
+        required: true
     },
     {
         name: 'email',
         label: 'Email',
         type: 'email',
-        required: true,
-        section: 'personal',
-        validators: ['required', 'email']
+        required: true
     },
     {
         name: 'phone_number',
         label: 'Phone Number',
         type: 'tel',
-        required: true,
-        section: 'personal',
-        validators: ['required']
+        required: true
     },
     {
         name: 'role',
         label: 'Role',
         type: 'select',
         required: true,
-        section: 'system',
         options: [
             { value: 'admin', label: 'Admin' },
             { value: 'owner', label: 'Owner' },
             { value: 'mechanic', label: 'Mechanic' },
             { value: 'accountant', label: 'Accountant' }
-        ],
-        validators: ['required']
+        ]
     },
     {
         name: 'tenant_id',
         label: 'Garage',
         type: 'select',
-        required: true,
-        section: 'system',
-        validators: ['required']
+        required: true
     },
     {
         name: 'is_active',
-        label: 'Active',
-        type: 'checkbox',
+        label: 'Status',
+        type: 'boolean',
         required: false,
-        section: 'system',
         defaultValue: true
     }
 ];

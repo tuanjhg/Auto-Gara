@@ -1,0 +1,274 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center">
+  <div class="absolute inset-0 bg-black/50" (click)="closeModal()"></div>
+  <div class="relative z-10 rounded-lg bg-gray-100 p-2 sm:p-6 shadow-xl w-full sm:w-[54vw] max-w-full sm:max-w-[1000px] max-h-[100vh] sm:max-h-[95vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    
+    <div *ngIf="errorMessage" class="absolute top-4 right-4 z-30 rounded-lg bg-red-100 border border-red-400 px-4 py-3 text-red-700 shadow-lg">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button (click)="errorMessage = ''" class="ml-2 text-red-500 hover:text-red-700">
+          <mat-icon class="h-4 w-4">close</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6" [class.opacity-50]="isLoading">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">
+          {{ user?.full_name || (isLoading ? 'Loading...' : 'User Details') }}
+        </h1>
+        <p class="text-gray-500">
+          Details for user 
+          <span class="font-semibold text-gray-700">
+            {{ user?.username || (isLoading ? 'Loading...' : 'N/A') }}
+          </span>
+        </p>
+      </div>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mt-4 sm:mt-0">
+        <button *ngIf="!isEditMode && user && !isLoading" 
+                (click)="toggleEditMode()" 
+                class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200 disabled:opacity-50"
+                [disabled]="isLoading">
+          Edit
+        </button>
+        <button *ngIf="!isEditMode && user && !isLoading" 
+                (click)="deleteUser()" 
+                class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+                [disabled]="isLoading">
+          Delete
+        </button>
+        <button class="mb-0.5 self-end sm:self-auto" (click)="closeModal()">
+          <mat-icon svgIcon="exit_to_app"></mat-icon>
+        </button>
+      </div>
+    </div>
+
+
+    <div *ngIf="isLoading" class="flex items-center justify-center flex-1 p-6">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Loading user details...</p>
+      </div>
+    </div>
+
+
+    <div *ngIf="!isLoading && errorMessage" class="flex items-center justify-center flex-1 p-6">
+      <div class="text-center">
+        <mat-icon class="w-16 h-16 text-red-500 mx-auto" svgIcon="error"></mat-icon>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">Error Loading User</h3>
+        <p class="mt-2 text-gray-600">{{ errorMessage }}</p>
+        <button (click)="loadUserDetail()" 
+          class="mt-4 px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-lg hover:bg-yellow-700">
+          Try Again
+        </button>
+      </div>
+    </div>
+
+
+    <div *ngIf="!isLoading && !errorMessage && user" class="rounded-lg bg-white shadow flex-1 flex flex-col min-h-0" [class.opacity-50]="isLoading">
+      <form [formGroup]="form" class="flex flex-col h-full">
+        <div class="border-b border-gray-200 px-4">
+          <nav class="-mb-px flex items-center justify-between space-x-6">
+            <div class="flex space-x-6">
+              <button type="button" 
+                      class="border-b-2 border-yellow-200 px-1 py-3 text-sm font-medium text-[#DEE33E]">
+                User Info
+              </button>
+            </div>
+            
+            <div *ngIf="isEditMode" class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <button type="button" 
+                      (click)="saveChanges()"
+                      [disabled]="!hasChanges() || form.invalid"
+                      class="w-full sm:w-auto rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200 disabled:opacity-50">
+                Save Changes
+              </button>
+              <button type="button" 
+                      (click)="toggleEditMode()"
+                      class="w-full sm:w-auto rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-black hover:bg-gray-400 disabled:opacity-50">
+                Cancel
+              </button>
+            </div>
+          </nav>
+        </div>
+
+        <div class="px-4 py-5 overflow-auto flex-1">
+          
+
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+            <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
+              
+
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Username</label>
+                <span class="font-semibold">{{ user?.username || 'N/A' }}</span>
+                <small class="text-xs text-gray-400 mt-1">Username cannot be changed</small>
+              </div>
+
+
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Full Name</label>
+                <ng-container *ngIf="!isEditMode">
+                  <span class="font-semibold">{{ user?.full_name || 'N/A' }}</span>
+                </ng-container>
+                <ng-container *ngIf="isEditMode">
+                  <input class="form-input border border-gray-300 rounded-xl p-2 font-semibold"
+                         formControlName="full_name"
+                         type="text"
+                         [ngClass]="{
+                           'border-red-500 focus:ring-red-200': form.get('full_name')?.invalid && form.get('full_name')?.touched,
+                           'border-green-500 focus:ring-green-200': form.get('full_name')?.valid && form.get('full_name')?.touched,
+                           'border-gray-300 focus:ring-gray-200': !form.get('full_name')?.touched
+                         }" />
+                  <div *ngIf="getFieldError('full_name')" class="mt-1 text-xs text-red-600">
+                    {{ getFieldError('full_name') }}
+                  </div>
+                </ng-container>
+              </div>
+
+
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Email</label>
+                <ng-container *ngIf="!isEditMode">
+                  <span class="font-semibold">{{ user?.email || 'N/A' }}</span>
+                </ng-container>
+                <ng-container *ngIf="isEditMode">
+                  <input class="form-input border border-gray-300 rounded-xl p-2 font-semibold"
+                         formControlName="email"
+                         type="email"
+                         [ngClass]="{
+                           'border-red-500 focus:ring-red-200': form.get('email')?.invalid && form.get('email')?.touched,
+                           'border-green-500 focus:ring-green-200': form.get('email')?.valid && form.get('email')?.touched,
+                           'border-gray-300 focus:ring-gray-200': !form.get('email')?.touched
+                         }" />
+                  <div *ngIf="getFieldError('email')" class="mt-1 text-xs text-red-600">
+                    {{ getFieldError('email') }}
+                  </div>
+                </ng-container>
+              </div>
+
+
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Phone Number</label>
+                <ng-container *ngIf="!isEditMode">
+                  <span class="font-semibold">{{ user?.phone_number || 'N/A' }}</span>
+                </ng-container>
+                <ng-container *ngIf="isEditMode">
+                  <input class="form-input border border-gray-300 rounded-xl p-2 font-semibold"
+                         formControlName="phone_number"
+                         type="tel"
+                         [ngClass]="{
+                           'border-red-500 focus:ring-red-200': form.get('phone_number')?.invalid && form.get('phone_number')?.touched,
+                           'border-green-500 focus:ring-green-200': form.get('phone_number')?.valid && form.get('phone_number')?.touched,
+                           'border-gray-300 focus:ring-gray-200': !form.get('phone_number')?.touched
+                         }" />
+                  <div *ngIf="getFieldError('phone_number')" class="mt-1 text-xs text-red-600">
+                    {{ getFieldError('phone_number') }}
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">System Information</h3>
+            <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
+              
+
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Role</label>
+                <ng-container *ngIf="!isEditMode">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit"
+                    [ngClass]="{
+                      'bg-purple-100 text-purple-800': user?.role === 'admin',
+                      'bg-blue-100 text-blue-800': user?.role === 'owner',
+                      'bg-green-100 text-green-800': user?.role === 'mechanic',
+                      'bg-yellow-100 text-yellow-800': user?.role === 'accountant'
+                    }">
+                    {{ getRoleLabel(user?.role) }}
+                  </span>
+                </ng-container>
+                <ng-container *ngIf="isEditMode">
+                  <select class="form-input border border-gray-300 rounded-xl p-2 font-semibold"
+                          formControlName="role"
+                          [ngClass]="{
+                            'border-red-500 focus:ring-red-200': form.get('role')?.invalid && form.get('role')?.touched,
+                            'border-green-500 focus:ring-green-200': form.get('role')?.valid && form.get('role')?.touched,
+                            'border-gray-300 focus:ring-gray-200': !form.get('role')?.touched
+                          }">
+                    <option value="admin">Admin</option>
+                    <option value="owner">Owner</option>
+                    <option value="mechanic">Mechanic</option>
+                    <option value="accountant">Accountant</option>
+                  </select>
+                  <div *ngIf="getFieldError('role')" class="mt-1 text-xs text-red-600">
+                    {{ getFieldError('role') }}
+                  </div>
+                </ng-container>
+              </div>
+
+              <!-- Garage (R-O-per) -->
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Garage</label>
+                <span class="font-semibold">{{ getTenantName(user?.tenant_id) || 'N/A' }}</span>
+                <small class="text-xs text-gray-400 mt-1">Garage assignment cannot be changed</small>
+              </div>
+
+              
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Status</label>
+                <ng-container *ngIf="!isEditMode">
+                  <span [ngClass]="{
+                    'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium w-fit': user?.is_active === true,
+                    'bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium w-fit': user?.is_active === false
+                  }">
+                    {{ user?.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                </ng-container>
+                <ng-container *ngIf="isEditMode">
+                  <div class="flex items-center">
+                    <input type="checkbox" 
+                      formControlName="is_active"
+                      class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
+                    />
+                    <label class="ml-2 block text-sm text-gray-900 font-semibold">Active</label>
+                  </div>
+                </ng-container>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-gray-500 mb-1">Created Date</label>
+                <span class="font-semibold">{{ user?.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<app-confirm-model
+  [open]="showConfirmSave"
+  title="Confirm Save Changes"
+  message="Are you sure you want to save the changes to this user?"
+  confirmText="Save Changes"
+  cancelText="Cancel"
+  confirmClass="bg-[#DEE33E] hover:bg-yellow-200 text-black"
+  cancelClass="bg-gray-200 hover:bg-gray-300 text-gray-900"
+  (confirmed)="confirmSave()"
+  (cancelled)="showConfirmSave = false">
+</app-confirm-model>
+
+<app-confirm-model
+  [open]="showConfirmDelete"
+  title="Confirm Delete User"
+  [message]="'Are you sure you want to delete ' + (user?.full_name || '') + '? This action cannot be undone.'"
+  confirmText="Delete User"
+  cancelText="Cancel"
+  confirmClass="bg-red-500 hover:bg-red-600 text-white"
+  cancelClass="bg-gray-200 hover:bg-gray-300 text-gray-900"
+  (confirmed)="confirmDelete()"
+  (cancelled)="showConfirmDelete = false">
+</app-confirm-model>

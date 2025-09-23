@@ -1,6 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { filter, map } from 'rxjs/operators';
+
+interface RouteData {
+  [key: string]: unknown;
+  headerTitle?: string;
+  headerSubtitle?: string;
+}
 
 @Component({
   selector: 'app-header',
@@ -12,40 +18,35 @@ export class HeaderComponent implements OnInit {
   userName: string = 'Cody Fisher';
   userRole: string = 'Owner';
   userAvatarUrl: string = 'favicon-16x16.png';
-  headerTitle: string = '';
-  headerSubtitle: string = '';
+  headerTitle: string = 'Dashboard';
+  headerSubtitle: string = 'Overview of your garage';
   isDropdownOpen: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
-      this.updateHeaderContent();
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.getRouteData())
+    ).subscribe((data: RouteData) => {
+      this.updateHeaderFromRouteData(data);
     });
-    this.updateHeaderContent();
+    this.updateHeaderFromRouteData(this.getRouteData());
   }
 
-  updateHeaderContent(): void {
-    const url = this.router.url;
-    if (url.startsWith('/order')) {
-      this.headerTitle = 'Order';
-      this.headerSubtitle = 'Manage and track your orders';
-    } else if (url.startsWith('/vehicle')) {
-      this.headerTitle = 'Vehicle';
-      this.headerSubtitle = 'Manage your vehicles';
-    } else if (url.startsWith('/dashboard')) {
-      this.headerTitle = 'Dashboard';
-      this.headerSubtitle = 'Overview of your garage';
-    } else if (url.startsWith('/customers')) {
-      this.headerTitle = 'Customers';
-      this.headerSubtitle = 'Customer management';
-    } else if (url.startsWith('/inventory')) {
-      this.headerTitle = 'Inventory';
-      this.headerSubtitle = 'Parts and stock management';
-    } else {
-      this.headerTitle = 'Garage';
-      this.headerSubtitle = 'Let\'s check your Garage today';
+  private getRouteData(): RouteData {
+    let route = this.activatedRoute;
+    while (route.firstChild) {
+      route = route.firstChild;
     }
+    return route.snapshot.data;
   }
 
+  private updateHeaderFromRouteData(data: RouteData): void {
+    this.headerTitle = data['headerTitle'] || 'Dashboard';
+    this.headerSubtitle = data['headerSubtitle'] || 'Overview of your garage';
+  }
 }

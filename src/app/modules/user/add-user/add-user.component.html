@@ -1,0 +1,123 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" (click)="close()"></div>
+    <div class="relative z-10 rounded-lg bg-gray-100 p-6 shadow-xl w-[54vw] max-w-[1000px] max-h-[95vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
+            <h2 class="text-2xl font-extrabold text-[#DEE33E]">Add User</h2>
+            <button class="mb-0.5" (click)="close()">
+                <mat-icon svgIcon="exit_to_app"></mat-icon>
+            </button>
+        </div>
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div *ngFor="let field of fields" class="flex flex-col">
+                <label class="text-sm font-medium text-gray-600 mb-1"> {{ field.label }} <span *ngIf="field.require" class="text-red-500"> *</span> </label>
+                <ng-container [ngSwitch]="field.type">
+                    
+                    <input
+                        *ngSwitchCase="'text'"
+                        [formControlName]="field.name"
+                        [placeholder]="field.placeholder"
+                        class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
+                        [class.border-red-500]="showError(field.name)"
+                        [class.border-green-500]="!showError(field.name) && userForm.get(field.name)?.value"
+                    />
+
+                    <input
+                        *ngSwitchCase="'password'"
+                        [formControlName]="field.name"
+                        [placeholder]="field.placeholder"
+                        type="password"
+                        class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
+                        [class.border-red-500]="showError(field.name)"
+                        [class.border-green-500]="!showError(field.name) && userForm.get(field.name)?.value"
+                    />
+
+                    <input
+                        *ngSwitchCase="'email'"
+                        [formControlName]="field.name"
+                        [placeholder]="field.placeholder"
+                        type="email"
+                        class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
+                        [class.border-red-500]="showError(field.name)"
+                        [class.border-green-500]="!showError(field.name) && userForm.get(field.name)?.value"
+                    />
+
+                    <input
+                        *ngSwitchCase="'tel'"
+                        [formControlName]="field.name"
+                        [placeholder]="field.placeholder"
+                        type="tel"
+                        class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
+                        [class.border-red-500]="showError(field.name)"
+                        [class.border-green-500]="!showError(field.name) && userForm.get(field.name)?.value"
+                    />
+
+                
+                    <select
+                        *ngSwitchCase="'select'"
+                        [formControlName]="field.name"
+                        class="form-select border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
+                        [class.border-red-500]="showError(field.name)"
+                        [class.border-green-500]="!showError(field.name) && userForm.get(field.name)?.value"
+                    >
+                        <option value="" disabled>{{ field.placeholder }}</option>
+                        
+                        <ng-container *ngIf="field.name === 'role'">
+                            <option *ngFor="let option of field.options" [value]="option.value">
+                                {{ option.label }}
+                            </option>
+                        </ng-container>
+                        
+                        <ng-container *ngIf="field.name === 'tenant_id'">
+                            <option value="" disabled>{{ field.placeholder }}</option>
+                            <option *ngFor="let tenant of tenants" [value]="tenant.tenant_id">
+                                {{ tenant.name }}
+                            </option>
+                        </ng-container>
+                    </select>
+
+                    
+                    <div class="flex items-center gap-6" *ngSwitchCase="'boolean'">
+                        <label class="inline-flex items-center gap-2 border-green-300 bg-green-50 text-green-800 px-3 py-2 rounded-lg">
+                            <input type="radio" [formControlName]="field.name" [value]="true" />
+                            <span class="font-semibold">Active</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 border-red-300 bg-red-50 text-red-800 px-3 py-2 rounded-lg">
+                            <input type="radio" [formControlName]="field.name" [value]="false" />
+                            <span class="font-semibold">Inactive</span>
+                        </label>
+                    </div>
+                </ng-container>
+
+                
+                <p *ngIf="showError(field.name)" class="mt-1 text-xs text-red-600">
+                    {{ getMsg(field.name, field.label) }}
+                </p>
+            </div>
+
+            
+            <div class="col-span-1 md:col-span-2 flex justify-end space-x-3 pt-2">
+                <button type="button" (click)="close()" class="rounded-lg bg-gray-300 hover:bg-gray-400 px-4 py-2 text-sm font-medium">Cancel</button>
+                <button
+                    type="submit"
+                    [disabled]="userForm.invalid"
+                    class="rounded-lg bg-[#DEE33E] hover:bg-yellow-200 px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+                >
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div *ngIf="showConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="relative z-10 rounded-lg bg-white p-6 shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Confirm Add User</h3>
+        <p class="text-sm text-gray-500 mb-6">Are you sure you want to add this user?</p>
+        <div class="flex justify-end space-x-3">
+            <button type="button" (click)="cancelAdd()" class="rounded-lg bg-gray-300 hover:bg-gray-400 px-4 py-2 text-sm font-medium">Cancel</button>
+            <button type="button" (click)="confirmAdd()" class="rounded-lg bg-[#DEE33E] hover:bg-yellow-200 px-4 py-2 text-sm font-medium text-black">Confirm</button>
+        </div>
+    </div>
+</div>

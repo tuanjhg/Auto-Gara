@@ -27,6 +27,15 @@ export function getErrorMessage(nameControl: AbstractControl, label: string): st
     if (errors['pattern']) {
         return `Invalid format ${label}.`;
     }
+    if (errors['passwordMismatch']) {
+        return 'Passwords do not match.';
+    }
+    if (errors['invalidUsername']) {
+        return `${label} can only contain letters, numbers, dots, underscores and hyphens.`;
+    }
+    if (errors['invalidPhoneNumber']) {
+        return `${label} is not a valid phone number.`;
+    }
     return null;
 }
 

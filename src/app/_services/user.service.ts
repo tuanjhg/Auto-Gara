@@ -54,11 +54,8 @@ export class UserService extends BaseService {
     const paramWithTenant = params as GetParamRequest & { tenantId?: number };
     if (paramWithTenant.tenantId) {
       httpParams = httpParams.set('tenant_id', String(paramWithTenant.tenantId));
-      console.log('Added tenant_id filter:', paramWithTenant.tenantId);
     }
 
-    console.log('UserService.getPaginated params:', params);
-    console.log('Final HTTP params:', httpParams.toString());
     return this.http.get<PaginatedResponse<UserModel>>(`${this.baseUrl}/${this.endPoint}`, { headers, params: httpParams });
   }
 
