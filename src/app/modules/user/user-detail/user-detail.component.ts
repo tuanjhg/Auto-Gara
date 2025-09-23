@@ -288,7 +288,7 @@ export class UserDetailComponent implements OnChanges, OnInit {
       return 'N/A';
     }
 
-    const tenant = this.tenants.find(t => t.tenantId === tenantId);
+    const tenant = this.tenants.find(t => t.tenant_id === tenantId);
     return tenant?.name || 'N/A';
   }
 

@@ -41,8 +41,6 @@
       <div class="mb-4 p-4">
         <app-common-filter-bar
           [searchText]="searchText"
-          [filterOptions]="tableColumns"
-          [filterColumnLabel]="filterColumnLabel"
           (searchChange)="onSearchChange($event)"
           (filterChange)="selectFilter($event)">
         </app-common-filter-bar>

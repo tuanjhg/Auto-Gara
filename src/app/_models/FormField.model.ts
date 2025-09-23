@@ -2,7 +2,7 @@ export interface FormField {
   name: string;
   controlName?: string;
   label: string;
-  type: 'text' | 'number' | 'tel' | 'select' | 'textarea' | 'date';
+  type: 'text' | 'number' | 'tel' | 'select' | 'textarea' | 'date' | 'radio';
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];
@@ -19,3 +19,4 @@ export interface TableColumn {
   className?: string;
   sortable?: boolean;
 }
+

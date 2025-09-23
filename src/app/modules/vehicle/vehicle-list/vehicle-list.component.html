@@ -28,8 +28,6 @@
       <div class="mb-4 p-4">
     <app-common-filter-bar
       [searchText]="searchText"
-      [filterOptions]="tableColumns"
-      [filterColumnLabel]="filterColumnLabel"
       (searchChange)="onSearchChange($event)"
       (filterChange)="selectFilter($event)">
     </app-common-filter-bar>
@@ -48,9 +46,9 @@
         (action)="handleTableAction($event)">
       </app-common-table>
 
-      <div *ngIf="isCreateModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal('create')">
+      <div *ngIf="isCreateModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal('create', false)">
         <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-2xl max-h-[120vh] " (click)="$event.stopPropagation()">
-          <app-add-vehicle (closeModalRequest)="closeModal('create')"></app-add-vehicle>
+          <app-add-vehicle (closed)="closeModal('create', $event)"></app-add-vehicle>
         </div>
       </div>
       <div *ngIf="isDetailModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal('detail')">

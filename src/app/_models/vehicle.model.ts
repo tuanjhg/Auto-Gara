@@ -10,7 +10,7 @@ export interface vehicleModel {
   color?: string;
   vin_number?: string;
   last_mileage?: number;
-  createdAt?: Date;
+  createdAt?: string;
   updatedAt?: Date;
   tenant?: {
     name: string;
@@ -32,7 +32,7 @@ export interface VehicleDisplayRow {
   model: string;
   ownerName: string;
   tenantName: string;
-  entryDate: string;
+  createdAt: string;
 }
 export const vehicleFormFields: FormField[] = [
   {
@@ -95,14 +95,6 @@ export const vehicleFormFields: FormField[] = [
     section: 'vehicle',
   },
     {
-    name: 'entryDate',
-    controlName: 'entryDate',
-    label: 'Entry Date',
-    type: 'date',
-    section: 'owner',
-    required: true,
-  },
-    {
     name: 'tenant_id',
     controlName: 'tenant',
     label: 'Tenant',
@@ -131,7 +123,7 @@ export interface VehicleDetail extends vehicleModel {
   color: string;
   last_mileage: number;
   ownerName: string;
-  entryDate: Date;
+  createdAt: string;
   status: {
     label: string;
     style: string;

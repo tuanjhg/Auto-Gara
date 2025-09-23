@@ -18,7 +18,7 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
     { key: 'model', label: 'Model', className: 'text-left', sortable: true },
     { key: 'ownerName', label: 'Owner', className: 'text-left' },
     { key: 'tenantName', label: 'Gara', className: 'text-left' },
-    { key: 'entryDate', label: 'EntryDate', className: 'text-left', sortable: true },
+    { key: 'createdAt', label: 'EntryDate', className: 'text-left', sortable: true },
     { key: 'all', label: 'All', className: 'text-right' },
     { key: 'actions', label: 'Actions', className: 'text-right' }
   ];
@@ -58,7 +58,7 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
           model: `${vehicle.make} ${vehicle.model}`,
           ownerName: vehicle.customers?.full_name || 'Không rõ',
           tenantName: vehicle.tenant?.name || 'Không rõ',
-          entryDate: vehicle.createdAt ? (typeof vehicle.createdAt === 'string' ? vehicle.createdAt : new Date(vehicle.createdAt).toISOString()) : ''
+          createdAt: vehicle.createdAt ? this.formatDateDDMMYYYY(vehicle.createdAt) : ''
         }));
         this.updatePaginationArray();
         this.cdr.detectChanges();
@@ -123,12 +123,19 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
     }, 0);
   }
 
-  closeModal(type: 'create' | 'detail'): void {
+  closeModal(type: 'create' | 'detail', added?: boolean): void {
     if (type === 'create') {
       this.isCreateModalOpen = false;
+      if (added) {
+        this.loadData();
+      }
     } else if (type === 'detail') {
       this.isDetailModalOpen = false;
+      if (added) {
+        this.loadData();
+      }
     }
+    this.cdr.detectChanges();
   }
 
   selectFilter(option: { key: keyof VehicleDisplayRow | 'all'; label: string }): void {
@@ -146,4 +153,5 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
       this.openConfirmModel(event.row.vehicle_id);
     }
   }
+
 }

@@ -310,7 +310,7 @@ export class VehicleDetailComponent implements OnInit {
     const vehicleData: any = {};
 
     this.formFields.forEach((field) => {
-      if (field.name === 'entryDate') {
+      if (field.name === 'createdAt') {
         return;
       }
       const controlName = field.controlName || field.name;
@@ -341,7 +341,7 @@ export class VehicleDetailComponent implements OnInit {
       status: apiVehicle.status ?? { label: 'Unknown', style: 'info' },
       images: apiVehicle.images ?? { main: this.defaultImage, thumbnails: [] },
       ownerName: apiVehicle.customers?.full_name ?? 'Unknown Owner',
-      entryDate: apiVehicle.createdAt ? new Date(apiVehicle.createdAt) : new Date(),
+      createdAt: apiVehicle.createdAt ?? '',
       last_mileage: apiVehicle.last_mileage ? Number(apiVehicle.last_mileage) : 0,
     };
   }

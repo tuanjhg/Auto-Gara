@@ -1,6 +1,7 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
+import * as moment from 'moment';
 
 export abstract class BaseListComponent<T> {
   isCreateModalOpen = false;
@@ -98,6 +99,9 @@ export abstract class BaseListComponent<T> {
     this.paginationArray = pages;
   }
 
+  formatDateDDMMYYYY(date: string | Date): string {
+    return date ? moment(date).isValid() ? moment(date).format('DD/MM/YYYY') : '' : '';
+  }
 
     abstract loadData(): void;
 }

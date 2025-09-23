@@ -1,5 +1,5 @@
 export interface GaraModel {
-    tenantId: number;
+    tenant_id: number;
     name: string;
     address: string;
     phone: number;
