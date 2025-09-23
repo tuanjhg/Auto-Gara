@@ -53,7 +53,7 @@
                                     Gara Info
                                 </a>
                                 <div *ngIf="isEditMode" class="flex space-x-2">
-                                    <button type="submit" [disabled]="form.invalid"
+                                    <button type="submit" [disabled]="form.invalid" 
                                         class="rounded-lg bg-[#DEE33E] px-4 py-2 text-sm font-medium text-black hover:bg-yellow-200">
                                         Save
                                     </button>
@@ -67,38 +67,24 @@
                         <div class=" px-4 py-5 overflow-auto">
                             <div class="grid grid-cols-1 gap-x-6 gap-y-4 text-sm md:grid-cols-2">
                                 <div *ngFor="let field of fields" class="flex flex-col">
-                                    <label class="text-gray-500">{{field.label}}</label>
+                                    <label class="text-gray-500">{{field.label}} <ng-container *ngIf="isEditMode"><span *ngIf="field.require"
+                            class="text-red-500"> *</span></ng-container></label>
                                     <ng-container *ngIf="!isEditMode; else editField">
                                         <span class="font-semibold">{{field.value}}</span>
                                     </ng-container>
                                     <ng-template #editField>
-                                        <ng-container *ngIf="field.name === 'ownerUser'; else defaultInput">
-                                            <select [formControlName]="field.name"
-                                                class="form-select border border-gray-300 rounded-xl p-1 font-semibold"
-                                                [ngClass]="{
-                                                                'border-red-500 focus:ring-red-200': isInvalid(field.name),
-                                                                'border-green-500 focus:ring-green-200': isValid(field.name),
-                                                                'border-gray-300 focus:ring-gray-200': !isInvalid(field.name) && !isValid(field.name)
-                                                                }">
-                                                <option [ngValue]="null" disabled>-- Select Owner --</option>
-                                                <option *ngFor="let owner of owners" [ngValue]="owner.id">{{
-                                                    owner.full_name }}</option>
-                                            </select>
-                                            <div class="mt-1 text-xs text-red-600" *ngIf="showError(field.name)">
-                                                {{ getError(field.name) }}
-                                            </div>
+                                        <ng-container *ngIf="field.name === 'ownerUser'; else other">
+                                            <span class="font-semibold">{{field.value}}</span>
                                         </ng-container>
-
-                                        <ng-template #defaultInput>
+                                        <ng-template #other>
                                             <input
-                                                class="form-input border border-gray-300 rounded-xl p-1 font-semibold"
-                                                [formControlName]="field.name" [type]="field.type" [ngClass]="{
-                                                        'border-red-500 focus:ring-red-200': isInvalid(field.name),
-                                                        'border-green-500 focus:ring-green-200': isValid(field.name),
-                                                        'border-gray-300 focus:ring-gray-200': !isInvalid(field.name) && !isValid(field.name)
-                                                        }" />
+                                                *ngIf="field.type === 'text' || field.type === 'tel'|| field.type === 'email'"
+                                                [formControlName]="field.name" [placeholder]="field.placeholder"
+                                                class="form-select border border-gray-300 rounded-xl p-1 font-semibold  placeholder:font-normal placeholder:text-gray-400"
+                                                [class.border-red-500]="showError(field.name)"
+                                                [class.border-green-500]="!showError(field.name) && form.get(field.name)?.value" />
                                             <div class="mt-1 text-xs text-red-600" *ngIf="showError(field.name)">
-                                                {{ getError(field.name) }}
+                                                {{ getMsg(field.name, field.label) }}
                                             </div>
                                         </ng-template>
                                     </ng-template>
@@ -160,14 +146,7 @@
         </div>
     </div>
 </div>
-<app-confirm-model
-[open]="openDelete"
-[title]="'Delete'"
-[message]="'Bạn có chắc chắn muốn xoá gara này không?'"
-[confirmText]="'Xoá'"
-[cancelText]="'Huỷ'"
-(confirmed)="onConfirmDelete()"
-(cancelled)="onCancelDelete()"
->
+<app-confirm-model [open]="openDelete" [title]="'Delete'" [message]="'Bạn có chắc chắn muốn xoá gara này không?'"
+    [confirmText]="'Xoá'" [cancelText]="'Huỷ'" (confirmed)="onConfirmDelete()" (cancelled)="onCancelDelete()">
 
 </app-confirm-model>

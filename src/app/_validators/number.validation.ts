@@ -1,6 +1,6 @@
 import { ValidatorFn, Validators } from '@angular/forms';
 import { ValidationNumberOpts } from '@df_models/validation.model';
-import { INTEGER_NUMBER, REAL_NUMBER } from './patterns.validation';
+import { INTEGER_NUMBER, PHONE_NUMBER, REAL_NUMBER } from './patterns.validation';
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function validationNumber(opts: ValidationNumberOpts): ValidatorFn[] {
@@ -25,6 +25,9 @@ export function validationNumber(opts: ValidationNumberOpts): ValidatorFn[] {
     }
     if (opts.realNumber) {
         validation.push(Validators.pattern(REAL_NUMBER));
+    }
+        if (opts.phone) {
+        validation.push(Validators.pattern(PHONE_NUMBER));
     }
     return validation;
 }

@@ -46,14 +46,12 @@ export interface GaraDetailModel {
     is_active: boolean;
     createdAt: string;
     owner: GaraUserApi;
-
 }
 export interface UpdateGaraModel {
     name: string;
     address: string;
     phone: number;
     email: string;
-    owner_user_id: string;
     is_active: boolean;
 }
 export interface AddGaralModel {
@@ -64,4 +62,21 @@ export interface AddGaralModel {
     ownerUser: string;
     isActive: boolean;
 }
+export interface GaraField {
+    label: string;
+    name: string;
+    type: string;
+    value: string | number | boolean;
+    options?: { label: string; value: number }[];
+    require?: boolean;
+    placeholder?: string;
+}
 
+export interface GaraAddField {
+    label: string;
+    name: string;
+    type: string;
+    options?: { label: string; value: number }[];
+    require?: boolean;
+    placeholder?: string;
+}

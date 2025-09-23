@@ -2,6 +2,7 @@ export interface ValidationStringOpts {
     required?: boolean;
     minLength?: number;
     maxLength?: number;
+    email?: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     pattern?: any;
 }
@@ -13,4 +14,5 @@ export interface ValidationNumberOpts {
     maxLength?: number;
     integer?: boolean;
     realNumber?: boolean;
+    phone?: boolean;
 }

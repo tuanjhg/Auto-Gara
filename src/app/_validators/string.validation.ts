@@ -16,5 +16,8 @@ export function validationString(otps: ValidationStringOpts): ValidatorFn[] {
     if (otps.pattern) {
         validation.push(Validators.pattern(otps.pattern));
     }
+    if (otps.email) {
+        validation.push(Validators.email);
+    }
     return validation;
 }

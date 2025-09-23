@@ -1,137 +1,80 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AddGaralModel } from '@df_models/gara.model';
-import { UserModel } from '@df_models/user.model';
+import { Router } from '@angular/router';
+import { AddGaralModel, GaraAddField } from '@df_models/gara.model';
+import { UserListApiResponse, UserModel } from '@df_models/user.model';
 import { GaraService } from '@df_services/gara.service';
 import { UserService } from '@df_services/user.service';
+import { CreateGaraSchema } from '@df_validators/formSchemas/create-gara.schema';
+import { buildFormGroup } from '@df_validators/formSchemas/form-schema';
+import { getErrorMessage, shouldShowError } from '@df_validators/messageError';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs';
 
 @Component({
-  selector: 'app-add-gara',
-  templateUrl: './add-gara.component.html'
+    selector: 'app-add-gara',
+    templateUrl: './add-gara.component.html',
 })
 export class AddGaraComponent implements OnInit {
-  @Output() closed = new EventEmitter<void>();
-  formAdd!: FormGroup;
-  owners: UserModel[] = [];
-  fields: { label: string; name: string; placeholder: string; type: string; options?: { label: string; value: string | number | boolean }[] }[] = [
-    { label: 'Gara Name', name: 'name', placeholder: 'Enter gara name', type: 'text' },
-    { label: 'Phone Number', name: 'phone', placeholder: 'VD: 0987654321', type: 'tel' },
-    { label: 'Email', name: 'email', placeholder: 'example@gmail.com', type: 'email' },
-    {
-      label: 'Gara Owner',
-      name: 'owner_user_id',
-      placeholder: 'Owner',
-      type: 'select',
-    },
-    {
-      label: 'Status',
-      name: 'is_active',
-      placeholder: 'Status',
-      type: 'select',
-      options: [
-        { label: 'Active', value: true },
-        { label: 'Inactive', value: false }
-      ]
-    },
-    { label: 'Address', name: 'address', placeholder: 'Enter gara address', type: 'textarea' },
-  ];
+    @Output() closed = new EventEmitter<void>();
+    formAdd!: FormGroup;
+    owners: UserModel[] = [];
+    fields: GaraAddField[] = [
+        { label: 'Gara Owner', name: 'owner_user_id', type: 'select', placeholder: 'Owner' ,require:true},
+        { label: 'Gara Name', name: 'name', type: 'text', placeholder: 'Enter gara name',require:true },
+        { label: 'Phone Number', name: 'phone', type: 'tel', placeholder: 'VD: 0987654321',require:true },
+        { label: 'Email', name: 'email', type: 'email', placeholder: 'example@gmail.com',require:true },
+        { label: 'Address', name: 'address', type: 'text', placeholder: 'Enter gara address',require:true },
+        { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Status' ,require:true},
 
-  errorMessages: Record<string, Record<string, string>> = {
-    name: { required: 'Gara name is require', pattern: 'Only letters, spaces are allowed.' },
-    phone: { required: 'phone number is require', pattern: 'phone number invalid (10–11 numbers)' },
-    email: { required: 'Email is require', email: 'Email invalid' },
-    owner_user_id: { required: 'gara owner is require' },
-    is_active: { required: 'choose status' },
-    address: { required: 'address is require' },
-  };
-
-  constructor(
-    private fb: FormBuilder,
-    private garaServive: GaraService,
-    private userService: UserService,
-    private toastr: ToastrService) { }
-  ngOnInit(): void {
-    this.initFormAdd();
-    this.loadOwners();
-  }
-  loadOwners(): void {
-    this.userService.getAll({ role: 'owner' }).subscribe({
-      next: (res: UserModel[]) => {
-        const userList = res;
-        this.owners = userList.filter(u => u.tenant_id === null);
-        const ownerOptions = this.owners.map(u => ({
-          label: `${u.full_name}`,
-          value: u.id
-        }));
-        this.fields = this.fields.map(f =>
-          f.name === 'owner_user_id' ? { ...f, options: ownerOptions } : f
-        );
-      },
-      error: (err) => {
-          const msg = err.error.errors.join('\n');
-          this.toastr.error(msg, 'Failed!');
-      }
-    });
-  }
-  showError(name: string): boolean {
-    const c = this.formAdd?.get(name);
-    return !!c && c.invalid && (c.dirty || c.touched);
-  }
-  getError(name: string): string | null {
-    const c = this.formAdd?.get(name);
-    if (!c || !c.errors) { return null; }
-
-    const map = this.errorMessages[name] || {};
-    for (const key of Object.keys(map)) {
-      if (c.errors[key]) { return map[key]; }
+    ];
+    constructor(private fb: FormBuilder, private garaServive: GaraService, private userService: UserService, private toastr: ToastrService, private router: Router) {}
+    ngOnInit(): void {
+        this.formAdd = buildFormGroup(this.fb, CreateGaraSchema);
+        this.loadOwners();
     }
-  }
-  initFormAdd(): FormGroup {
-    return this.formAdd = this.fb.group({
-      name: ['', Validators.compose([
-        Validators.required,
-        Validators.pattern(/^[\p{L}\p{N}\s,./-]+$/u)
-      ])],
-      phone: ['', Validators.compose([
-        Validators.required,
-        Validators.pattern(/^[0-9]{9,11}$/)
-      ])],
-      email: ['', Validators.compose([
-        Validators.required,
-        Validators.email
-      ])],
-      owner_user_id: null,
-      is_active: [null, Validators.compose([
-        Validators.required
-      ])],
-      address: ['', Validators.compose([
-        Validators.required,
-        Validators.pattern(/^[\p{L}\p{N}\s,./-]+$/u)
-      ])],
-    });
-  }
-  onSubmit(): void {
-    if (this.formAdd.valid) {
-      const addGaraRequest: AddGaralModel = this.formAdd.getRawValue();
-      this.garaServive.create(addGaraRequest).subscribe({
-        next: () => {
-          const toastRef = this.toastr.success('Add new gara successfully!', 'Successfully!');
-          toastRef.onHidden.subscribe(() => {
-            this.close();
-          });
-        },
-        error: (err) => {
-          const msg = err.error.errors.join('\n');
-          this.toastr.error(msg, 'Failed!');
+    loadOwners(): void {
+        this.userService.getPaginated({ role: 'owner' }).subscribe({
+            next: (res: UserListApiResponse) => {
+                const userList = res.data;
+                this.owners = userList.filter(u => u.tenant_id === null);
+                const ownerOptions = this.owners.map(u => ({
+                    label: `${u.full_name}`,
+                    value: u.id,
+                }));
+                this.fields = this.fields.map(field => (field.name === 'owner_user_id' ? { ...field, options: ownerOptions } : field));
+            },
+            error: (err) => {
+                const msg = err.error.error.join('\n');
+                this.toastr.error(msg, 'Failed!');
+            },
+        });
+    }
+    showError = (name: string): boolean => shouldShowError(this.formAdd.get(name));
+    getMsg = (name: string, label: string): string => getErrorMessage(this.formAdd.get(name), label);
+
+    onSubmit(): void {
+        if (this.formAdd.valid) {
+            const addGaraRequest: AddGaralModel = this.formAdd.getRawValue();
+            this.garaServive.create(addGaraRequest).subscribe({
+                next: () => {
+                    const toastRef = this.toastr.success('Add new gara successfully!', 'Successfully!');
+                    toastRef.onHidden.subscribe(() => {
+                        this.close();
+                    });
+                },
+                error: (err) => {
+                    const msg = err.error.error.join('\n');
+                    this.toastr.error(msg, 'Failed!');
+                },
+            });
+        } else {
+            this.formAdd.markAllAsTouched();
         }
-      });
-    } else {
-      this.formAdd.markAllAsTouched();
     }
-  }
-  close(): void {
-    this.closed.emit();
-  }
+    onCreateOwner(): void {
+        this.router.navigate(['/user']);
+    }
+    close(): void {
+        this.closed.emit();
+    }
 }
