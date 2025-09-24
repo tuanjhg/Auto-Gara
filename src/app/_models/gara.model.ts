@@ -80,3 +80,11 @@ export interface GaraAddField {
     require?: boolean;
     placeholder?: string;
 }
+export interface GaraDisplayRow {
+  tenant_id: number;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  owner: string;
+}

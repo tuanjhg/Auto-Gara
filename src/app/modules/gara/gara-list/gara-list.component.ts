@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { GaraApiItem, GaraDetailModel, GaraListApiResponse, GaraModel } from '@df_models/gara.model';
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { GaraApiItem, GaraDetailModel, GaraDisplayRow, GaraListApiResponse, GaraModel } from '@df_models/gara.model';
 import { GaraService } from '@df_services/gara.service';
+import { BaseListComponent } from '@shared/components/base-list.component';
 import { LoadingService } from '@shared/services/loading.service';
 import { ToastrService } from 'ngx-toastr';
 import { debounceTime, Subject } from 'rxjs';
@@ -10,20 +11,22 @@ import { debounceTime, Subject } from 'rxjs';
     templateUrl: './gara-list.component.html',
     styleUrls: ['./gara-list.component.scss'],
 })
-export class GaraListComponent implements OnInit {
-    searchTerm: string = '';
-    headers: string[] = ['Gara Name', 'Address', 'Email', 'Phone', 'Owner'];
-
-    garas: GaraApiItem[] = [];
-    filterGaras: GaraApiItem[] = [];
-
-    selectedField: string = '';
-    sortDirection: 'asc' | 'desc';
+export class GaraListComponent extends BaseListComponent<GaraDisplayRow> implements OnInit {
+    @ViewChild('nameCell', { static: true }) nameCell: TemplateRef<unknown>;
+    cellTemplates: { [key: string]: TemplateRef<unknown> } = {};
+    tableColumns = [
+        { key: 'name', label: 'Gara Name', className: 'text-left', sortable: true },
+        { key: 'address', label: 'Address', className: 'text-left', sortable: true },
+        { key: 'email', label: 'Email', className: 'text-left', sortable: true },
+        { key: 'phone', label: 'Phone', className: 'text-left' },
+        { key: 'owner', label: 'Owner', className: 'text-left' },
+        { key: 'actions', label: 'Actions', className: 'text-right' },
+    ];
+    sortOrder: 'asc' | 'desc' = 'desc';
     sortColumn: keyof GaraApiItem | '' = 'createdAt';
 
     pageSize: number = 10;
     currentPage: number = 1;
-    totalItems: number = 0;
 
     detailOpen = false;
     selectedGara: GaraDetailModel;
@@ -33,26 +36,14 @@ export class GaraListComponent implements OnInit {
     selectedToDelete: number;
 
     addOpen = false;
-    private search$ = new Subject<string>();
 
-    constructor(private garaService: GaraService, private toastr: ToastrService, public loadingService: LoadingService) {}
-    get totalPages(): number {
-        return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
-    }
-    get paginationArray(): number[] {
-        const total = this.totalPages;
-        const range = 1;
-        const start = Math.max(1, this.currentPage - range);
-        const end = Math.min(total, this.currentPage + range);
-        const pages: number[] = [];
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
-        }
-        return pages;
+    constructor(private garaService: GaraService, private toastr: ToastrService, public loadingService: LoadingService, cdr: ChangeDetectorRef) {
+        super(cdr);
+        this.sortColumn = 'createdAt';
+        this.sortOrder = 'asc';
     }
 
     ngOnInit(): void {
-        this.search$.pipe(debounceTime(1500)).subscribe(() => this.filterData());
         this.loadData();
     }
     loadData(): void {
@@ -62,64 +53,30 @@ export class GaraListComponent implements OnInit {
                 pageNumber: this.currentPage,
                 rowsPerPage: this.pageSize,
                 sort: this.sortColumn,
-                order: this.sortDirection,
-                search: this.searchTerm,
+                order: this.sortOrder,
+                search: this.searchText.trim() || undefined,
             })
             .subscribe({
                 next: (res: GaraListApiResponse) => {
                     const data = res.data;
                     const total = res.totalCount;
-                    if (data.length == 0 && total > 0 && this.currentPage > 1) {
-                        this.currentPage = this.currentPage - 1;
-                        this.loadData();
-                        return;
-                    }
-                    this.garas = res.data;
-                    this.totalItems = res.totalCount;
+                    this.totalPages = Math.ceil(total / this.pageSize);
+                    this.displayData = res.data.map(tenant => ({
+                        tenant_id: tenant.tenant_id,
+                        name: tenant.name,
+                        phone: tenant.phone,
+                        email: tenant.email,
+                        owner: tenant.owner?.full_name || 'None',
+                        address: tenant.address,
+                    }));
+                    this.updatePaginationArray();
+                    this.cdr.detectChanges();
                     this.loadingService.hide();
                 },
                 error: () => {},
             });
     }
-    filterData(): void {
-        const term = this.searchTerm.trim().toLowerCase();
-        if (term.valueOf) {
-            this.currentPage = 1;
-            this.loadData();
-        }
-    }
-    onSearchChange(search: string): void {
-        this.search$.next(search);
-    }
 
-    getSortKey(header: string): keyof GaraApiItem {
-        const map: { [key: string]: keyof GaraApiItem } = {
-            'Gara Name': 'name',
-            'Address': 'address',
-            'Email': 'email',
-        };
-
-        return map[header] || 'name';
-    }
-    sortBy(header: string): void {
-        const col = this.getSortKey(header);
-        if (this.sortColumn === col) {
-            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            this.sortColumn = col;
-            this.sortDirection = 'asc';
-        }
-        this.currentPage = 1;
-        this.loadData();
-    }
-
-    changePage(page: number): void {
-        const total = this.totalPages;
-        if (page >= 1 && page <= total) {
-            this.currentPage = page;
-            this.loadData();
-        }
-    }
     openAdd(): void {
         this.addOpen = true;
     }
@@ -133,7 +90,9 @@ export class GaraListComponent implements OnInit {
             next: (res: GaraDetailModel) => {
                 this.selectedGara = res;
             },
-            error: (err) => {},
+            error: (err) => {
+                this.toastr.error(err.error.error.join('/n'));
+            },
         });
     }
 
@@ -166,5 +125,13 @@ export class GaraListComponent implements OnInit {
                 this.toastr.error('Xoá gara thất bại!', 'failed!');
             },
         });
+    }
+
+    handleTableAction(event: { type: string; row: GaraDisplayRow }): void {
+        if (event.type === 'edit') {
+            this.openDetail(event.row.tenant_id);
+        } else if (event.type === 'delete') {
+            this.openConfirmModel(event.row.tenant_id);
+        }
     }
 }
