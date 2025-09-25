@@ -1,29 +1,28 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FormField,FormSection  } from '../../../_models/FormField.model';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { vehicleFormFields } from '../../../_models/vehicle.model';
+import { buildFormGroup } from 'app/_validators/formSchemas/form-schema';
+import { VehicleSchema } from 'app/_validators/formSchemas/vehicle.schema';
 import { VehicleService } from 'app/_services/vehicle.service';
 import { GaraService } from 'app/_services/gara.service';
 import { CustomerService } from 'app/_services/customer.service';
 import { ToastrService } from 'ngx-toastr';
 import { GaraModel } from 'app/_models/gara.model';
 import { Customer } from 'app/_models/customer.model';
+import { getErrorMessage, shouldShowError } from '@df_validators/messageError';
 
 @Component({
   selector: 'app-add-vehicle',
   templateUrl: './add-vehicle.component.html',
 })
 export class AddVehicleComponent implements OnInit {
-  @Output() vehicleAdded = new EventEmitter<object>();
-  @Output() closeModalRequest = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<boolean>();
 
   formFields = vehicleFormFields;
   vehicleForm!: FormGroup;
-  formSections: FormSection[] = [];
-  currentStep: number = 0;
   submitted: boolean = false;
   tenants: GaraModel[] = [];
-  owners: Customer[] = [];
+  customer: Customer[] = [];
 
   showConfirmModal = false;
 
@@ -36,97 +35,36 @@ export class AddVehicleComponent implements OnInit {
   ) {
   }
 
-  get currentSection(): FormSection {
-  return this.formSections[this.currentStep];
-}
+
 
   ngOnInit(): void {
-    this.vehicleForm = this.buildForm();
-    this.formSections = this.groupFieldsBySection();
-
+    this.vehicleForm = buildFormGroup(this.fb, VehicleSchema);
     this.garaService.getAll().subscribe((response: any) => {
-      this.tenants = Array.isArray(response) ? response : response.data;
+      const tenants = Array.isArray(response) ? response : response.data;
+      const tenantOptions = tenants.map((tenant: GaraModel) => ({ value: tenant.tenant_id, label: tenant.name }));
+      const tenantField = this.formFields.find(form => form.name === 'tenant_id');
+      if (tenantField) { tenantField.options = tenantOptions; }
     });
-
     this.vehicleForm.get('tenant_id')?.valueChanges.subscribe((tenant_id) => {
+      const customerField = this.formFields.find(f => f.name === 'customer_id');
       if (tenant_id) {
         this.vehicleForm.get('customer_id')?.enable();
-        this.customerService.getCustomersByTenant(tenant_id).subscribe((owners: any) => {
-          this.owners = Array.isArray(owners) ? owners : owners.data;
+        this.customerService.getCustomersByTenant(tenant_id).subscribe((customers: Customer[] | { data: Customer[] }) => {
+          const customerList = Array.isArray(customers) ? customers : customers.data;
+          if (customerField) {
+            customerField.options = customerList.map((customer: Customer) => ({ value: String(customer.customer_id), label: customer.full_name }));
+          }
         });
       } else {
         this.vehicleForm.get('customer_id')?.disable();
-        this.owners = [];
+        if (customerField) { customerField.options = []; }
         this.vehicleForm.get('customer_id')?.setValue('');
       }
     });
   }
 
-  buildForm(): FormGroup {
-    const formGroup: any = {};
-    this.formFields.forEach((field) => {
-      const validators = field.required ? [Validators.required] : [];
-      formGroup[field.name] = ['', validators];
-    });
-    return this.fb.group(formGroup);
-  }
-
-
-nextStep(): void {
-  if (this.isCurrentStepValid()) {
-    if (this.currentStep < this.formSections.length - 1) {
-      this.currentStep++;
-    }
-  } else {
-    this.currentSection.fields.forEach((field: any) => {
-      this.vehicleForm.get(field.name)?.markAsTouched();
-    });
-  }
-}
-
-  previousStep(): void {
-    if (this.currentStep > 0) {
-      this.currentStep--;
-    }
-  }
-
-  isCurrentStepValid(): boolean {
-    const currentFields = this.currentSection.fields;
-    for (const field of currentFields) {
-      if (this.vehicleForm.get(field.name)?.invalid) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-   groupFieldsBySection(): FormSection[] {
-    const sectionTitles: { [key: string]: string } = {
-      vehicle: 'Vehicle Information',
-      owner: 'Owner Details',
-      status: 'Initial Status',
-    };
-
-    const sectionsMap = new Map<string, FormField[]>();
-
-    this.formFields.forEach((field) => {
-      const sectionKey = field.section || 'default';
-      if (!sectionsMap.has(sectionKey)) {
-        sectionsMap.set(sectionKey, []);
-      }
-      const sectionFields = sectionsMap.get(sectionKey);
-      if (sectionFields) {
-        sectionFields.push(field);
-      }
-    });
-
-    return Array.from(sectionsMap.entries()).map(([key, fields]) => ({
-      title: sectionTitles[key] || 'Other',
-      fields
-    }));
-  }
-  close(): void {
-    this.closeModalRequest.emit();
+  close(added: boolean = false): void {
+    this.closed.emit(added);
   }
 
   addVehicle(): void {
@@ -134,31 +72,31 @@ nextStep(): void {
     if (this.vehicleForm.invalid) {
       return;
     }
-    this.showConfirmModal = true;
   }
 
   onConfirmAddVehicle(): void {
     this.showConfirmModal = false;
     const formValue = this.vehicleForm.value;
     const vehicleData = {
-      tenant_id: formValue.tenant_id,
-      customer_id: formValue.customer_id,
+      tenant_id: Number(formValue.tenant_id),
+      customer_id: Number(formValue.customer_id),
       plate_number: formValue.plate_number,
       vin_number: formValue.vin_number,
       make: formValue.make,
       model: formValue.model,
-      year: formValue.year,
+      year: Number(formValue.year),
       color: formValue.color,
-    };
+      last_mileage: Number(formValue.last_mileage),
+  };
     this.vehicleService.create(vehicleData).subscribe({
-      next: (response) => {
+      next: () => {
         this.toastr.success('Add vehicle successfully!', 'Success');
-        this.vehicleAdded.emit(response as object);
-        this.close();
+        this.closed.emit(true);
       },
       error: (error) => {
         const message = error?.error?.message || 'Error occurs when adding a car!';
         this.toastr.error(message, 'Add a car failed');
+        this.closed.emit(false);
       }
     });
   }
@@ -166,4 +104,7 @@ nextStep(): void {
   onCancelAddVehicle(): void {
     this.showConfirmModal = false;
   }
+
+  showError = (name: string): boolean => shouldShowError(this.vehicleForm.get(name));
+  getMsg = (name: string, label: string): string => getErrorMessage(this.vehicleForm.get(name), label);
 }

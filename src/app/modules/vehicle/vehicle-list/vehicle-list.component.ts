@@ -2,6 +2,9 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { TableColumn } from '../../../_models/FormField.model';
 import { VehicleDisplayRow, vehicleModel } from '../../../_models/vehicle.model';
 import { VehicleService } from '@df_services/vehicle.service';
+import { GaraService } from '@df_services/gara.service';
+import { GaraApiItem, GaraListApiResponse } from '../../../_models/gara.model';
+import { SelectedTenantService } from 'app/shared/services/select-tenant.service';
 import { GetParamRequest, PaginatedResponse } from 'app/_models/api.model';
 import { LoadingService } from 'app/shared/services/loading.service';
 import { ToastrService } from 'ngx-toastr';
@@ -23,19 +26,70 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
     { key: 'actions', label: 'Actions', className: 'text-right' }
   ];
 
+
+  garas: GaraApiItem[] = [];
+  selectedGarage: string | number = 'all';
+  isGarageMenuOpen = false;
+
   constructor(
     private vehicleService: VehicleService,
+    private garaService: GaraService,
     public loadingService: LoadingService,
     cdr: ChangeDetectorRef,
-    public toastr: ToastrService
+    public toastr: ToastrService,
+    private selectedTenant: SelectedTenantService
   ) {
     super(cdr);
     this.sortColumn = 'createdAt';
     this.sortOrder = 'asc';
   }
 
+
+  get selectedGarageLabel(): string {
+    if (this.selectedGarage === 'all') {
+      return 'All';
+    }
+    const found = this.garas.find(gara => gara.tenant_id === this.selectedGarage);
+    return found ? found.name : 'All';
+  }
+
   ngOnInit(): void {
+    this.loadGaras();
+    const initTenant = this.selectedTenant.getTenantId();
+    this.selectedGarage = initTenant != null ? initTenant : 'all';
     this.loadData();
+  }
+
+  selectGarage(garage: GaraApiItem | { value: 'all', label: string }): void {
+    if ('tenant_id' in garage) {
+      this.selectedGarage = garage.tenant_id;
+    } else {
+      this.selectedGarage = garage.value;
+    }
+    this.selectedTenant.setTenantId(this.selectedGarage === 'all' ? null : Number(this.selectedGarage), { syncUrl: true });
+    this.currentPage = 1;
+    this.loadData();
+    this.isGarageMenuOpen = false;
+  }
+
+  loadGaras(): void {
+    this.garaService.getAllGara().subscribe({
+      next: (res: GaraListApiResponse) => {
+        this.garas = Array.isArray(res) ? res : (res.data || []);
+        const hasSelected =
+          this.selectedGarage === 'all' ||
+          this.garas.some(gara => gara.tenant_id === this.selectedGarage);
+        if (!hasSelected) {
+          this.selectedGarage = 'all';
+          this.selectedTenant.setTenantId(null, { syncUrl: true });
+        }
+      },
+      error: () => {
+        this.garas = [];
+        this.selectedGarage = 'all';
+        this.selectedTenant.setTenantId(null, { syncUrl: true });
+      }
+    });
   }
 
   loadData(): void {
@@ -45,7 +99,8 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
       rowsPerPage: this.pageSize,
       sort: this.sortColumn,
       order: this.sortOrder,
-      search: this.searchText.trim() || undefined
+      search: this.searchText.trim() || undefined,
+      tenant_id: this.selectedGarage !== 'all' ? this.selectedGarage : undefined
     };
     this.vehicleService.getPaginated(params).subscribe({
       next: (res: PaginatedResponse<vehicleModel>) => {
@@ -136,14 +191,6 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
       }
     }
     this.cdr.detectChanges();
-  }
-
-  selectFilter(option: { key: keyof VehicleDisplayRow | 'all'; label: string }): void {
-    this.filterColumn = option.key;
-    this.filterColumnLabel = option.label;
-    this.isFilterMenuOpen = false;
-    this.currentPage = 1;
-    this.loadData();
   }
 
   handleTableAction(event: { type: string; row: VehicleDisplayRow }): void {

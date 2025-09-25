@@ -13,23 +13,42 @@
 <div class="flex flex-col min-w-full ">
     <div class="flex flex-col  ">
       <div class="flex flex-row justify-between">
-        <div class="flex items-center justify-center bg-white py-2 px-4 rounded-lg">Show: <span class="font-bold">All </span> 
-        <button class="hover:bg-gray-200 w-5 h-6 ">
+        <div class="relative flex items-center bg-white py-2 px-4 rounded-lg select-none">
+          Show: <span class="font-bold ml-1">{{ selectedGarageLabel }}</span>
+          <button class="hover:bg-gray-200 w-5 h-6 ml-1" (click)="isGarageMenuOpen = !isGarageMenuOpen">
             <mat-icon svgIcon="arrow_drop_down"></mat-icon>
-        </button>
+          </button>
+         <div *ngIf="isGarageMenuOpen"
+            class="absolute right-0 top-full mt-2 min-w-full bg-white border rounded-xl border-gray-200 shadow-lg z-20"
+            style="transition: opacity 0.3s ease-in-out;"
+            [ngClass]="{'opacity-0 pointer-events-none': !isGarageMenuOpen, 'opacity-100': isGarageMenuOpen}">
+            <div style="max-height: 300px; overflow-y: auto;">
+            <a (click)="$event.stopPropagation(); selectGarage({ value: 'all', label: 'All' }); isGarageMenuOpen = false"
+              href="javascript:void(0)"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              role="menuitem">
+              All
+            </a>
+            <a *ngFor="let gara of garas" (click)="$event.stopPropagation(); selectGarage(gara); isGarageMenuOpen = false"
+              href="javascript:void(0)"
+              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              role="menuitem">
+              {{ gara.name }}
+            </a>
+            </div>
+          </div>
         </div>
         <button (click)="openCreateModal()" class="w-full sm:w-auto bg-white rounded-lg  font-semibold py-2 px-4  shadow-sm hover:bg-gray-200 flex items-center justify-center gap-2">
             <mat-icon svgIcon="add"></mat-icon>
                 Add Vehicle
-                </button>
+        </button>
       </div>
     </div>
   <div class="flex flex-col bg-white mb-4 mt-4">
       <div class="mb-4 p-4">
     <app-common-filter-bar
       [searchText]="searchText"
-      (searchChange)="onSearchChange($event)"
-      (filterChange)="selectFilter($event)">
+      (searchChange)="onSearchChange($event)">
     </app-common-filter-bar>
       <app-common-table
         [columns]="tableColumns"

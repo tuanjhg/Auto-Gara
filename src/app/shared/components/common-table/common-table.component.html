@@ -1,6 +1,6 @@
 <div class="bg-white rounded-lg shadow overflow-y-auto mb-4">
-  <div style="overflow-x:auto;">
-    <table class="w-full min-w-[600px] bg-white rounded-lg">
+  <div class="overflow-x:auto overflow-y-auto max-h-[calc(90vh-300px)]">
+    <table class="w-full min-w-[600px]  bg-white rounded-lg">
       <thead class="sticky top-0 z-10 bg-gray-50">
         <ng-container *ngFor="let col of columns">
           <th *ngIf="col.key !== 'all' && col.key !== 'actions'"
