@@ -16,7 +16,7 @@ import { buildFormGroup } from '@df_validators/formSchemas/form-schema';
 export class CustomerDetailComponent implements OnInit, OnChanges {
     @Input() open: boolean = false;
     @Input() id: number;
-    @Output() closed = new EventEmitter<void>();
+    @Output() closed = new EventEmitter<boolean>();
     customerSelected: CustomerApiItem;
     form: FormGroup;
     isEditMode: boolean = false;
@@ -76,14 +76,11 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
     }
     onCancelEdit(): void {
         this.isEditMode = false;
-        this.loadCustomerDetail();
     }
     onFormSubmit(): void {
         if (this.form.invalid) {
             return;
         }
-        this.customerUpdateRequest = this.form.value;
-
         this.customerUpdateRequest = {
             ...this.form.value,
             tenant_id: this.customerSelected.tenant_id
@@ -93,10 +90,11 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
                 this.toastrService.success('Customer updated successfully!');
                 this.isEditMode = false;
                 this.loadCustomerDetail();
-                this.closed.emit();
+                this.closed.emit(true);
             },
             error: (err) => {
                 this.toastrService.error(getErrorMessage(this.form, err), 'Update failed!');
+                this.closed.emit(false);
             },
         });
     }
@@ -104,7 +102,7 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
         this.openConfirm = true;
     }
     close(): void {
-        this.closed.emit();
+        this.closed.emit(false);
     }
     showError(field: string): boolean {
         return shouldShowError(this.form.get(field));
@@ -126,7 +124,7 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
             },
         });
     }
-    
+
     onCancelDelete(): void {
         this.openConfirm = false;
     }

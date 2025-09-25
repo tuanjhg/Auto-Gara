@@ -177,23 +177,17 @@ export class CustomerListComponent extends BaseListComponent<CustomerDisplayRow>
     }, 0);
   }
 
-  closeModal(type: 'create' | 'detail'): void {
-    this.loadData();
-    if (type === 'create') {
-      this.isCreateModalOpen = false;
-    } else if (type === 'detail') {
-      this.isDetailModalOpen = false;
-    }
-    this.cdr.detectChanges();
+ closeModal(type: 'create' | 'detail', added?: boolean): void {
+  if (type === 'create') {
+    this.isCreateModalOpen = false;
+  } else if (type === 'detail') {
+    this.isDetailModalOpen = false;
   }
-
-  selectFilter(option: { key: keyof CustomerDisplayRow | 'all'; label: string }): void {
-    this.filterColumn = option.key;
-    this.filterColumnLabel = option.label;
-    this.isFilterMenuOpen = false;
-    this.currentPage = 1;
+  if (!!added) {
     this.loadData();
   }
+  this.cdr.detectChanges();
+}
 
   handleTableAction(event: { type: string; row: CustomerDisplayRow }): void {
     if (event.type === 'edit') {

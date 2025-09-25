@@ -13,6 +13,7 @@ import { CommonTableComponent } from './components/common-table/common-table.com
 import { CommonFilterBarComponent } from './components/common-filter-bar/common-filter-bar.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { CommonDialogComponent } from './components/common-dialog/common-dialog.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
     ImageGalleryComponent,
     GarageSelectorComponent,
     CommonTableComponent,
-    CommonFilterBarComponent
+    CommonFilterBarComponent,
+    CommonDialogComponent
   ],
   imports: [
     CommonModule,
@@ -47,6 +49,7 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
     CommonFilterBarComponent,
     MatDatepickerModule,
     MatMomentDateModule,
+    CommonDialogComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
