@@ -19,13 +19,12 @@ export class AddGaraComponent implements OnInit {
     formAdd!: FormGroup;
     owners: UserModel[] = [];
     fields: GaraAddField[] = [
-        { label: 'Gara Owner', name: 'owner_user_id', type: 'select', placeholder: 'Owner' ,require:true},
-        { label: 'Gara Name', name: 'name', type: 'text', placeholder: 'Enter gara name',require:true },
-        { label: 'Phone Number', name: 'phone', type: 'tel', placeholder: 'VD: 0987654321',require:true },
-        { label: 'Email', name: 'email', type: 'email', placeholder: 'example@gmail.com',require:true },
-        { label: 'Address', name: 'address', type: 'text', placeholder: 'Enter gara address',require:true },
-        { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Status' ,require:true},
-
+        { label: 'Gara Owner', name: 'owner_user_id', type: 'select', placeholder: 'Owner', require: true },
+        { label: 'Gara Name', name: 'name', type: 'text', placeholder: 'Enter gara name', require: true },
+        { label: 'Phone Number', name: 'phone', type: 'tel', placeholder: 'VD: 0987654321', require: true },
+        { label: 'Email', name: 'email', type: 'email', placeholder: 'example@gmail.com', require: true },
+        { label: 'Address', name: 'address', type: 'text', placeholder: 'Enter gara address', require: true },
+        { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Status', require: true },
     ];
     constructor(private fb: FormBuilder, private garaServive: GaraService, private userService: UserService, private toastr: ToastrService, private router: Router) {}
     ngOnInit(): void {
@@ -33,13 +32,12 @@ export class AddGaraComponent implements OnInit {
         this.loadOwners();
     }
     loadOwners(): void {
-        this.userService.getPaginated({ role: 'owner' }).subscribe({
+        this.userService.getPaginated({ hasTenant: false }).subscribe({
             next: (res: UserListApiResponse) => {
                 const userList = res.data;
-                this.owners = userList.filter(u => u.tenant_id === null);
-                const ownerOptions = this.owners.map(u => ({
-                    label: `${u.full_name}`,
-                    value: u.id,
+                const ownerOptions = userList.map(user => ({
+                    label: `${user.full_name}`,
+                    value: user.id,
                 }));
                 this.fields = this.fields.map(field => (field.name === 'owner_user_id' ? { ...field, options: ownerOptions } : field));
             },
@@ -57,13 +55,10 @@ export class AddGaraComponent implements OnInit {
             const addGaraRequest: AddGaralModel = this.formAdd.getRawValue();
             this.garaServive.create(addGaraRequest).subscribe({
                 next: () => {
-                    const toastRef = this.toastr.success('Add new gara successfully!', 'Successfully!');
-                    toastRef.onHidden.subscribe(() => {
-                        this.close();
-                    });
+                    this.toastr.success('Add new gara successfully!', 'Successfully!');
                 },
                 error: (err) => {
-                    const msg = err.error.error.join('\n');
+                    const msg = err.error.errors.join('\n');
                     this.toastr.error(msg, 'Failed!');
                 },
             });
