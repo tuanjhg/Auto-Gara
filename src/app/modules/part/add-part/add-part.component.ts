@@ -62,7 +62,6 @@ export class AddPartComponent implements OnInit {
                 error: (err) => {
                     const msg = err.error.error.join('\n');
                     this.toastrService.error(msg, 'failed!');
-                    this.close();
                 },
             });
         }
