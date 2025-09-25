@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { PartApiItem, PartListApiResponse } from '@df_models/part.model';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { GaraApiItem, GaraListApiResponse } from '@df_models/gara.model';
+import { PartApiItem, PartDisplayRow, PartListApiResponse } from '@df_models/part.model';
+import { GaraService } from '@df_services/gara.service';
 import { PartService } from '@df_services/part.service';
+import { BaseListComponent } from '@shared/components/base-list.component';
 import { LoadingService } from '@shared/services/loading.service';
+import { SelectedTenantService } from '@shared/services/select-tenant.service';
 import { Toast, ToastrService } from 'ngx-toastr';
 import { debounceTime, Subject } from 'rxjs';
 
@@ -10,42 +14,61 @@ import { debounceTime, Subject } from 'rxjs';
     templateUrl: './part-list.component.html',
     styleUrls: ['./part-list.component.scss'],
 })
-export class PartListComponent implements OnInit {
-    headers: string[] = ['Code', 'Part Name', 'supplier', 'Gara', 'Price'];
+export class PartListComponent extends BaseListComponent<PartDisplayRow> implements OnInit, AfterViewInit {
+    @ViewChild('fullNameCell', { static: true }) fullNameCell: TemplateRef<unknown>;
+    cellTemplates: { [key: string]: TemplateRef<unknown> } = {};
+    tableColumns = [
+        { key: 'part_number', label: 'Code', className: 'text-left', sortable: true },
+        { key: 'name', label: 'Part Name', className: 'text-left', sortable: true },
+        { key: 'supplier', label: 'Supplier', className: 'text-left', sortable: true },
+        { key: 'tenant', label: 'Gara', className: 'text-left' },
+        { key: 'default_price', label: 'Price', className: 'text-left' },
+        { key: 'all', label: 'All', className: 'text-right' },
+
+        { key: 'actions', label: 'Actions', className: 'text-right' },
+    ];
     parts: PartApiItem[];
     totalPartRecord: number;
     pageSize: number = 10;
     currentPage: number = 1;
-    search$ = new Subject<string>();
-    searchTerm: string = '';
     sortColumn: string;
-    sortDirection: 'asc' | 'desc';
+    sortOrder: 'asc' | 'desc';
     openDelete: boolean = false;
-    idSelected: number ;
+    idSelected: number;
     isOpenDetail: boolean = false;
     addOpen: boolean = false;
+    garas: GaraApiItem[] = [];
+    isGarageMenuOpen = false;
+    selectedGarage: string | number = 'all';
 
-    constructor(private partService: PartService, public loadingService: LoadingService, private toastrService: ToastrService) {}
-    get totalPages(): number {
-        return Math.max(1, Math.ceil(this.totalPartRecord / this.pageSize));
+    constructor(
+        private partService: PartService,
+        private garaService: GaraService,
+        public loadingService: LoadingService,
+        private toastrService: ToastrService,
+        cdr: ChangeDetectorRef,
+        private selectedTenant: SelectedTenantService,
+    ) {
+        super(cdr);
+        this.sortColumn = 'createdAt';
+        this.sortOrder = 'asc';
     }
-    get paginationArray(): number[] {
-        const total = this.totalPages;
-        const range = 1;
-        const start = Math.max(1, this.currentPage - range);
-        const end = Math.min(total, this.currentPage + range);
-        const pages: number[] = [];
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
+    get selectedGarageLabel(): string {
+        if (this.selectedGarage === 'all') {
+            return 'All';
         }
-        return pages;
+        const found = this.garas.find(g => g.tenant_id === this.selectedGarage);
+        return found ? found.name : 'All';
     }
 
     ngOnInit(): void {
-        this.search$.pipe(debounceTime(1000)).subscribe(() => {
-            this.filterData();
-        });
+    this.loadGaras();
+        const initTenant = this.selectedTenant.getTenantId();
+        this.selectedGarage = initTenant != null ? initTenant : 'all';
         this.loadData();
+    }
+    ngAfterViewInit(): void {
+        this.cellTemplates = { name: this.fullNameCell };
     }
     loadData(): void {
         this.loadingService.show();
@@ -54,62 +77,59 @@ export class PartListComponent implements OnInit {
                 pageNumber: this.currentPage,
                 rowsPerPage: this.pageSize,
                 sort: this.sortColumn,
-                order: this.sortDirection,
-                search: this.searchTerm,
+                order: this.sortOrder,
+                search: this.searchText.trim() || undefined,
+                tenant_id: this.selectedGarage !== 'all' ? this.selectedGarage : undefined,
             })
             .subscribe({
                 next: (res: PartListApiResponse) => {
-                    const data = res.data;
                     const total = res.totalCount;
-                    if (data.length == 0 && total > 0 && this.currentPage > 1) {
-                        this.currentPage = this.currentPage - 1;
-                        this.loadData();
-                        return;
-                    }
-                    this.parts = res.data;
-                    this.totalPartRecord = res.totalCount;
+                    this.totalPages = Math.ceil(total / this.pageSize);
+                    this.displayData = res.data.map(part => ({
+                        part_id: part.part_id,
+                        part_number: part.part_number,
+                        name: part.name,
+                        supplier: part.supplier,
+                        tenant: part.tenant?.name || 'None',
+                        default_price: part.default_price,
+                        is_active: part.is_active
+                    }));
+                    this.updatePaginationArray();
+                    this.cdr.detectChanges();
                     this.loadingService.hide();
                 },
             });
     }
-    onSearchChange(search: string): void {
-        this.search$.next(search);
+    loadGaras(): void {
+        this.garaService.getAllGara().subscribe({
+            next: (res: GaraListApiResponse) => {
+                this.garas = Array.isArray(res) ? res : res.data || [];
+                const hasSelected = this.selectedGarage === 'all' || this.garas.some(gara => gara.tenant_id === this.selectedGarage);
+                if (!hasSelected) {
+                    this.selectedGarage = 'all';
+                    this.selectedTenant.setTenantId(null, { syncUrl: true });
+                }
+            },
+            error: () => {
+                this.garas = [];
+                this.selectedGarage = 'all';
+                this.selectedTenant.setTenantId(null, { syncUrl: true });
+            },
+        });
     }
-    filterData(): void {
-        this.currentPage = 1;
-        this.loadData();
-    }
-    changePage(page: number): void {
-        const total = this.totalPages;
-        if (page >= 1 && page <= total) {
-            this.currentPage = page;
-            this.loadData();
-        }
-    }
-    getSortKey(header: string): keyof PartApiItem {
-        const map: { [key: string]: keyof PartApiItem } = {
-            'Part Name': 'name',
-            'Code': 'part_number',
-            'Price': 'default_price',
-            'supplier': 'supplier',
-            'Gara': 'tenant',
-        };
-        return map[header] || 'name';
-    }
-    sortBy(header: string): void {
-        const col = this.getSortKey(header);
-        if (header === 'Gara') {
-            return;
-        }
-        if (this.sortColumn === col) {
-            this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+
+    selectGarage(garage: GaraApiItem | { value: 'all'; label: string }): void {
+        if ('tenant_id' in garage) {
+            this.selectedGarage = garage.tenant_id;
         } else {
-            this.sortColumn = col;
-            this.sortDirection = 'asc';
+            this.selectedGarage = garage.value;
         }
+        this.selectedTenant.setTenantId(this.selectedGarage === 'all' ? null : Number(this.selectedGarage), { syncUrl: true });
         this.currentPage = 1;
         this.loadData();
+        this.isFilterMenuOpen = false;
     }
+
     openConfirmModel(id: number): void {
         this.idSelected = id;
         this.openDelete = true;
@@ -145,5 +165,12 @@ export class PartListComponent implements OnInit {
     onAddClosed(): void {
         this.addOpen = false;
         this.loadData();
+    }
+    handleTableAction(event: { type: string; row: PartDisplayRow }): void {
+        if (event.type === 'edit') {
+            this.openDetail(event.row.part_id);
+        } else if (event.type === 'delete') {
+            this.openConfirmModel(event.row.part_id);
+        }
     }
 }

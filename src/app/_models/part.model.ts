@@ -59,3 +59,12 @@ export interface CreatePart {
     supplier: string;
     is_active: boolean;
 }
+export interface PartDisplayRow {
+    part_id: number;
+    part_number: string;
+    name: string;
+    supplier: string;
+    tenant: string;
+    default_price: number;
+    is_active: boolean;
+}
