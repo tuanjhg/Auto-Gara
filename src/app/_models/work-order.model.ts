@@ -21,6 +21,25 @@ export interface WorkOrder {
     final_check_by_user_id?: number | null;
     final_check_at?: string | null;
 }
+export interface AddWorkOrderField {
+    label: string;
+    name: string;
+    type: string;
+    placeholder?: string;
+    displayValue?: string;
+    options?: { label: string; value: number }[];
+    require?: boolean;
+}
+export interface CreateWorkOrder {
+    tenant_id: number;
+    customer_id: number;
+    vehicle_id: number;
+    initial_notes: string;
+    estimated_completion_date: string;
+    created_by_user_id: string;
+    total_quote_price: number;
+    total_paid_amount: number;
+}
 
 export const KANBAN_COLUMNS: WorkOrderStatus[] = ['pending', 'waiting_for_approval', 'in_progress', 'ready_for_final_check'];
 
@@ -76,8 +95,8 @@ export const workOrders: WorkOrder[] = [
         id: 1025,
         tenant: 'dung',
         work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
-        vehicle: 'Khách lẻ',
+        customer: 'phúc',
+        vehicle: '98D1-234',
         status: 'pending',
         initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
         estimated_completion_date: '2025-08-04',
@@ -95,6 +114,42 @@ export const workOrders: WorkOrder[] = [
         tenant: 'dung',
         work_order_code: '#RO-1025',
         customer: 'khách lẻ',
+        vehicle: '99B1-234',
+        status: 'pending',
+        initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
+        estimated_completion_date: '2025-08-04',
+        total_quote_price: null,
+        total_paid_amount: 0,
+        created_by_user_id: 7,
+        created_at: '2025-08-01T09:20:00+07:00',
+        updated_at: '2025-08-01T09:20:00+07:00',
+        completed_at: null,
+        final_check_by_user_id: null,
+        final_check_at: null,
+    },
+    {
+        id: 1025,
+        tenant: 'dung',
+        work_order_code: '#RO-1025',
+        customer: 'Toàn',
+        vehicle: '97B3-372',
+        status: 'pending',
+        initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
+        estimated_completion_date: '2025-08-04',
+        total_quote_price: null,
+        total_paid_amount: 0,
+        created_by_user_id: 7,
+        created_at: '2025-08-01T09:20:00+07:00',
+        updated_at: '2025-08-01T09:20:00+07:00',
+        completed_at: null,
+        final_check_by_user_id: null,
+        final_check_at: null,
+    },
+    {
+        id: 1025,
+        tenant: 'dung',
+        work_order_code: '#RO-1025',
+        customer: 'Tuấn',
         vehicle: 'Khách lẻ',
         status: 'pending',
         initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
@@ -112,43 +167,7 @@ export const workOrders: WorkOrder[] = [
         id: 1025,
         tenant: 'dung',
         work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
-        vehicle: 'Khách lẻ',
-        status: 'pending',
-        initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
-        estimated_completion_date: '2025-08-04',
-        total_quote_price: null,
-        total_paid_amount: 0,
-        created_by_user_id: 7,
-        created_at: '2025-08-01T09:20:00+07:00',
-        updated_at: '2025-08-01T09:20:00+07:00',
-        completed_at: null,
-        final_check_by_user_id: null,
-        final_check_at: null,
-    },
-    {
-        id: 1025,
-        tenant: 'dung',
-        work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
-        vehicle: 'Khách lẻ',
-        status: 'pending',
-        initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
-        estimated_completion_date: '2025-08-04',
-        total_quote_price: null,
-        total_paid_amount: 0,
-        created_by_user_id: 7,
-        created_at: '2025-08-01T09:20:00+07:00',
-        updated_at: '2025-08-01T09:20:00+07:00',
-        completed_at: null,
-        final_check_by_user_id: null,
-        final_check_at: null,
-    },
-    {
-        id: 1025,
-        tenant: 'dung',
-        work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
+        customer: 'Thanh',
         vehicle: 'Khách lẻ',
         status: 'pending',
         initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
@@ -166,7 +185,7 @@ export const workOrders: WorkOrder[] = [
         id: 1026,
         tenant: 'dung',
         work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
+        customer: 'Văn',
         vehicle: 'Khách lẻ',
         status: 'pending',
         initial_notes: 'Bảo dưỡng định kỳ 20,000 km.',
@@ -184,7 +203,7 @@ export const workOrders: WorkOrder[] = [
         id: 1024,
         tenant: 'dung',
         work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
+        customer: 'Tú',
         vehicle: 'Khách lẻ',
 
         status: 'in_progress',
@@ -203,8 +222,8 @@ export const workOrders: WorkOrder[] = [
         id: 1025,
         tenant: 'dung',
         work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
-        vehicle: 'Khách lẻ',
+        customer: 'Dũng Trần',
+        vehicle: '98D2-00118',
         status: 'pending',
         initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
         estimated_completion_date: '2025-08-04',
@@ -221,8 +240,8 @@ export const workOrders: WorkOrder[] = [
         id: 1025,
         tenant: 'dung',
         work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
-        vehicle: 'Khách lẻ',
+        customer: 'Dũng Trần',
+        vehicle: '98D2-00118',
         status: 'pending',
         initial_notes: 'Kiểm tra hệ thống phanh, có tiếng kêu lạ.',
         estimated_completion_date: '2025-08-04',
@@ -239,8 +258,8 @@ export const workOrders: WorkOrder[] = [
         id: 1022,
         tenant: 'dung',
         work_order_code: '#RO-1025',
-        customer: 'khách lẻ',
-        vehicle: 'Khách lẻ',
+        customer: 'Dũng Trần',
+        vehicle: '98D2-00118',
         status: 'waiting_for_approval',
         initial_notes: 'Sơn lại cản trước, thay dầu.',
         estimated_completion_date: null,
