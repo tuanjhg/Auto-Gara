@@ -1,213 +1,165 @@
-import { Component } from '@angular/core';
-import { WorkOrder, WorkOrderStatus, KANBAN_COLUMNS,workOrders } from 'app/_models/work-order.model';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-type SortKey = 'work_order_code' | 'estimated_completion_date' | 'total_quote_price' | 'total_paid_amount';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { WorkerOrderApiItem, workOrders } from 'app/_models/work-order.model';
+import { WorkOrderService } from '@df_services/work-order.service';
+import { LoadingService } from '@shared/services/loading.service';
+import { ToastrService } from 'ngx-toastr';
+import { SelectedTenantService } from '@shared/services/select-tenant.service';
+import { WorkOrderDisplayRow } from '@df_models/work-order.model';
+import { BaseListComponent } from '@shared/components/base-list.component';
+import { GaraService } from '@df_services/gara.service';
+import { GaraApiItem, GaraListApiResponse } from '@df_models/gara.model';
+import { PaginatedResponse } from '@df_models/api.model';
 
 @Component({
-  selector: 'app-order',
-  templateUrl: './work-order-list.component.html'
+    selector: 'app-order',
+    templateUrl: './work-order-list.component.html',
 })
-export class WorkOrderListComponent {
-  pageSize: number = 10;
-  currentPage: number = 1;
-  isAddModalOpen: boolean = false;
-  isDetailModalOpen: boolean = false;
-  viewMode: 'kanban' | 'list' = 'kanban';
-  showMoreMap: { [key: string]: number } = {};
-  searchText = '';
-  statusFilter: '' | WorkOrderStatus = '';
-  workOrderId: number | undefined;
-  workOrders: WorkOrder[] = workOrders;
-  readonly KANBAN_COLUMNS = KANBAN_COLUMNS;
-  readonly KANBAN_COLUMN_LIMIT = 3;
+export class WorkOrderListComponent extends BaseListComponent<WorkOrderDisplayRow> implements OnInit {
+    pageSize: number = 10;
+    currentPage: number = 1;
+    isAddModalOpen: boolean = false;
+    isDetailModalOpen: boolean = false;
+    sortColumn: string;
+    sortOrder: 'asc' | 'desc' = 'desc';
+    selectedGarage: string | number = 'all';
+    idSelected: number;
+    isOpenDetail: boolean;
+    openDelete: boolean;
+    addOpen: boolean;
+    garas: GaraApiItem[] = [];
+    isGarageMenuOpen = false;
 
-  sort: { key: SortKey; dir: 'asc' | 'desc' } = { key: 'work_order_code', dir: 'asc' };
+    tableColumns = [
+        { key: 'work_order_code', label: 'Order Code', className: 'text-left', sortable: true },
+        { key: 'vehicle', label: 'Vehicle', className: 'text-left', sortable: false },
+        { key: 'tenant', label: 'Tenant', className: 'text-left', sortable: false },
+        { key: 'customer', label: 'Customer', className: 'text-left', sortable: false },
+        { key: 'initial_notes', label: 'Description', className: 'text-left', sortable: false },
+        { key: 'estimated_completion_date', label: 'Delivery Date', className: 'text-left', sortable: true },
+        { key: 'status', label: 'Status', className: 'text-left', sortable: false },
+        { key: 'actions', label: 'Actions', className: 'text-center', sortable: false },
+    ];
 
-  STATUS_LABEL: Record<WorkOrderStatus, string> = {
-    pending: 'pending',
-    waiting_for_approval: 'waiting for approval',
-    in_progress: 'in progress',
-    ready_for_final_check: 'ready for final check',
-    completed: 'completed',
-    paid: 'paid',
-    rejected_by_customer: 'rejected by customer',
-    paused: 'paused'
-  };
-
-  workOrderColumns = [
-    { key: 'work_order_code', label: 'Order Code', className: 'text-left', sortable: true },
-    { key: 'vehicle_id', label: 'Vehicle', className: 'text-left', sortable: false },
-    { key: 'tenant_id', label: 'Tenant', className: 'text-left', sortable: false },
-    { key: 'initial_notes', label: 'Description', className: 'text-left', sortable: false },
-    { key: 'estimated_completion_date', label: 'Delivery Date', className: 'text-left', sortable: true },
-    { key: 'status', label: 'Status', className: 'text-left', sortable: false },
-    { key: 'total_quote_price', label: 'Quote Price', className: 'text-right', sortable: true },
-    { key: 'total_paid_amount', label: 'Paid Amount', className: 'text-right', sortable: true },
-    { key: 'amount_due', label: 'Amount Due', className: 'text-right', sortable: false },
-    { key: 'actions', label: 'Actions', className: 'text-center', sortable: false }
-  ];
-
-  constructor() {
-    const saved = localStorage.getItem('workOrders');
-    if (saved) {
-      try {
-        this.workOrders = JSON.parse(saved);
-      } catch (e) {
-        this.workOrders = workOrders;
-      }
+    constructor(
+        private workOderService: WorkOrderService,
+        public loadingService: LoadingService,
+        cdr: ChangeDetectorRef,
+        public toastr: ToastrService,
+        private selectedTenant: SelectedTenantService,
+        private garaService: GaraService,
+    ) {
+        super(cdr);
+        this.sortColumn = 'createdAt';
+        this.sortOrder = 'asc';
     }
-  }
-
-  get listFiltered(): WorkOrder[] {
-    const q = this.searchText.trim().toLowerCase();
-
-    let rows = this.workOrders.filter((w) => {
-      const hitQ = !q || [
-        w.work_order_code?.toLowerCase(),
-        String(w.vehicle_id),
-        String(w.customer_id),
-        w.initial_notes?.toLowerCase(),
-        w.status?.toLowerCase()
-      ].some(val => val && val.includes(q));
-      const hitS = !this.statusFilter || w.status === this.statusFilter;
-      return hitQ && hitS;
-    });
-
-    rows = rows.sort((a, b) => {
-      const dir = this.sort.dir === 'asc' ? 1 : -1;
-      const k = this.sort.key;
-
-      const va = a[k as keyof WorkOrder];
-      const vb = b[k as keyof WorkOrder];
-
-      const toCmp = (v: string | number | Date | null | undefined): string | number => {
-        if (v === null || v === undefined) { return ''; }
-        if (k === 'estimated_completion_date') { return new Date(v as string).getTime(); }
-        return v as string | number;
-      };
-
-      const A = toCmp(va);
-      const B = toCmp(vb);
-      if (A < B) { return -1 * dir; }
-      if (A > B) { return 1 * dir; }
-      return 0;
-    });
-
-    return rows;
-  }
-
-  get paginatedList(): WorkOrder[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.listFiltered.slice(start, start + this.pageSize);
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.listFiltered.length / this.pageSize) || 1;
-  }
-  get paginationArray(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-  }
-  changePage(page: number): void {
-    if (page < 1 || page > this.totalPages) {
-      return;
+    get selectedGarageLabel(): string {
+        if (this.selectedGarage === 'all') {
+            return 'All';
+        }
+        const found = this.garas.find(g => g.tenant_id === this.selectedGarage);
+        return found ? found.name : 'All';
     }
-    this.currentPage = page;
-  }
-  onPageSizeChange(): void {
-    this.currentPage = 1;
-  }
 
-  setView(v: 'kanban' | 'list'): void { this.viewMode = v; }
-  applyFilter(): void {}
-  sortBy(key: SortKey): void {
-    this.sort.dir = this.sort.key === key && this.sort.dir === 'asc' ? 'desc' : 'asc';
-    this.sort.key = key;
-  }
-
-  amountDue(w: WorkOrder): number | null {
-    if (w.total_quote_price == null) {
-      return null;
+    ngOnInit(): void {
+        // this.loadGaras();
+        const initTenant = this.selectedTenant.getTenantId();
+        this.selectedGarage = initTenant != null ? initTenant : 'all';
+        this.loadData();
     }
-    return Math.max(0, (w.total_quote_price || 0) - (w.total_paid_amount || 0));
-  }
-
-  getWorkOrderCountByStatus(status: WorkOrderStatus): number {
-    return this.workOrders.filter(w => w.status === status).length;
-  }
-
-  getOrdersByColumn(col: string): WorkOrder[] {
-  return this.workOrders.filter(w => w.status === col);
-}
-
-
-  getVisibleOrders(col: string): WorkOrder[] {
-    const all = this.getOrdersByColumn(col);
-    const shown = typeof this.showMoreMap[col] === 'number' ? this.showMoreMap[col] : this.KANBAN_COLUMN_LIMIT;
-    return all.slice(0, shown);
-  }
-
-  showMoreInKanban(col: string): void {
-    const current = this.showMoreMap[col] ? this.showMoreMap[col] : this.KANBAN_COLUMN_LIMIT;
-    const total = this.getOrdersByColumn(col).length;
-    this.showMoreMap[col] = Math.min(current + this.KANBAN_COLUMN_LIMIT, total);
-  }
-
-  showLessInKanban(col: string): void {
-    this.showMoreMap[col] = this.KANBAN_COLUMN_LIMIT;
-  }
-
-  getStatusStyle(status: WorkOrderStatus): string {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'waiting_for_approval':
-        return 'bg-blue-100 text-blue-800';
-      case 'in_progress':
-        return 'bg-green-100 text-green-800';
-      case 'ready_for_final_check':
-        return 'bg-gray-100 text-gray-800';
-      case 'completed':
-        return 'bg-gray-200 text-gray-600';
-      default:
-        return '';
+    loadData(): void {
+        // this.loadingService.show();
+        // this.workOderService
+        //     .getPaginated({
+        //         pageNumber: this.currentPage,
+        //         rowsPerPage: this.pageSize,
+        //         sort: this.sortColumn,
+        //         order: this.sortOrder,
+        //         search: this.searchText.trim() || undefined,
+        //         tenant_id: this.selectedGarage !== 'all' ? this.selectedGarage : undefined,
+        //     })
+        //     .subscribe({
+        //         next: (res: PaginatedResponse<WorkerOrderApiItem>) => {
+        //             const total = res.totalCount;
+        //             this.totalPages = Math.ceil(total / this.pageSize);
+        //             this.displayData = res.data.map(workOrder => ({
+        //                 work_order_id: workOrder.work_order_id,
+        //                 work_order_code: workOrder.work_order_code,
+        //                 status: workOrder.status,
+        //                 initial_notes: workOrder.initial_notes,
+        //                 estimated_completion_date: workOrder.estimated_completion_date,
+        //                 vehicle: workOrder.vehicle?.plate_number || 'None',
+        //                 customer: workOrder.customer?.full_name || 'None',
+        //                 tenant: workOrder.tenant?.name || 'None',
+        //             }));
+        //             this.updatePaginationArray();
+        //             this.cdr.detectChanges();
+        //             this.loadingService.hide();
+        //         },
+        //     });
+        this.displayData = workOrders.map(workOrder => ({
+            work_order_id: workOrder.id,
+            work_order_code: workOrder.work_order_code,
+            status: workOrder.status,
+            initial_notes: workOrder.initial_notes,
+            estimated_completion_date: workOrder.estimated_completion_date,
+            vehicle: workOrder.vehicle || 'None',
+            customer: workOrder.customer || 'None',
+            tenant: workOrder.tenant || 'None',
+        }));
     }
-  }
-
-  openDetailModal(workOrderId: number ): void {
-    this.isDetailModalOpen = true;
-    this.workOrderId = workOrderId;
-  }
-
-  openAddModal(): void {
-    this.isAddModalOpen = true;
-  }
-  closeModal(modalType: 'add' | 'edit'): void {
-    if (modalType === 'add') {
-      this.isAddModalOpen = false;
-    }else{
-      this.isDetailModalOpen = false;
+    loadGaras(): void {
+        this.garaService.getAllGara().subscribe({
+            next: (res: GaraListApiResponse) => {
+                this.garas = Array.isArray(res) ? res : res.data || [];
+                if (!this.selectedGarage) {
+                    this.selectedGarage = 'all';
+                    this.selectedTenant.setTenantId(null, { syncUrl: true });
+                }
+            },
+            error: () => {
+                this.garas = [];
+                this.selectedGarage = 'all';
+                this.selectedTenant.setTenantId(null, { syncUrl: true });
+            },
+        });
     }
-  }
 
-  onKanbanDrop(event: CdkDragDrop<WorkOrder[]>, col: string): void {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      const movedOrder = event.previousContainer.data[event.previousIndex];
-      movedOrder.status = col as WorkOrderStatus;
-      event.previousContainer.data.splice(event.previousIndex, 1);
-      event.container.data.splice(event.currentIndex, 0, movedOrder);
-      this.showStatusChangeToast(movedOrder.work_order_code, col);
+    changePage(page: number): void {
+        if (page < 1 || page > this.totalPages) {
+            return;
+        }
+        this.currentPage = page;
     }
-    this.saveKanbanData();
-  }
-
-  showStatusChangeToast(orderCode: string, newStatus: string): void {
-    window?.alert?.(`Order ${orderCode} moved to ${this.STATUS_LABEL[newStatus as WorkOrderStatus]}`);
-  }
-
-  saveKanbanData(): void {
-    localStorage.setItem('workOrders', JSON.stringify(this.workOrders));
-  }
-
+    onPageSizeChange(): void {
+        this.currentPage = 1;
+    }
+    openDetail(id: number): void {
+        this.idSelected = id;
+        this.isOpenDetail = true;
+    }
+    openConfirmModel(id: number): void {
+        this.idSelected = id;
+        this.openDelete = true;
+    }
+    openAdd(): void {
+        this.addOpen = true;
+    }
+    selectGarage(garage: GaraApiItem | { value: 'all'; label: string }): void {
+        if ('tenant_id' in garage) {
+            this.selectedGarage = garage.tenant_id;
+        } else {
+            this.selectedGarage = garage.value;
+        }
+        this.selectedTenant.setTenantId(this.selectedGarage === 'all' ? null : Number(this.selectedGarage), { syncUrl: true });
+        this.currentPage = 1;
+        this.loadData();
+        this.isFilterMenuOpen = false;
+    }
+    handleTableAction(event: { type: string; row: WorkOrderDisplayRow }): void {
+        if (event.type === 'edit') {
+            this.openDetail(event.row.work_order_id);
+        } else if (event.type === 'delete') {
+            this.openConfirmModel(event.row.work_order_id);
+        }
+    }
 }
