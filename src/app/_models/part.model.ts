@@ -1,7 +1,3 @@
-export interface PartListApiResponse {
-    data: PartApiItem[];
-    totalCount: number;
-}
 export interface PartApiItem {
     part_id: number;
     tenant_id: number;

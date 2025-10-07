@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { GaraApiItem, GaraListApiResponse } from '@df_models/gara.model';
+import { GaraApiItem } from '@df_models/gara.model';
+import { PaginatedResponse } from '@df_models/api.model';
 import { PartApiItem, PartField, UpdatePart } from '@df_models/part.model';
 import { GaraService } from '@df_services/gara.service';
 import { PartService } from '@df_services/part.service';
@@ -36,7 +37,7 @@ export class PartDetailComponent implements OnInit, OnChanges {
         private formBuider: FormBuilder,
         private loadingService: LoadingService,
         private garaService: GaraService,
-    ) {}
+    ) { }
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['id']) {
             this.loadPartDetail();
@@ -74,8 +75,8 @@ export class PartDetailComponent implements OnInit, OnChanges {
     }
     loadgara(): void {
         this.garaService.getPaginated().subscribe({
-            next: (res: GaraListApiResponse) => {
-                const garaList = res.data || [];
+            next: (res: PaginatedResponse<GaraApiItem>) => {
+                const garaList = res.data?.rows || [];
                 this.garas = garaList.filter(item => item.is_active === true || item.tenant_id === this.partSelected.tenant_id);
                 const garaOptions = this.garas.map(gara => ({
                     label: `${gara.name}`,

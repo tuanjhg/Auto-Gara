@@ -1,6 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { GaraApiItem, GaraListApiResponse } from '@df_models/gara.model';
-import { PartApiItem, PartDisplayRow, PartListApiResponse } from '@df_models/part.model';
+import { GaraApiItem } from '@df_models/gara.model';
+import { PaginatedResponse } from '@df_models/api.model';
+import { PartApiItem, PartDisplayRow } from '@df_models/part.model';
 import { GaraService } from '@df_services/gara.service';
 import { PartService } from '@df_services/part.service';
 import { BaseListComponent } from '@shared/components/base-list.component';
@@ -62,7 +63,7 @@ export class PartListComponent extends BaseListComponent<PartDisplayRow> impleme
     }
 
     ngOnInit(): void {
-    this.loadGaras();
+        this.loadGaras();
         const initTenant = this.selectedTenant.getTenantId();
         this.selectedGarage = initTenant != null ? initTenant : 'all';
         this.loadData();
@@ -82,10 +83,10 @@ export class PartListComponent extends BaseListComponent<PartDisplayRow> impleme
                 tenant_id: this.selectedGarage !== 'all' ? this.selectedGarage : undefined,
             })
             .subscribe({
-                next: (res: PartListApiResponse) => {
-                    const total = res.totalCount;
+                next: (res: PaginatedResponse<PartApiItem>) => {
+                    const total = res.data.totalCount;
                     this.totalPages = Math.ceil(total / this.pageSize);
-                    this.displayData = res.data.map(part => ({
+                    this.displayData = res.data.rows.map(part => ({
                         part_id: part.part_id,
                         part_number: part.part_number,
                         name: part.name,
@@ -102,8 +103,8 @@ export class PartListComponent extends BaseListComponent<PartDisplayRow> impleme
     }
     loadGaras(): void {
         this.garaService.getAllGara().subscribe({
-            next: (res: GaraListApiResponse) => {
-                this.garas = Array.isArray(res) ? res : res.data || [];
+            next: (res: PaginatedResponse<GaraApiItem>) => {
+                this.garas = res.data?.rows || [];
                 const hasSelected = this.selectedGarage === 'all' || this.garas.some(gara => gara.tenant_id === this.selectedGarage);
                 if (!hasSelected) {
                     this.selectedGarage = 'all';

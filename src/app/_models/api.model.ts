@@ -1,13 +1,18 @@
 export interface ApiResponse<T> {
     data: T;
-    message?: string;
-    success: boolean;
-    errors?: unknown;
+    statusCode: number;
+    msg: string;
+}
+
+export interface PaginatedData<T> {
+    rows: T[];
+    totalCount: number;
 }
 
 export interface PaginatedResponse<T> {
-    data: T[];
-    totalCount: number;
+    data: PaginatedData<T>;
+    statusCode?: number;
+    msg?: string;
 }
 
 export interface QueryParams {

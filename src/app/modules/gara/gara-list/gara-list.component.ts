@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { GaraApiItem, GaraDetailModel, GaraDisplayRow, GaraListApiResponse, GaraModel } from '@df_models/gara.model';
+import { GaraApiItem, GaraDetailModel, GaraDisplayRow, GaraModel } from '@df_models/gara.model';
+import { PaginatedResponse } from '@df_models/api.model';
 import { GaraService } from '@df_services/gara.service';
 import { BaseListComponent } from '@shared/components/base-list.component';
 import { LoadingService } from '@shared/services/loading.service';
@@ -57,11 +58,11 @@ export class GaraListComponent extends BaseListComponent<GaraDisplayRow> impleme
                 search: this.searchText.trim() || undefined,
             })
             .subscribe({
-                next: (res: GaraListApiResponse) => {
-                    const data = res.data;
-                    const total = res.totalCount;
+                next: (res: PaginatedResponse<GaraApiItem>) => {
+                    const total = res.data.totalCount;
                     this.totalPages = Math.ceil(total / this.pageSize);
-                    this.displayData = res.data.map(tenant => ({
+
+                    this.displayData = res.data.rows.map(tenant => ({
                         tenant_id: tenant.tenant_id,
                         name: tenant.name,
                         phone: tenant.phone,
@@ -73,7 +74,7 @@ export class GaraListComponent extends BaseListComponent<GaraDisplayRow> impleme
                     this.cdr.detectChanges();
                     this.loadingService.hide();
                 },
-                error: () => {},
+                error: () => { },
             });
     }
 

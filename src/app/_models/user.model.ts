@@ -1,8 +1,3 @@
-export interface UserListApiResponse {
-    data: UserModel[];
-    totalCount: number;
-}
-
 export interface UserModel {
     id: number;
     tenant_id: number;

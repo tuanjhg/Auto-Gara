@@ -2,13 +2,12 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { TableColumn } from '../../../_models/FormField.model';
 import { VehicleDisplayRow, vehicleModel } from '../../../_models/vehicle.model';
 import { VehicleService } from '@df_services/vehicle.service';
-import { GaraService } from '@df_services/gara.service';
-import { GaraApiItem, GaraListApiResponse } from '../../../_models/gara.model';
-import { SelectedTenantService } from 'app/shared/services/select-tenant.service';
 import { GetParamRequest, PaginatedResponse } from 'app/_models/api.model';
 import { LoadingService } from 'app/shared/services/loading.service';
 import { ToastrService } from 'ngx-toastr';
 import { BaseListComponent } from 'app/shared/components/base-list.component';
+import { GarageSelectionEvent } from 'app/shared/components/garage-selector/garage-selector.component';
+import { UserService } from 'app/_services/user.service';
 
 @Component({
   selector: 'app-vehicle',
@@ -19,77 +18,35 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
   tableColumns: TableColumn[] = [
     { key: 'plate_number', label: 'PlateNumber', className: 'text-left', sortable: true },
     { key: 'model', label: 'Model', className: 'text-left', sortable: true },
-    { key: 'ownerName', label: 'Owner', className: 'text-left' },
+    { key: 'customerName', label: 'Customer', className: 'text-left' },
     { key: 'tenantName', label: 'Gara', className: 'text-left' },
     { key: 'createdAt', label: 'EntryDate', className: 'text-left', sortable: true },
     { key: 'all', label: 'All', className: 'text-right' },
     { key: 'actions', label: 'Actions', className: 'text-right' }
   ];
-
-
-  garas: GaraApiItem[] = [];
-  selectedGarage: string | number = 'all';
-  isGarageMenuOpen = false;
+  selectedGaraId: string | number = 'all';
+  userRole = this.userService.getRole();
 
   constructor(
     private vehicleService: VehicleService,
-    private garaService: GaraService,
     public loadingService: LoadingService,
     cdr: ChangeDetectorRef,
-    public toastr: ToastrService,
-    private selectedTenant: SelectedTenantService
+    private userService: UserService,
+    public toastr: ToastrService
   ) {
     super(cdr);
     this.sortColumn = 'createdAt';
     this.sortOrder = 'asc';
   }
 
-
-  get selectedGarageLabel(): string {
-    if (this.selectedGarage === 'all') {
-      return 'All';
-    }
-    const found = this.garas.find(gara => gara.tenant_id === this.selectedGarage);
-    return found ? found.name : 'All';
-  }
-
   ngOnInit(): void {
-    this.loadGaras();
-    const initTenant = this.selectedTenant.getTenantId();
-    this.selectedGarage = initTenant != null ? initTenant : 'all';
     this.loadData();
   }
 
-  selectGarage(garage: GaraApiItem | { value: 'all', label: string }): void {
-    if ('tenant_id' in garage) {
-      this.selectedGarage = garage.tenant_id;
-    } else {
-      this.selectedGarage = garage.value;
-    }
-    this.selectedTenant.setTenantId(this.selectedGarage === 'all' ? null : Number(this.selectedGarage), { syncUrl: true });
+  onGaraSelected(event: GarageSelectionEvent): void {
+    this.selectedGaraId = event.garaId;
     this.currentPage = 1;
     this.loadData();
-    this.isGarageMenuOpen = false;
-  }
-
-  loadGaras(): void {
-    this.garaService.getAllGara().subscribe({
-      next: (res: GaraListApiResponse) => {
-        this.garas = Array.isArray(res) ? res : (res.data || []);
-        const hasSelected =
-          this.selectedGarage === 'all' ||
-          this.garas.some(gara => gara.tenant_id === this.selectedGarage);
-        if (!hasSelected) {
-          this.selectedGarage = 'all';
-          this.selectedTenant.setTenantId(null, { syncUrl: true });
-        }
-      },
-      error: () => {
-        this.garas = [];
-        this.selectedGarage = 'all';
-        this.selectedTenant.setTenantId(null, { syncUrl: true });
-      }
-    });
   }
 
   loadData(): void {
@@ -100,18 +57,18 @@ export class VehicleListComponent extends BaseListComponent<VehicleDisplayRow> i
       sort: this.sortColumn,
       order: this.sortOrder,
       search: this.searchText.trim() || undefined,
-      tenant_id: this.selectedGarage !== 'all' ? this.selectedGarage : undefined
+      tenant_id: this.selectedGaraId !== 'all' ? this.selectedGaraId : undefined
     };
     this.vehicleService.getPaginated(params).subscribe({
       next: (res: PaginatedResponse<vehicleModel>) => {
         this.loadingService.hide();
-        this.totalItems = res.totalCount;
+        this.totalItems = res.data.totalCount;
         this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.displayData = res.data.map(vehicle => ({
+        this.displayData = res.data.rows.map(vehicle => ({
           vehicle_id: vehicle.vehicle_id,
           plate_number: vehicle.plate_number,
           model: `${vehicle.make} ${vehicle.model}`,
-          ownerName: vehicle.customers?.full_name || 'Không rõ',
+          customerName: vehicle.customers?.full_name || 'Không rõ',
           tenantName: vehicle.tenant?.name || 'Không rõ',
           createdAt: vehicle.createdAt ? this.formatDateDDMMYYYY(vehicle.createdAt) : ''
         }));

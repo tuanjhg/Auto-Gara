@@ -8,26 +8,29 @@ import {
     HttpErrorResponse,
     HttpResponse
 } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, finalize, tap, switchMap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { LoginService } from '@df_services/login.service';
-import { LoadingService } from 'app/shared/services/loading.service';
+
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
-    private loadingRequests = new Set<string>();
 
     constructor(
         private router: Router,
-        private loginService: LoginService,
-        private loadingService: LoadingService
-    ) {}
+        private loginService: LoginService
+    ) { }
 
     intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-        this.startLoading(request.url);
-        this.loadingService.show();
-        const modifiedRequest = this.addCommonHeaders(request);
+        const isLoginOrRefresh =
+            request.url.includes('/login') || request.url.includes('/refresh-token');
+        let modifiedRequest = request;
+        const token = this.getAuthToken();
+        if (token && !isLoginOrRefresh) {
+            modifiedRequest = this.addAuthorizationHeader(request, token);
+        }
+
         return next.handle(modifiedRequest).pipe(
             tap((event) => {
                 if (event instanceof HttpResponse && !environment.production) {
@@ -36,37 +39,29 @@ export class ApiInterceptor implements HttpInterceptor {
             }),
             catchError((error: HttpErrorResponse) => {
                 if (error.status === 401) {
-                    return this.handleUnauthorizedWithRefresh(request, next);
+                    const refreshToken = localStorage.getItem('refreshToken');
+                    if (!isLoginOrRefresh && refreshToken && refreshToken.trim() !== '') {
+                        return this.handleUnauthorizedWithRefresh(request, next);
+                    } else {
+                        this.handleUnauthorized();
+                        return throwError(() => ({ status: 401, userMessage: 'Session expired. Please login again.' }));
+                    }
                 }
-                if(error.status === 500) {
+                if (error.status === 500) {
                     this.router.navigate(['/error']);
                     return throwError(() => error);
                 }
                 return this.handleErrorResponse(error);
-            }),
-            finalize(() => {
-                this.stopLoading(request.url);
-                this.loadingService.hide();
             })
         );
     }
 
-    private addCommonHeaders(request: HttpRequest<unknown>): HttpRequest<unknown> {
-        let headers = request.headers;
-
-        if (!headers.has('Content-Type') && !(request.body instanceof FormData)) {
-            headers = headers.set('Content-Type', 'application/json');
-        }
-
-        if (!headers.has('Accept')) {
-            headers = headers.set('Accept', 'application/json');
-        }
-
-        const token = this.getAuthToken();
-        if (token && !headers.has('Authorization')) {
-            headers = headers.set('Authorization', `Bearer ${token}`);
-        }
-        return request.clone({ headers });
+    private addAuthorizationHeader(request: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
+        return request.clone({
+            setHeaders: {
+                Authorization: `Bearer ${token}`
+            }
+        });
     }
 
     private logSuccessfulRequest(response: HttpResponse<unknown>): void {
@@ -100,10 +95,7 @@ export class ApiInterceptor implements HttpInterceptor {
     private handleUnauthorized(): void {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        localStorage.removeItem('iduser');
-        localStorage.removeItem('datasession');
-        localStorage.removeItem('typeuser');
-        localStorage.removeItem('isadmin');
+        localStorage.removeItem('role');
 
         this.router.navigate(['/login'], {
             queryParams: { returnUrl: this.router.url }
@@ -113,9 +105,15 @@ export class ApiInterceptor implements HttpInterceptor {
     private handleUnauthorizedWithRefresh(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
         return this.loginService.refreshToken().pipe(
             switchMap((res) => {
-                if (res && res.accessToken) {
-                    localStorage.setItem('accessToken', res.accessToken);
-                    const newRequest = this.addCommonHeaders(request);
+                if (res && res.accessToken && res.refreshToken) {
+                    try {
+                        localStorage.setItem('accessToken', res.accessToken);
+                        localStorage.setItem('refreshToken', res.refreshToken);
+                    } catch (e) {
+                        this.handleUnauthorized();
+                        return throwError(() => ({ status: 401, userMessage: 'Session expired. Please login again.' }));
+                    }
+                    const newRequest = this.addAuthorizationHeader(request, res.accessToken);
                     return next.handle(newRequest);
                 } else {
                     this.handleUnauthorized();
@@ -131,13 +129,5 @@ export class ApiInterceptor implements HttpInterceptor {
 
     private getAuthToken(): string | null {
         return localStorage.getItem('accessToken');
-    }
-
-    private startLoading(url: string): void {
-        this.loadingRequests.add(url);
-    }
-
-    private stopLoading(url: string): void {
-        this.loadingRequests.delete(url);
     }
 }

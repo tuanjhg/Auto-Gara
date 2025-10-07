@@ -111,9 +111,9 @@ export class UserListComponent implements OnInit {
     this.userService.getPaginated(params).subscribe({
       next: (res: PaginatedResponse<UserModel>) => {
         this.loadingService.hide();
-        this.totalItems = res.totalCount;
+        this.totalItems = res.data.totalCount;
         this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-        this.displayData = res.data.map(user => ({
+        this.displayData = res.data.rows.map(user => ({
           user_id: user.id,
           username: user.username || user.email || `User${user.id}`,
           full_name: user.full_name,

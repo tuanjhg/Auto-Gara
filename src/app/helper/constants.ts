@@ -258,3 +258,10 @@ export const listDateWithCountry = {
     'Greenland': 'DD-MM-YYYY',
     'Mexico': 'DD/MM/YYYY'
 };
+
+export enum Role {
+    Admin = 'admin',
+    Owner = 'owner',
+    Mechanic = 'mechanic',
+    Accountant = 'accountant'
+}

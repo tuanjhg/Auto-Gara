@@ -12,7 +12,7 @@ export interface LoginResponse {
     message?: string;
     success?: boolean;
     accessToken: string;
-    refreshToken?: string;
+    refreshToken: string;
 }
 
 export type loginModel = LoginResponse;

@@ -2,7 +2,8 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AddGaralModel, GaraAddField } from '@df_models/gara.model';
-import { UserListApiResponse, UserModel } from '@df_models/user.model';
+import { UserModel } from '@df_models/user.model';
+import { PaginatedResponse } from '@df_models/api.model';
 import { GaraService } from '@df_services/gara.service';
 import { UserService } from '@df_services/user.service';
 import { CreateGaraSchema } from '@df_validators/formSchemas/create-gara.schema';
@@ -26,15 +27,15 @@ export class AddGaraComponent implements OnInit {
         { label: 'Address', name: 'address', type: 'text', placeholder: 'Enter gara address', require: true },
         { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Status', require: true },
     ];
-    constructor(private fb: FormBuilder, private garaServive: GaraService, private userService: UserService, private toastr: ToastrService, private router: Router) {}
+    constructor(private fb: FormBuilder, private garaServive: GaraService, private userService: UserService, private toastr: ToastrService, private router: Router) { }
     ngOnInit(): void {
         this.formAdd = buildFormGroup(this.fb, CreateGaraSchema);
         this.loadOwners();
     }
     loadOwners(): void {
         this.userService.getPaginated({ hasTenant: false }).subscribe({
-            next: (res: UserListApiResponse) => {
-                const userList = res.data;
+            next: (res: PaginatedResponse<UserModel>) => {
+                const userList = res.data.rows;
                 const ownerOptions = userList.map(user => ({
                     label: `${user.full_name}`,
                     value: user.id,

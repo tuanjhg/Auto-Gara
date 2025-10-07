@@ -32,20 +32,20 @@ export class LoginService extends BaseService<LoginResponse> {
         };
 
         return this.call<LoginResponse>('POST', requestData, 'login');
-}
+    }
 
-     refreshToken(): Observable<{ accessToken: string }> {
+    refreshToken(): Observable<{ accessToken: string; refreshToken: string }> {
         const refreshToken = localStorage.getItem('refreshToken') || '';
-        return this.httpClient.post<{ accessToken: string }>(
+        return this.httpClient.post<{ accessToken: string; refreshToken: string }>(
             `${this.baseUrl}/${this.endPoint}/refresh-token`,
             { refreshToken }
         );
     }
     logout(): void {
         const refreshToken = localStorage.getItem('refreshToken') || '';
-        if(!refreshToken){
+        if (!refreshToken) {
             return;
         }
-        this.httpClient.post(`${this.baseUrl}/${this.endPoint}/logout`, {refreshToken});
+        this.httpClient.post(`${this.baseUrl}/${this.endPoint}/logout`, { refreshToken });
     }
 }
