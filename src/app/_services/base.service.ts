@@ -84,12 +84,7 @@ export class BaseService<T = unknown> {
         }
 
         return request.pipe(
-            map((response) => {
-                if (responseType === 'json') {
-                    return this.extractData<R>(response as ApiResponse<R> | R);
-                }
-                return response as R;
-            }),
+            map(response => response as R),
             catchError(this.handleError.bind(this))
         );
     }
@@ -171,17 +166,6 @@ export class BaseService<T = unknown> {
         }
 
         return httpHeaders;
-    }
-
-    protected extractData<U>(response: ApiResponse<U> | U): U {
-        if (response && typeof response === 'object' && 'data' in response) {
-            // Check if this is a PaginatedResponse (has data.totalCount)
-            if ('data' in response && response.data && typeof response.data === 'object' && 'totalCount' in response.data) {
-                return response as U; // Return full PaginatedResponse
-            }
-            return (response as ApiResponse<U>).data; // Return data property for regular ApiResponse
-        }
-        return response as U;
     }
 
     protected handleError(error: HttpErrorResponse): Observable<never> {

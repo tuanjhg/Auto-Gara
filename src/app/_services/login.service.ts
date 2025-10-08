@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { BaseService } from './base.service';
 import { Constants } from 'app/helper/constants';
 import { HttpClient } from '@angular/common/http';
-import { LoginResponse, LoginRequest } from '@df_models/login.model';
+import { LoginResponse, LoginRequest, ApiLoginResponse } from '@df_models/login.model';
 import { ApiRequestData } from '../_models/api.model';
 
 @Injectable({
@@ -21,7 +21,7 @@ export class LoginService extends BaseService<LoginResponse> {
     }
 
 
-    login(email: string, password: string): Observable<LoginResponse> {
+    login(email: string, password: string): Observable<ApiLoginResponse> {
         const loginData: LoginRequest = {
             email,
             password
@@ -31,7 +31,7 @@ export class LoginService extends BaseService<LoginResponse> {
             body: loginData
         };
 
-        return this.call<LoginResponse>('POST', requestData, 'login');
+        return this.call<ApiLoginResponse>('POST', requestData, 'login');
     }
 
     refreshToken(): Observable<{ accessToken: string; refreshToken: string }> {
