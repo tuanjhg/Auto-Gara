@@ -4,7 +4,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PaginatedResponse } from '@df_models/api.model';
 import { CustomerApiItem } from '@df_models/customer.model';
-import { GaraApiItem, GaraListApiResponse } from '@df_models/gara.model';
+import { GaraApiItem } from '@df_models/gara.model';
 import { vehicleModel } from '@df_models/vehicle.model';
 import { AddWorkOrderField, CreateWorkOrder } from '@df_models/work-order.model';
 import { CustomerService } from '@df_services/customer.service';
@@ -83,8 +83,8 @@ export class AddWorkOrderComponent implements OnInit {
     }
     loadgara(): void {
         this.garaService.getPaginated().subscribe({
-            next: (res: GaraListApiResponse) => {
-                const garaList = res.data || [];
+            next: (res: PaginatedResponse<GaraApiItem>) => {
+                const garaList = res.data.rows || [];
                 this.garas = garaList.filter(item => item.is_active === true);
                 const garaOptions = this.garas.map(gara => ({
                     label: `${gara.name}`,
@@ -107,7 +107,7 @@ export class AddWorkOrderComponent implements OnInit {
     loadVehiclesByCustomer(customerId: number) {
         this.vehicleService.getPaginated().subscribe({
             next: (list: PaginatedResponse<vehicleModel>) => {
-                const opts = list.data.map(v => ({ label: v.plate_number, value: v.vehicle_id }));
+                const opts = list.data.rows .map(v => ({ label: v.plate_number, value: v.vehicle_id }));
                 this.updateFieldOptions('vehicle_id', opts);
                 this.formAdd.get('vehicle_id')?.enable({ emitEvent: false });
             },

@@ -7,7 +7,7 @@ import { SelectedTenantService } from '@shared/services/select-tenant.service';
 import { WorkOrderDisplayRow } from '@df_models/work-order.model';
 import { BaseListComponent } from '@shared/components/base-list.component';
 import { GaraService } from '@df_services/gara.service';
-import { GaraApiItem, GaraListApiResponse } from '@df_models/gara.model';
+import { GaraApiItem } from '@df_models/gara.model';
 import { PaginatedResponse } from '@df_models/api.model';
 
 @Component({
@@ -109,8 +109,8 @@ export class WorkOrderListComponent extends BaseListComponent<WorkOrderDisplayRo
     }
     loadGaras(): void {
         this.garaService.getAllGara().subscribe({
-            next: (res: GaraListApiResponse) => {
-                this.garas = Array.isArray(res) ? res : res.data || [];
+            next: (res: PaginatedResponse<GaraApiItem>) => {
+                this.garas = Array.isArray(res) ? res : res.data.rows || [];
                 if (!this.selectedGarage) {
                     this.selectedGarage = 'all';
                     this.selectedTenant.setTenantId(null, { syncUrl: true });
