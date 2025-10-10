@@ -9,12 +9,11 @@ import { BaseListComponent } from '@shared/components/base-list.component';
 import { GaraService } from '@df_services/gara.service';
 import { GaraApiItem } from '@df_models/gara.model';
 import { PaginatedResponse } from '@df_models/api.model';
-
 @Component({
     selector: 'app-order',
     templateUrl: './work-order-list.component.html',
 })
-export class WorkOrderListComponent extends BaseListComponent<WorkOrderDisplayRow> implements OnInit {
+export class WorkOrderListComponent extends BaseListComponent<WorkerOrderApiItem> implements OnInit {
     pageSize: number = 10;
     currentPage: number = 1;
     isAddModalOpen: boolean = false;
@@ -31,9 +30,9 @@ export class WorkOrderListComponent extends BaseListComponent<WorkOrderDisplayRo
 
     tableColumns = [
         { key: 'work_order_code', label: 'Order Code', className: 'text-left', sortable: true },
-        { key: 'vehicle', label: 'Vehicle', className: 'text-left', sortable: false },
-        { key: 'tenant', label: 'Tenant', className: 'text-left', sortable: false },
-        { key: 'customer', label: 'Customer', className: 'text-left', sortable: false },
+        { key: 'vehicle.plate_number', label: 'Vehicle', className: 'text-left', sortable: false },
+        { key: 'tenant.name', label: 'Tenant', className: 'text-left', sortable: false },
+        { key: 'customer.full_name', label: 'Customer', className: 'text-left', sortable: false },
         { key: 'initial_notes', label: 'Description', className: 'text-left', sortable: false },
         { key: 'estimated_completion_date', label: 'Delivery Date', className: 'text-left', sortable: true },
         { key: 'status', label: 'Status', className: 'text-left', sortable: false },
@@ -61,51 +60,37 @@ export class WorkOrderListComponent extends BaseListComponent<WorkOrderDisplayRo
     }
 
     ngOnInit(): void {
-        // this.loadGaras();
+        this.loadGaras();
         const initTenant = this.selectedTenant.getTenantId();
         this.selectedGarage = initTenant != null ? initTenant : 'all';
         this.loadData();
     }
     loadData(): void {
-        // this.loadingService.show();
-        // this.workOderService
-        //     .getPaginated({
-        //         pageNumber: this.currentPage,
-        //         rowsPerPage: this.pageSize,
-        //         sort: this.sortColumn,
-        //         order: this.sortOrder,
-        //         search: this.searchText.trim() || undefined,
-        //         tenant_id: this.selectedGarage !== 'all' ? this.selectedGarage : undefined,
-        //     })
-        //     .subscribe({
-        //         next: (res: PaginatedResponse<WorkerOrderApiItem>) => {
-        //             const total = res.totalCount;
-        //             this.totalPages = Math.ceil(total / this.pageSize);
-        //             this.displayData = res.data.map(workOrder => ({
-        //                 work_order_id: workOrder.work_order_id,
-        //                 work_order_code: workOrder.work_order_code,
-        //                 status: workOrder.status,
-        //                 initial_notes: workOrder.initial_notes,
-        //                 estimated_completion_date: workOrder.estimated_completion_date,
-        //                 vehicle: workOrder.vehicle?.plate_number || 'None',
-        //                 customer: workOrder.customer?.full_name || 'None',
-        //                 tenant: workOrder.tenant?.name || 'None',
-        //             }));
-        //             this.updatePaginationArray();
-        //             this.cdr.detectChanges();
-        //             this.loadingService.hide();
-        //         },
-        //     });
-        this.displayData = workOrders.map(workOrder => ({
-            work_order_id: workOrder.id,
-            work_order_code: workOrder.work_order_code,
-            status: workOrder.status,
-            initial_notes: workOrder.initial_notes,
-            estimated_completion_date: workOrder.estimated_completion_date,
-            vehicle: workOrder.vehicle || 'None',
-            customer: workOrder.customer || 'None',
-            tenant: workOrder.tenant || 'None',
-        }));
+        this.loadingService.show();
+        this.workOderService
+            .getPaginated({
+                page_number: this.currentPage,
+                rows_per_page: this.pageSize,
+                sort: this.sortColumn,
+                order: this.sortOrder,
+                search: this.searchText.trim() || undefined,
+                tenant_id: this.selectedGarage !== 'all' ? this.selectedGarage : undefined,
+            })
+            .subscribe({
+                next: (res: PaginatedResponse<WorkerOrderApiItem>) => {
+                    const total = res.data.totalCount;
+                    this.totalPages = Math.ceil(total / this.pageSize);
+                    this.displayData = res.data.rows;
+                    this.updatePaginationArray();
+                    this.cdr.detectChanges();
+                    this.loadingService.hide();
+                },
+                error: (err) => {
+                    const msg = err.error.errors.join('\n');
+                    this.toastr.error(msg, 'failed!');
+                    this.loadingService.hide();
+                },
+            });
     }
     loadGaras(): void {
         this.garaService.getAllGara().subscribe({
@@ -143,6 +128,10 @@ export class WorkOrderListComponent extends BaseListComponent<WorkOrderDisplayRo
     }
     openAdd(): void {
         this.addOpen = true;
+    }
+    onAddClosed(): void {
+        this.addOpen = false;
+        this.loadData();
     }
     selectGarage(garage: GaraApiItem | { value: 'all'; label: string }): void {
         if ('tenant_id' in garage) {

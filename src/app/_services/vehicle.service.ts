@@ -1,47 +1,21 @@
 import { Injectable } from '@angular/core';
 import { VehicleDisplayRow, vehicleModel } from '@df_models/vehicle.model';
-import { FormField } from '@df_models/FormField.model';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BaseService } from './base.service';
 import { Observable } from 'rxjs';
 import { Constants } from 'app/helper/constants';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root',
 })
 export class VehicleService extends BaseService {
-  displayData: VehicleDisplayRow[] = [];
+    displayData: VehicleDisplayRow[] = [];
 
-  constructor(
-    protected httpClient: HttpClient
-  ) {
-    super(
-      httpClient,
-      Constants.BASE_API_URL,
-      Constants.END_POINT.vehicle
-    );
-  }
+    constructor(protected httpClient: HttpClient) {
+        super(httpClient, Constants.BASE_API_URL, Constants.END_POINT.vehicle);
+    }
 
-  getVehicleDetail(vehicleId: number): Observable<vehicleModel> {
-    return this.httpClient.get<vehicleModel>(
-      `${this.baseUrl}/${this.endPoint}/${vehicleId}`
-    );
-  }
-
-  createFormSections(fields: FormField[]): any[] {
-    const sectionConfig = {
-      vehicle: { title: 'Vehicle Information', fields: [] as FormField[] },
-      owner: { title: 'Owner Details', fields: [] as FormField[] },
-      status: { title: 'Initial Status', fields: [] as FormField[] },
-    };
-
-    fields.forEach((field) => {
-      if (field.name && sectionConfig.hasOwnProperty(field.section)) {
-        (sectionConfig as any)[field.section].fields.push(field);
-      }
-    });
-
-    return Object.values(sectionConfig);
-  }
-
+    getVehicleDetail(vehicleId: number): Observable<vehicleModel> {
+        return this.httpClient.get<vehicleModel>(`${this.baseUrl}/${this.endPoint}/${vehicleId}`);
+    }
 }

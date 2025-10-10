@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { PaginatedResponse } from '@df_models/api.model';
 import { CustomerApiItem } from '@df_models/customer.model';
 import { GaraApiItem } from '@df_models/gara.model';
+import { UserInfoToken } from '@df_models/login.model';
 import { vehicleModel } from '@df_models/vehicle.model';
 import { AddWorkOrderField, CreateWorkOrder } from '@df_models/work-order.model';
 import { CustomerService } from '@df_services/customer.service';
@@ -29,7 +30,7 @@ export class AddWorkOrderComponent implements OnInit {
     garas: GaraApiItem[];
     previewUrl: string | null = null;
     isDragOver = false;
-    userInfo: { role: string; id: number };
+    userInfo: UserInfoToken;
     constructor(
         private formBuilder: FormBuilder,
         private garaService: GaraService,
@@ -40,10 +41,8 @@ export class AddWorkOrderComponent implements OnInit {
     ) {}
     ngOnInit(): void {
         this.formAdd = buildFormGroup(this.formBuilder, createWorkOrderSchema);
-        this.userInfo = {
-            id: Number(localStorage.getItem('id') ?? 0),
-            role: localStorage.getItem('role') ?? '',
-        };
+        const getUsertoken = localStorage.getItem('user');
+        this.userInfo = JSON.parse(getUsertoken);
         this.fields = [
             { label: 'Gara', name: 'tenant_id', type: 'select', placeholder: 'Select Gara', require: true },
             { label: 'Customer', name: 'customer_id', type: 'select', placeholder: 'Select Customer', require: true },
@@ -54,14 +53,13 @@ export class AddWorkOrderComponent implements OnInit {
             { label: 'Total Paid', name: 'total_quote_price', type: 'number', placeholder: 'Enter Number', require: true },
             { label: 'Quoted Price', name: 'total_paid_amount', type: 'number', placeholder: 'Enter Number', require: true },
         ];
-        console.log(this.userInfo);
         this.formAdd.patchValue({
             created_by_user_id: this.userInfo.id,
         });
-        this.loadgara();
+        this.loadgarages();
         this.formAdd.get('customer_id')?.disable({ emitEvent: false });
         this.formAdd.get('vehicle_id')?.disable({ emitEvent: false });
-        this.loadgara();
+        this.loadgarages();
         this.formAdd.get('tenant_id')?.valueChanges.subscribe((tenant_id) => {
             this.formAdd.patchValue({ customer_id: null, vehicle_id: null }, { emitEvent: false });
             this.formAdd.get('customer_id')?.disable({ emitEvent: false });
@@ -72,16 +70,16 @@ export class AddWorkOrderComponent implements OnInit {
                 this.loadCustomersByTenant(tenant_id);
             }
         });
-        this.formAdd.get('customer_id')?.valueChanges.subscribe((customerId) => {
+        this.formAdd.get('customer_id')?.valueChanges.subscribe((customer_id) => {
             this.formAdd.patchValue({ vehicle_id: null }, { emitEvent: false });
             this.formAdd.get('vehicle_id')?.disable({ emitEvent: false });
             this.updateFieldOptions('vehicle_id', []);
-            if (customerId) {
-                this.loadVehiclesByCustomer(customerId);
+            if (customer_id) {
+                this.loadVehiclesByCustomer(customer_id);
             }
         });
     }
-    loadgara(): void {
+    loadgarages(): void {
         this.garaService.getPaginated().subscribe({
             next: (res: PaginatedResponse<GaraApiItem>) => {
                 const garaList = res.data.rows || [];
@@ -94,24 +92,24 @@ export class AddWorkOrderComponent implements OnInit {
             },
         });
     }
-    loadCustomersByTenant(tenantId: number) {
-        this.customerService.getCustomersByTenant(tenantId).subscribe({
-            next: (list: CustomerApiItem[]) => {
-                const opts = (list || []).map(c => ({ label: c.full_name, value: c.customer_id }));
+    loadCustomersByTenant(tenant_id: number) {
+        this.customerService.getPaginated({ tenant_id, is_active: true }).subscribe({
+            next: (list: PaginatedResponse<CustomerApiItem>) => {
+                const opts = list.data.rows.map(c => ({ label: c.full_name, value: c.customer_id }));
                 this.updateFieldOptions('customer_id', opts);
                 this.formAdd.get('customer_id')?.enable({ emitEvent: false });
             },
-            error: () => this.toastrService.error('Failed to load customers', 'Error'),
+            error: err => this.toastrService.error(err.error.errors, 'Error'),
         });
     }
-    loadVehiclesByCustomer(customerId: number) {
-        this.vehicleService.getPaginated().subscribe({
+    loadVehiclesByCustomer(customer_id: number) {
+        this.vehicleService.getPaginated({ customer_id }).subscribe({
             next: (list: PaginatedResponse<vehicleModel>) => {
-                const opts = list.data.rows .map(v => ({ label: v.plate_number, value: v.vehicle_id }));
+                const opts = list.data.rows.map(v => ({ label: v.plate_number, value: v.vehicle_id }));
                 this.updateFieldOptions('vehicle_id', opts);
                 this.formAdd.get('vehicle_id')?.enable({ emitEvent: false });
             },
-            error: () => this.toastrService.error('Failed to load vehicles', 'Error'),
+            error: err => this.toastrService.error(err.error.errors, 'Error'),
         });
     }
     onSubmit(): void {
@@ -123,7 +121,7 @@ export class AddWorkOrderComponent implements OnInit {
                     this.close();
                 },
                 error: (err) => {
-                    const msg = err.error.error.join('\n');
+                    const msg = err.error.errors.join('\n');
                     this.toastrService.error(msg, 'failed!');
                 },
             });
