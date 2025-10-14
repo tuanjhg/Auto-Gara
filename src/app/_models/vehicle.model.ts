@@ -1,4 +1,4 @@
-import {FormField} from './FormField.model';
+import { FormField } from './FormField.model';
 export interface vehicleModel {
   vehicle_id?: number;
   tenant_id: number;
@@ -30,7 +30,7 @@ export interface VehicleDisplayRow {
   vehicle_id: number;
   plate_number: string;
   model: string;
-  ownerName: string;
+  customerName: string;
   tenantName: string;
   createdAt: string;
 }
@@ -94,18 +94,19 @@ export const vehicleFormFields: FormField[] = [
     placeholder: 'e.g., 12345',
     section: 'vehicle',
   },
-    {
+  {
     name: 'tenant_id',
     controlName: 'tenant',
     label: 'Tenant',
     type: 'select',
+    placeholder: 'Select Tenant',
     required: true,
     section: 'owner',
   },
   {
     name: 'customer_id',
-    controlName: 'owner',
-    label: 'Owner',
+    controlName: 'customer',
+    label: 'Customer',
     type: 'select',
     placeholder: 'Select customer',
     required: true,

@@ -13,7 +13,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class VehicleDetailComponent implements OnInit {
 
-  @Input() vehicleId: number ;
+  @Input() vehicleId: number;
 
   @Output() closeModalRequest = new EventEmitter<void>();
   @Output() editRequest = new EventEmitter<number>();
@@ -32,7 +32,7 @@ export class VehicleDetailComponent implements OnInit {
 
   tenants: GaraModel[] = [];
   owners: Customer[] = [];
-  vehicle: VehicleDetail ;
+  vehicle: VehicleDetail;
   originalVehicle: VehicleDetail;
   imageUploadFiles: File[] = [];
 
@@ -84,8 +84,8 @@ export class VehicleDetailComponent implements OnInit {
     }
   }
 
-   close(): void {
-      this.closeModalRequest.emit();
+  close(): void {
+    this.closeModalRequest.emit();
   }
 
   editVehicle(): void {
@@ -106,7 +106,7 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   async confirmSave(): Promise<void> {
-    if (!this.vehicle || !this.validateForm()) {return;}
+    if (!this.vehicle || !this.validateForm()) { return; }
 
     this.isSaving = true;
     this.loadingService.show();
@@ -145,7 +145,7 @@ export class VehicleDetailComponent implements OnInit {
     return !!(control && control.valid && (control.dirty || control.touched));
   }
 
-    confirmDelete(): void {
+  confirmDelete(): void {
     this.showConfirmDelete = true;
   }
 
@@ -206,7 +206,7 @@ export class VehicleDetailComponent implements OnInit {
   }
 
   private updateFormValues(): void {
-    if (!this.vehicle || !this.form) {return;}
+    if (!this.vehicle || !this.form) { return; }
 
     this.formFields.forEach((field) => {
       const controlName = field.controlName || field.name;

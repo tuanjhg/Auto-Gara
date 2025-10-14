@@ -1,11 +1,15 @@
 <div *ngIf="show" class="fixed inset-0 z-50 flex items-center justify-center">
     <div class="absolute inset-0 bg-black/50" (click)="close()"></div>
-    <div class="relative z-10 rounded-lg bg-gray-100 p-6 shadow-xl" [ngStyle]="{'width': width, 'max-width': maxWidth, 'max-height': maxHeight, 'overflow-y': 'auto'}">
+    <div class="relative z-10 rounded-lg bg-gray-100 p-6 shadow-xl"
+        [ngStyle]="{'width': width, 'max-width': maxWidth, 'max-height': maxHeight, 'overflow-y': 'auto'}">
         <header class="flex items-center justify-between border-b border-gray-300 pb-3 mb-4">
             <h2 class="text-2xl font-extrabold text-[#DEE33E]">{{ title }}</h2>
-            <button *ngIf="showClose" class="mb-0.5" (click)="close()">
-                <mat-icon svgIcon="exit_to_app"></mat-icon>
-            </button>
+            <div class="flex items-center gap-2 ml-auto">
+                <ng-content select="[dialog-header]"></ng-content>
+                <button *ngIf="showClose" class="mb-0.5" (click)="close()">
+                    <mat-icon svgIcon="exit_to_app"></mat-icon>
+                </button>
+            </div>
         </header>
         <main>
             <ng-content select="[dialog-content]"></ng-content>

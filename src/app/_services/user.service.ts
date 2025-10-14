@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { BaseService } from './base.service';
 import { Constants } from 'app/helper/constants';
 import { UserDetail, UserModel, UserQueryParams } from '@df_models/user.model';
-import { GetParamRequest, PaginatedResponse } from '@df_models/api.model';
+import { GetParamRequest, PaginatedResponse, ApiResponse } from '@df_models/api.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,12 +19,12 @@ export class UserService extends BaseService {
     );
   }
 
-  getAllUser(): Observable<{ data: UserModel[] }> {
+  getAllUser(): Observable<ApiResponse<{ rows: UserModel[] }>> {
     const token = localStorage.getItem('token');
     const headers = {
       Authorization: `Bearer ${token}`
     };
-    return this.http.get<{ data: UserModel[] }>(`${this.baseUrl}/${this.endPoint}`, { headers });
+    return this.http.get<ApiResponse<{ rows: UserModel[] }>>(`${this.baseUrl}/${this.endPoint}`, { headers });
   }
 
   getPaginated(params: GetParamRequest): Observable<PaginatedResponse<UserModel>> {
@@ -92,7 +92,7 @@ export class UserService extends BaseService {
     };
     return this.http.delete<{ message: string }>(`${this.baseUrl}/${this.endPoint}/${id}`, { headers });
   }
-  getUserFilter(params?: UserQueryParams): Observable<{ data: UserModel[] }> {
+  getUserFilter(params?: UserQueryParams): Observable<ApiResponse<{ rows: UserModel[] }>> {
     const token = localStorage.getItem('accessToken');
     const headers = {
       Authorization: `Bearer ${token}`
@@ -132,6 +132,11 @@ export class UserService extends BaseService {
         httpParams = httpParams.set('dateTo', params.dateTo);
       }
     }
-    return this.http.get<{ data: UserModel[] }>(`${this.baseUrl}/${this.endPoint}`,{ headers, params: httpParams  });
+    return this.http.get<ApiResponse<{ rows: UserModel[] }>>(`${this.baseUrl}/${this.endPoint}`, { headers, params: httpParams });
   }
+
+  getRole(): string {
+    return localStorage.getItem('role') || '';
+  }
+
 }

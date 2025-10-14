@@ -3,7 +3,6 @@ export interface LoginRequest {
     password: string;
 }
 
-
 export interface LoginResponse {
     id: number;
     email: string;
@@ -12,7 +11,18 @@ export interface LoginResponse {
     message?: string;
     success?: boolean;
     accessToken: string;
-    refreshToken?: string;
+    refreshToken: string;
+}
+export interface UserInfoToken {
+    id: number;
+    email: string;
+    role: string;
+}
+
+export interface ApiLoginResponse {
+    data: LoginResponse;
+    statusCode: number;
+    msg: string;
 }
 
 export type loginModel = LoginResponse;

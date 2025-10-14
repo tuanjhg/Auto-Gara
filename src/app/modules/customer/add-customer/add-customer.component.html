@@ -1,66 +1,66 @@
-<app-common-dialog
-    [title]="'Add Customer'"
-    [show]="true"
-    [showClose]="true"
-    (closed)="close()"
-    [width]="'54vw'"
-    [maxWidth]="'1000px'"
-    [maxHeight]="'95vh'"
->
-    <form id="addCustomerForm" [formGroup]="formAdd" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-6" dialog-content>
+<app-common-dialog [title]="'Add Customer'" [show]="true" [showClose]="true" (closed)="close()" [width]="'54vw'"
+    [maxWidth]="'1000px'" [maxHeight]="'95vh'">
+    <form id="addCustomerForm" [formGroup]="formAdd" (ngSubmit)="onSubmit()"
+        class="grid grid-cols-1 md:grid-cols-2 gap-6" dialog-content>
         <div *ngFor="let field of fields" class="flex flex-col">
             <label class="text-sm font-medium text-gray-600 mb-1">
                 {{ field.label }} <span *ngIf="field.require" class="text-red-500"> *</span>
             </label>
             <ng-container [ngSwitch]="field.type">
                 <div *ngSwitchCase="'date'" class="relative w-full flex items-center">
-                    <input matInput 
-                        [matDatepicker]="picker" 
-                        [formControlName]="field.name" 
+                    <input matInput [matDatepicker]="picker" [formControlName]="field.name"
                         [placeholder]="field.placeholder"
                         class="form-input w-full border rounded-2xl px-3 py-2 pr-10 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
                         [class.border-red-500]="showError(field.name)"
                         [class.border-green-500]="!showError(field.name) && formAdd.get(field.name)?.value">
-                    <mat-datepicker-toggle matSuffix [for]="picker" class="absolute right-0 mr-2 text-gray-400"></mat-datepicker-toggle>
+                    <mat-datepicker-toggle matSuffix [for]="picker"
+                        class="absolute right-0 mr-2 text-gray-400"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
                 </div>
-                <input *ngSwitchCase="'text'" [formControlName]="field.name"
-                    [placeholder]="field.placeholder"
+                <input *ngSwitchCase="'text'" [formControlName]="field.name" [placeholder]="field.placeholder"
                     class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
                     [class.border-red-500]="showError(field.name)"
                     [class.border-green-500]="!showError(field.name) && formAdd.get(field.name)?.value" />
-                <textarea *ngSwitchCase="'textarea'" [formControlName]="field.name"
-                    [placeholder]="field.placeholder"
+                <textarea *ngSwitchCase="'textarea'" [formControlName]="field.name" [placeholder]="field.placeholder"
                     rows="4"
                     class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
                     [class.border-red-500]="showError(field.name)"
                     [class.border-green-500]="!showError(field.name) && formAdd.get(field.name)?.value"></textarea>
-                    <select *ngSwitchCase="'select'" [formControlName]="field.name"
-                    class="form-input border rounded-2xl px-3 py-2 font-medium border-gray-300 focus:ring-2 focus:ring-yellow-500 bg-white"
-                    [class.border-red-500]="showError(field.name)"
-                    [class.border-green-500]="!showError(field.name) && formAdd.get(field.name)?.value">
-                <option value="" disabled selected hidden>--Select--</option>
-                    <ng-container *ngIf="field.options && field.options.length > 0; else noOption">
-                        <option *ngFor="let option of field.options" [value]="option.value">{{ option.label }}</option>
-                    </ng-container>
-                    <ng-template #noOption>
-                        <option disabled>No option found</option>
-                    </ng-template>
-                </select>
-                    <div class="flex items-center gap-6" *ngIf="field.type === 'boolean'">
-                        
-                        <label class="inline-flex items-center gap-2"
-                            [ngClass]="'border-green-300 bg-green-50 text-green-800'">
-                            <input type="radio" [formControlName]="field.name" [value]="true" />
-                            <span class="font-semibold">Active</span>
-                        </label>
-
-                        <label class="inline-flex items-center gap-2"
-                            [ngClass]="'border-red-300 bg-red-50 text-red-800'">
-                            <input type="radio" [formControlName]="field.name" [value]="false" />
-                            <span class="font-semibold">Inactive</span>
-                        </label>
+                <div *ngSwitchCase="'select'">
+                    <div appearance="outline"
+                        class="w-full  font-medium  focus:ring-2 focus:ring-yellow-500 bg-white rounded-2xl border border-gray-300 px-3 py-1 min-h-0 h-[36px]">
+                        <mat-select [formControlName]="field.name" [panelClass]="'tw-select-panel'" disableRipple
+                            [placeholder]="field.placeholder" class="min-h-0 h-[36px] text-sm font-medium px-2 py-1">
+                            <mat-option>
+                                <ngx-mat-select-search [formControl]="garaSearchControl"
+                                    placeholderLabel="Search gara..."
+                                    class="rounded border border-gray-300 bg-gray-50 text-xs px-1.5 py-0.5 focus:ring-2 focus:ring-yellow-400 min-h-0 h-[28px]">
+                                </ngx-mat-select-search>
+                            </mat-option>
+                            <mat-option *ngIf="isGaraLoading" disabled class="text-center">
+                                <div class="flex items-center justify-center py-2">
+                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                                    <span class="ml-2 text-sm text-gray-500">Loading...</span>
+                                </div>
+                            </mat-option>
+                            <mat-option *ngFor="let option of filteredGaraList" [value]="option.tenant_id"
+                                class="text-sm font-medium min-h-0 h-[32px]">{{ option.name }}</mat-option>
+                        </mat-select>
                     </div>
+                </div>
+                <div class="flex items-center gap-6" *ngIf="field.type === 'boolean'">
+
+                    <label class="inline-flex items-center gap-2"
+                        [ngClass]="'border-green-300 bg-green-50 text-green-800'">
+                        <input type="radio" [formControlName]="field.name" [value]="true" />
+                        <span class="font-semibold">Active</span>
+                    </label>
+
+                    <label class="inline-flex items-center gap-2" [ngClass]="'border-red-300 bg-red-50 text-red-800'">
+                        <input type="radio" [formControlName]="field.name" [value]="false" />
+                        <span class="font-semibold">Inactive</span>
+                    </label>
+                </div>
             </ng-container>
             <p *ngIf="showError(field.name)" class="mt-1 text-xs text-red-600">
                 {{ getMsg(field.name,field.label) }}
@@ -77,14 +77,8 @@
             (click)="showConfirm = true">
             Save
         </button>
-        <app-confirm-model
-            [open]="showConfirm"
-            title="Add new customer?"
-            message="Are you sure you want to add this customer?"
-            confirmText="Agree"
-            cancelText="Cancel"
-            (confirmed)="onConfirmAddCustomer()"
-            (cancelled)="showConfirm = false"
-        ></app-confirm-model>
+        <app-confirm-model [open]="showConfirm" title="Add new customer?"
+            message="Are you sure you want to add this customer?" confirmText="Agree" cancelText="Cancel"
+            (confirmed)="onConfirmAddCustomer()" (cancelled)="showConfirm = false"></app-confirm-model>
     </div>
 </app-common-dialog>

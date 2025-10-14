@@ -84,12 +84,7 @@ export class BaseService<T = unknown> {
         }
 
         return request.pipe(
-            map((response) => {
-                if (responseType === 'json') {
-                    return this.extractData<R>(response as ApiResponse<R> | R);
-                }
-                return response as R;
-            }),
+            map(response => response as R),
             catchError(this.handleError.bind(this))
         );
     }
@@ -117,9 +112,7 @@ export class BaseService<T = unknown> {
     }
 
     getPaginated(params?: QueryParams): Observable<PaginatedResponse<T>> {
-        return this.call<PaginatedResponse<T>>('GET', { query: params }).pipe(
-            map(response => this.normalizePaginatedResponse<T>(response))
-        );
+        return this.call<PaginatedResponse<T>>('GET', { query: params });
     }
 
     getById(id: string | number): Observable<T> {
@@ -173,44 +166,6 @@ export class BaseService<T = unknown> {
         }
 
         return httpHeaders;
-    }
-
-    protected extractData<U>(response: ApiResponse<U> | U): U {
-        if (response && typeof response === 'object' && 'data' in response) {
-            if ('totalCount' in response) {
-                return response as U;
-            }
-            return (response as ApiResponse<U>).data;
-        }
-        return response as U;
-    }
-
-    protected normalizePaginatedResponse<U>(response: any): PaginatedResponse<U> {
-        if (response) {
-            return {
-                data: response.data || [],
-                totalCount: response.totalCount || 0
-            };
-        }
-
-        if (response && Array.isArray(response.data)) {
-            return {
-                data: response.data,
-                totalCount: response.totalCount || 0
-            };
-        }
-
-        if (Array.isArray(response)) {
-            return {
-                data: response,
-                totalCount: response.length
-            };
-        }
-
-        return {
-            data: [],
-            totalCount: 0
-        };
     }
 
     protected handleError(error: HttpErrorResponse): Observable<never> {

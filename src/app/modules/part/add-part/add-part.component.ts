@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { GaraApiItem, GaraListApiResponse } from '@df_models/gara.model';
+import { GaraApiItem } from '@df_models/gara.model';
+import { PaginatedResponse } from '@df_models/api.model';
 import { CreatePart, PartAddField, PartField } from '@df_models/part.model';
 import { GaraService } from '@df_services/gara.service';
 import { PartService } from '@df_services/part.service';
@@ -21,27 +22,27 @@ export class AddPartComponent implements OnInit {
     fields: PartAddField[];
     garas: GaraApiItem[];
 
-    constructor(private formBuilder: FormBuilder, private partService: PartService, private toastrService: ToastrService, private garaService: GaraService) {}
+    constructor(private formBuilder: FormBuilder, private partService: PartService, private toastrService: ToastrService, private garaService: GaraService) { }
 
     ngOnInit(): void {
         this.formAdd = buildFormGroup(this.formBuilder, createPartSchema);
         this.fields = [
-            { label: 'Part Name', name: 'name', type: 'text', placeholder: 'Enter Part Name',require: true },
-            { label: 'Part Code', name: 'part_number', type: 'number', placeholder: 'Enter Part Code',require: true },
-            { label: 'Price', name: 'default_price', type: 'number', placeholder: 'Enter Price',require: true },
-            { label: 'Cost price', name: 'cost_price', type: 'number', placeholder: 'Enter Cost Price',require: true },
-            { label: 'Available', name: 'stock_quantity', type: 'number', placeholder: 'Enter Inventory Quantity',require: true },
-            { label: 'Unit', name: 'unit', type: 'text', placeholder: 'Enter Unit',require: true },
-            { label: 'Supplier', name: 'supplier', type: 'text', placeholder: 'Enter Supplier',require: true },
-            { label: 'Gara', name: 'tenant_id', type: 'select', placeholder: 'Select Gara',require: true },
-            { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Choose Status',require: true },
+            { label: 'Part Name', name: 'name', type: 'text', placeholder: 'Enter Part Name', require: true },
+            { label: 'Part Code', name: 'part_number', type: 'number', placeholder: 'Enter Part Code', require: true },
+            { label: 'Price', name: 'default_price', type: 'number', placeholder: 'Enter Price', require: true },
+            { label: 'Cost price', name: 'cost_price', type: 'number', placeholder: 'Enter Cost Price', require: true },
+            { label: 'Available', name: 'stock_quantity', type: 'number', placeholder: 'Enter Inventory Quantity', require: true },
+            { label: 'Unit', name: 'unit', type: 'text', placeholder: 'Enter Unit', require: true },
+            { label: 'Supplier', name: 'supplier', type: 'text', placeholder: 'Enter Supplier', require: true },
+            { label: 'Gara', name: 'tenant_id', type: 'select', placeholder: 'Select Gara', require: true },
+            { label: 'Status', name: 'is_active', type: 'boolean', placeholder: 'Choose Status', require: true },
         ];
         this.loadgara();
     }
     loadgara(): void {
         this.garaService.getPaginated().subscribe({
-            next: (res: GaraListApiResponse) => {
-                const garaList = res.data || [];
+            next: (res: PaginatedResponse<GaraApiItem>) => {
+                const garaList = res.data?.rows || [];
                 this.garas = garaList.filter(item => item.is_active === true);
                 const garaOptions = this.garas.map(gara => ({
                     label: `${gara.name}`,

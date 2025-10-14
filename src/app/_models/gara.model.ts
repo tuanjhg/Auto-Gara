@@ -7,10 +7,6 @@ export interface GaraModel {
     owner_user_id: number;
     is_active: boolean;
 }
-export interface GaraListApiResponse {
-    data: GaraApiItem[];
-    totalCount: number;
-}
 export interface GaraUserApi {
     full_name: string;
     phone_number: string;
@@ -81,10 +77,10 @@ export interface GaraAddField {
     placeholder?: string;
 }
 export interface GaraDisplayRow {
-  tenant_id: number;
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
-  owner: string;
+    tenant_id: number;
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    owner: string;
 }

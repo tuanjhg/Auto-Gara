@@ -1,12 +1,44 @@
-<div class="flex items-center gap-2" [class.text-sm]="dense">
-  <span class="text-slate-600">Garage:</span>
-  <select
-    class="border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-500"
-    [ngModel]="value ?? (showAll ? 'all' : null)"
-    (ngModelChange)="onChange($event)">
-    <option *ngIf="showAll" value="all">All Garages</option>
-    <option *ngFor="let gara of tenants; trackBy: trackByTenant" [value]="gara.tenant_id">
-      {{ gara.name }}
-    </option>
-  </select>
+<div [class]="containerClass" [formGroup]="garaSelectionForm">
+  <ng-container *ngIf="userRole === 'admin'; else showGaraNameOnly">
+    <mat-select class="w-full font-semibold text-gray-900 text-sm min-h-[28px]" formControlName="selectedGaraId"
+      (selectionChange)="selectGaraByValue($event.value)" [panelClass]="'tw-select-panel'" disableRipple>
+
+      <mat-select-trigger>
+        <span class="text-lg font-medium text-gray-500 mr-2">{{ labelText }}</span>
+        <span class="text-lg font-semibold text-gray-900">
+          {{ selectedGaraControl.value === 'all' ? allGaraText : selectedGaraName }}
+        </span>
+      </mat-select-trigger>
+
+      <mat-option>
+        <ngx-mat-select-search [formControl]="garaSearchControl" placeholderLabel="Search gara..."
+          class="rounded border border-gray-200 bg-gray-50 text-xs px-1.5 focus:ring-2 focus:ring-yellow-400">
+        </ngx-mat-select-search>
+      </mat-option>
+
+      <mat-option [value]="'all'" class="text-xs font-medium">{{ allGaraText }}</mat-option>
+
+      <mat-option *ngIf="isSearching" [disabled]="true" class="text-xs font-medium text-gray-500">
+        <div class="flex items-center">
+          <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600 mr-2"></div>
+          Searching...
+        </div>
+      </mat-option>
+
+      <mat-option *ngIf="!isSearching && filteredGaraList.length === 0 && garaSearchControl.value" [disabled]="true"
+        class="text-xs font-medium text-gray-500">
+        No gara found
+      </mat-option>
+
+      <mat-option *ngFor="let gara of filteredGaraList; trackBy: trackByTenant" [value]="gara.tenant_id"
+        class="text-xs font-medium">
+        {{ gara.name }}
+      </mat-option>
+    </mat-select>
+  </ng-container>
+
+  <ng-template #showGaraNameOnly>
+    <span class="text-lg font-medium text-gray-500 mr-2">Gara:</span>
+    <span class="text-lg font-semibold text-gray-900">{{ selectedGaraName }}</span>
+  </ng-template>
 </div>

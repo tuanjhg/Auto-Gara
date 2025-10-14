@@ -2,14 +2,13 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoginService } from '@df_services/login.service';
-import { LoginResponse } from 'app/_models/login.model';
+import { ApiLoginResponse } from 'app/_models/login.model';
 import { LoadingService } from 'app/shared/services/loading.service';
 import { ToastrService } from 'ngx-toastr';
-
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
@@ -22,9 +21,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     private loginService: LoginService,
     public loadingService: LoadingService,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
-   ngOnInit(): void {
+  ngOnInit(): void {
     this.loginForm = this.formbuilder.group({
       email: [
         '',
@@ -43,22 +42,23 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
   }
 
-  onSubmit(): void {
-    this.submitted = true;
-    if (this.loginForm.invalid) {
-      return;
-    }
-    this.loadingService.show();
-    const { email, password } = this.loginForm.value;
-    this.serverMessage = '';
+    onSubmit(): void {
+        this.submitted = true;
+        if (this.loginForm.invalid) {
+            return;
+        }
+        this.loadingService.show();
+        const { email, password } = this.loginForm.value;
+        this.serverMessage = '';
 
     this.loginService.login(email, password).subscribe({
 
 
-      next: (response: LoginResponse) => {
-        localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        localStorage.setItem('role',response.role);
+      next: (response: ApiLoginResponse) => {
+        const loginData = response.data;
+        localStorage.setItem('accessToken', loginData.accessToken);
+        localStorage.setItem('refreshToken', loginData.refreshToken);
+        localStorage.setItem('role', loginData.role);
         this.loadingService.hide();
         this.submitted = false;
         this.router.navigate(['/dashboard']);

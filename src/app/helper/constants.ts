@@ -102,7 +102,7 @@ enum EndPoint {
     user = 'user',
     jobsite = 'jobsite',
     search = 'search',
-    order = 'order',
+    order = 'work-orders',
     payment = 'payment',
     news = 'news',
     unit = 'unit',
@@ -258,3 +258,10 @@ export const listDateWithCountry = {
     'Greenland': 'DD-MM-YYYY',
     'Mexico': 'DD/MM/YYYY'
 };
+
+export enum Role {
+    Admin = 'admin',
+    Owner = 'owner',
+    Mechanic = 'mechanic',
+    Accountant = 'accountant'
+}

@@ -1,207 +1,62 @@
-<div class="flex flex-col min-w-full">
-
-  <div class="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-
-    <div class="flex flex-1 flex-col gap-2 lg:flex-row lg:items-center">
-      <div class="inline-flex rounded-md bg-slate-200 p-1 w-fit">
-        <button class="py-2 px-3 rounded-md text-sm"
-                [ngClass]="viewMode==='kanban' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:bg-slate-300/50'"
-                (click)="setView('kanban')">
-          Kanban
-        </button>
-        <button class="py-2 px-3 rounded-md text-sm"
-                [ngClass]="viewMode==='list' ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-600 hover:bg-slate-300/50'"
-                (click)="setView('list')">
-          List
-        </button>
-      </div>
-
-
-      <div  *ngIf="viewMode==='list'" class="flex-1">
-        <input
-          type="text"
-          [(ngModel)]="searchText"
-          (ngModelChange)="onSearchChange($event)"
-          placeholder="Search code, vehicle, customer…"
-          class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-slate-900/60"
-        />
-      </div>
-
-      <div *ngIf="viewMode==='list'" class="w-full lg:w-56">
-        <select
-          class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 outline-none"
-          [(ngModel)]="statusFilter"
-          (change)="applyFilter()"
+<div class="w-full">
+    <div class="flex items-center justify-between pb-4 bg-gray-100">
+        <div
+            (click)="isGarageMenuOpen = !isGarageMenuOpen"
+            class="relative flex items-center justify-center bg-white py-2 px-4 rounded-lg min-w-[240px] w-auto select-none cursor-pointer"
         >
-          <option value="">All</option>
-          <option *ngFor="let s of KANBAN_COLUMNS" [ngValue]="s">{{ STATUS_LABEL[s] }}</option>
-          <option [ngValue]="'canceled'">canceled</option>
-        </select>
-      </div>
-    </div>
-
-    <button (click)="openAddModal()" class="flex items-center gap-2 bg-black text-white justify-center font-medium py-2 px-4 rounded-xl hover:opacity-90">
-      <mat-icon svgIcon="add"></mat-icon>
-      Add new Order
-    </button>
-  </div>
-
-  <div *ngIf="viewMode==='kanban'" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6 gap-6">
-    <ng-container *ngFor="let col of KANBAN_COLUMNS">
-      <div class="flex flex-col bg-slate-50 rounded-2xl border border-slate-200">
-        <div class="p-3 border-b border-slate-200 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-slate-900">{{ STATUS_LABEL[col] }}</h3>
-          </div>
-          <span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
-            {{ getWorkOrderCountByStatus(col) }}
-          </span>
-        </div>
-
-        <div class="flex-1 p-4 space-y-4 min-h-[420px]">
-          <ng-container *ngIf="getOrdersByColumn(col).length === 0">
-            <p class="text-center text-slate-500 py-6">No work orders</p>
-          </ng-container>
-          <ng-container *ngIf="getOrdersByColumn(col).length > 0">
-            <div  class= "space-y-4"[cdkDropListData]="getOrdersByColumn(col)" (cdkDropListDropped)="onKanbanDrop($event, col)">
-            <div *ngFor="let w of getVisibleOrders(col)" cdkDrag >
-              <div class="bg-white p-4 rounded-2xl border border-slate-200 hover:shadow-md transition-all cursor-pointer"
-                   (click)="openDetailModal(w.id);$event.stopPropagation();">
-                <div class="flex justify-between items-start mb-2">
-                  <span class="font-semibold text-slate-900">#{{ w.work_order_code }}</span>
-                  <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full"
-                        [ngClass]="getStatusStyle(w.status)">
-                    {{ statusLabel ? statusLabel(w.status) : STATUS_LABEL[w.status] }}
-                  </span>
+            Show: <span class="font-bold ml-1">{{ selectedGarageLabel }}</span>
+            <div
+                *ngIf="isGarageMenuOpen"
+                class="absolute right-0 top-full mt-2 min-w-full bg-white border rounded-xl border-gray-200 shadow-lg z-20"
+                style="transition: opacity 0.3s ease-in-out"
+                [ngClass]="{ 'opacity-0 pointer-events-none': !isGarageMenuOpen, 'opacity-100': isGarageMenuOpen }"
+            >
+                <div style="max-height: 300px; overflow-y: auto">
+                    <a
+                        (click)="$event.stopPropagation(); selectGarage({ value: 'all', label: 'All' }); isGarageMenuOpen = false"
+                        href="javascript:void(0)"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                        role="menuitem"
+                    >
+                        All
+                    </a>
+                    <a
+                        *ngFor="let gara of garas"
+                        (click)="$event.stopPropagation(); selectGarage(gara); isGarageMenuOpen = false"
+                        href="javascript:void(0)"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                        role="menuitem"
+                    >
+                        {{ gara.name }}
+                    </a>
                 </div>
-
-                <p class="text-sm text-slate-900 font-medium truncate" [title]="w.vehicle_label">{{ w.vehicle_label }}</p>
-                <p class="text-xs text-slate-600 mb-3 line-clamp-2" [title]="w.initial_notes || w.desc">
-                  {{ w.initial_notes || w.desc || '—' }}
-                </p>
-
-                <div class="flex justify-between items-center border-t border-slate-200 pt-3 text-xs">
-                  <div class="flex items-center gap-2 text-slate-600">
-                    <mat-icon svgIcon="schedule"></mat-icon>
-                    <span>
-                      Shipped on:
-                      <ng-container *ngIf="w.estimated_completion_date; else dashDate">
-                        <span [class.text-rose-600]="isOverdue && isOverdue(w)">
-                          {{ w.estimated_completion_date | date:'dd/MM/yyyy' }}
-                        </span>
-                      </ng-container>
-                      <ng-template #dashDate>—</ng-template>
-                    </span>
-                  </div>
-                  <div *ngIf="amountDue && amountDue(w) !== null" class="flex items-center gap-1">
-                    <mat-icon svgIcon="attach_money"></mat-icon>
-                    <span class="font-semibold text-slate-900">
-                      {{ amountDue(w) | currency:'VND'}}
-                    </span>
-                  </div>
-                </div>
-              </div>
             </div>
-            <div class="flex gap-2 mt-2">
-              <button *ngIf="getVisibleOrders(col).length < getOrdersByColumn(col).length"
-                      class="text-xs text-blue-600 hover:underline flex items-center gap-1"
-                      (click)="showMoreInKanban(col)">
-                <mat-icon svgIcon="arrow_drop_down"></mat-icon>
-                Show more
-              </button>
-              <button *ngIf="getVisibleOrders(col).length > KANBAN_COLUMN_LIMIT"
-                      class="text-xs text-red-600 hover:underline flex items-center gap-1"
-                      (click)="showLessInKanban(col)">
-                <mat-icon svgIcon="arrow_drop_up"></mat-icon>
-                Show less
-              </button>
-            </div>
-            </div>
-          </ng-container>
         </div>
-      </div>
-    </ng-container>
-  </div>
-
-
-  <div *ngIf="viewMode==='list'" class="bg-white border border-slate-200 rounded-2xl">
-    <div class="overflow-x-auto overflow-auto max-h-[63vh]">
-      <table class="min-w-full text-sm  ">
-      <thead class="sticky top-0 z-10 bg-gray-50">
-        <tr>
-          <ng-container *ngFor="let col of workOrderColumns">
-            <th *ngIf="col.key !== 'all'"
-                class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                [ngClass]="col.className || 'text-left'"
-                [class.cursor-pointer]="col.sortable"
-                (click)="col.sortable && sortBy(col.key)">
-              <span class="flex items-center gap-1">
-                {{ col.label }}
-                <span *ngIf="col.sortable"
-                      [class.opacity-0]="!sort || sort.key !== col.key">
-                  {{ sort?.dir === 'asc' ? '▲' : '▼' }}
-                </span>
-              </span>
-            </th>
-            <th *ngIf="col.key === 'all'" class="py-3 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">
-            </th>
-          </ng-container>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <tr *ngFor="let w of paginatedList" class="hover:bg-gray-50 cursor-pointer">
-          <td *ngFor="let col of workOrderColumns" class="py-4 px-6" [ngClass]="col.className || 'text-left'">
-            <ng-container [ngSwitch]="col.key">
-              <div *ngSwitchCase="'actions'">
-                <button (click)="openDetailModal(w.id)" class="text-[#DEE33E] hover:text-yellow-300 font-medium">Detail</button>
-              </div>
-              <span *ngSwitchCase="'estimated_completion_date'">
-                {{ w.estimated_completion_date | date:'dd/MM/yyyy' }}
-              </span>
-              <span *ngSwitchCase="'amount_due'">
-                {{ amountDue(w) }}
-              </span>
-              <span *ngSwitchDefault class="font-sans text-gray-900">
-                {{ w[col.key] }}
-              </span>
-            </ng-container>
-          </td>
-        </tr>
-        <tr *ngIf="!paginatedList || paginatedList.length === 0">
-          <td class="p-6 text-center text-slate-500" [attr.colspan]="workOrderColumns.length">No data</td>
-        </tr>
-      </tbody>
-      </table>
+        <button (click)="openAdd()" class="flex items-center justify-center w-2/12 h-11 bg-white text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+            <mat-icon svgIcon="add"></mat-icon>
+            <span class="text-base">Add new order</span>
+        </button>
     </div>
-     <div class="flex items-center justify-between p-4 min-w-full bg-white">
-        <div class="text-sm text-gray-600">
-          Show:
-          <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" class="ml-2 border border-gray-300 rounded px-2 py-1 text-sm">
-            <option *ngFor="let size of [5,10,15]" [value]="size">{{ size }}</option>
-          </select>
+    <div class="flex flex-col bg-white mb-4 mt-4 min-w-0">
+        <div class="mb-4 p-4">
+            <app-common-filter-bar [searchText]="searchText" (searchChange)="onSearchChange($event)"> </app-common-filter-bar>
+            <app-common-table
+                [columns]="tableColumns"
+                [data]="displayData"
+                [sortColumn]="sortColumn"
+                [sortOrder]="sortOrder"
+                [paginationArray]="paginationArray"
+                [currentPage]="currentPage"
+                [totalPages]="totalPages"
+                [pageSize]="pageSize"
+                (sort)="changeSort($event)"
+                (pageChange)="changePage($event)"
+                (pageSizeChange)="pageSize = $event; changePage(1)"
+                (action)="handleTableAction($event)"
+            >
+            </app-common-table>
         </div>
-        <div class="flex items-center space-x-1">
-          <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1" class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
-            <mat-icon svgIcon="arrow_left"></mat-icon>
-          </button>
-          <ng-container *ngFor="let page of paginationArray">
-            <button (click)="changePage(page)" [ngClass]="{'bg-black text-white': currentPage === page, 'text-gray-600 hover:bg-gray-200': currentPage !== page}" class="w-8 h-8 flex items-center justify-center border rounded-xl text-sm font-medium">
-              {{ page }}
-            </button>
-          </ng-container>
-          <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages" class="w-8 h-8 flex items-center justify-center border rounded-full text-gray-600 hover:bg-gray-200 disabled:opacity-50">
-            <mat-icon svgIcon="arrow_right"></mat-icon>
-          </button>
-        </div>
-      </div>
-  </div>
-  <div *ngIf="isAddModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-2xl max-h-[120vh] ">
-      <app-add-work-order (closeModalRequest)="closeModal('add')"></app-add-work-order>
-    </div>
-  </div>
-  <div *ngIf="isDetailModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="bg-gray-100 rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-      <app-work-order-detail [workOrderId]="workOrderId" (closeModalRequest)="closeModal('detail')"></app-work-order-detail>
     </div>
 </div>
+<app-loading *ngIf="loadingService.loading$ | async" class="z-[10000]"></app-loading>
+<app-add-work-order *ngIf="addOpen" (closed)="onAddClosed()"> </app-add-work-order>

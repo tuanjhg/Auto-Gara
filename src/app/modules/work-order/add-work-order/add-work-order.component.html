@@ -1,132 +1,61 @@
-<div class="p-5">
-  <div class="flex flex-row justify-between">
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Add New Order</h1>
-        <p class="text-gray-500">
-          Step {{ currentStep + 1 }} of {{ orderFormSections.length }}: {{ currentSection.title }}
-        </p>
-    </div>
-    <button class="mb-6" (click)="close()">
-      <mat-icon svgIcon="exit_to_app"></mat-icon>
-    </button>
-  </div>
-  <div class="mx-auto max-w-4xl rounded-lg bg-white p-8 shadow-lg">
-    <div class="mb-8 flex justify-between">
-      <div *ngFor="let section of orderFormSections; let i = index" class="flex-1">
-        <div 
-          class="w-full py-1"
-          [ngClass]="{
-            'bg-[#DEE33E]': i <= currentStep, 
-            'bg-gray-200': i > currentStep,
-            'rounded-l-full': i === 0,
-            'rounded-r-full': i === orderFormSections.length - 1
-          }"
-        ></div>
-      </div>
-    </div>
-    <form [formGroup]="workOrderForm" (ngSubmit)="onSubmit()" class="space-y-8 h-120 overflow-y-auto">
-      <div>
-        <div 
-          class="grid gap-6 text-sm"
-          [ngClass]="
-            currentSection.fields.length <=3 ? 'grid-cols-1': 'grid-cols-2 md:grid-cols-2'
-        ">
-    <ng-container *ngFor="let field of currentSection.fields">
-      <div [ngClass]="field.colspan === 2 ? 'col-span-1 md:col-span-2' : ''">
-        <label [for]="field.name" class="mb-1 block font-medium text-gray-700">
-          {{ field.label }}<span *ngIf="field.required" class="text-red-500"> *</span>
-        </label>
-        <ng-container [ngSwitch]="field.type">
-          <input
-            *ngSwitchCase="'text'"
-            [id]="field.name"
-            [type]="field.type"
-            [placeholder]="field.placeholder"
-            [formControlName]="field.name"
-            [ngClass]="getFieldClass(field.name)"
-            class="w-full border-2 rounded-2xl px-4 py-2 text-gray-800 placeholder-gray-400 focus:outline-none transition hover:border-yellow-400"
-          />
-          <input
-            *ngSwitchCase="'number'"
-            [id]="field.name"
-            [type]="field.type"
-            [placeholder]="field.placeholder"
-            [formControlName]="field.name"
-            [ngClass]="getFieldClass(field.name)"
-            class="w-full border-2 rounded-2xl px-4 py-2 text-gray-800 placeholder-gray-400 focus:outline-none transition hover:border-yellow-400"
-          />
-          <select
-            *ngSwitchCase="'select'"
-            [id]="field.name"
-            [formControlName]="field.name"
-            [ngClass]="getFieldClass(field.name)"
-            class="w-full border-2 rounded-2xl px-4 py-2 text-gray-800 placeholder-gray-400 focus:outline-none transition hover:border-yellow-400"
-          >
-            <option value="" disabled>--Select--</option>
-            <option *ngFor="let option of field.options" [value]="option.value" [ngClass]="field.name === 'status' ? getStatusClass(option.value) : ''">
-              {{ option.label }}
-            </option>
-          </select>
-          <textarea
-            *ngSwitchCase="'textarea'"
-            [id]="field.name"
-            rows="4"
-            [placeholder]="field.placeholder"
-            [formControlName]="field.name"
-            [ngClass]="getFieldClass(field.name)"
-            class="w-full border-2 rounded-2xl px-4 py-2 text-gray-800 placeholder-gray-400 focus:outline-none transition hover:border-yellow-400"
-          ></textarea>
-          <input
-            *ngSwitchCase="'date'"
-            [id]="field.name"
-            type="date"
-            [formControlName]="field.name"
-            [ngClass]="getFieldClass(field.name)"
-            class="w-full border-2 rounded-2xl px-4 py-2 text-gray-800 placeholder-gray-400 focus:outline-none transition hover:border-yellow-400"
-          />
-        </ng-container>
-        <div 
-          *ngIf="workOrderForm.get(field.name)?.invalid && workOrderForm.get(field.name)?.touched" 
-          class="mt-1 text-xs text-red-500"
-        >
-          <span *ngIf="workOrderForm.get(field.name)?.errors?.['required']">
-            {{ field.label }} is required.
-          </span>
-        </div>
-      </div>
-    </ng-container>
-    </div>
-  </div>
-         <div class="flex justify-between border-t pt-4 ">
-        <div>
-          <button 
-            *ngIf="currentStep > 0"
-            type="button" 
-            (click)="previousStep()" 
-            class="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Back
-          </button>
-        </div>
-        <div>
-          <button
-              *ngIf="currentStep < orderFormSections.length - 1"
-              type="button" 
-              (click)="nextStep()" 
-              class="rounded-lg bg-[#DEE33E] px-6 py-2 text-sm font-medium text-white hover:bg-yellow-300 disabled:opacity-50"
+<app-common-dialog [title]="'Add Work Order'" [show]="true" [showClose]="true" (closed)="close()" [width]="'54vw'" [maxWidth]="'1000px'" [maxHeight]="'95vh'">
+    <form [formGroup]="formAdd" (ngSubmit)="onSubmit()" id="addFormPart" class="grid grid-cols-1 md:grid-cols-2 gap-6" dialog-content>
+        <div *ngFor="let field of fields" class="flex flex-col {{ field.type === 'file' ? 'md:col-span-2' : '' }}">
+            <label class="text-sm font-medium text-gray-600 mb-1">{{ field.label }} <span *ngIf="field.require" class="text-red-500"> *</span></label>
+            <input
+                *ngIf="field.type === 'text' || field.type === 'number'"
+                [formControlName]="field.name"
+                [placeholder]="field.placeholder"
+                class="form-input w-full border rounded-2xl px-3 py-2 pr-10 font-medium border-gray-300 bg-white"
+                [class.border-red-500]="showError(field.name)"
+                [class.border-green-500]="!showError(field.name) && formAdd.get(field.name)?.value"
+            />
+            <select
+                *ngIf="field.type === 'select'"
+                [formControlName]="field.name"
+                [placeholder]="field.placeholder"
+                class="form-input w-full border rounded-2xl px-3 py-2 pr-10 font-medium border-gray-300 bg-white"
+                [class.border-red-500]="showError(field.name)"
+                [class.border-green-500]="!showError(field.name) && formAdd.get(field.name)?.value"
             >
-              Next
-            </button>
-          <button 
-            *ngIf="currentStep === orderFormSections.length - 1"
-            type="submit" 
-            [disabled]="workOrderForm.invalid" 
-            class="rounded-lg bg-[#DEE33E] px-6 py-2 text-sm font-medium text-white hover:bg-yellow-300 disabled:opacity-50"
-          >
-            Save Order
-          </button>
+                <option [ngValue]="null" class="text-gray-400" disabled>
+                    {{ field.placeholder }}
+                </option>
+                <option *ngFor="let opt of field.options" [ngValue]="opt.value">{{ opt.label }}</option>
+            </select>
+            <div class="relative w-full flex items-center" *ngIf="field.type === 'date'">
+                <input
+                    matInput
+                    [matDatepicker]="picker"
+                    [formControlName]="field.name"
+                    [placeholder]="field.placeholder"
+                    class="form-input w-full border rounded-2xl px-3 py-2 pr-10 font-medium border-gray-300 bg-white"
+                    [class.border-red-500]="showError(field.name)"
+                    [class.border-green-500]="!showError(field.name) && formAdd.get(field.name)?.value"
+                />
+                <mat-datepicker-toggle matSuffix [for]="picker" class="absolute right-0 mr-2 text-gray-400"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </div>
+            <input
+                *ngIf="field.type === 'readonly'"
+                [value]="field.displayValue"
+                readonly
+                class="form-input w-full border rounded-2xl px-3 py-2 pr-10 font-medium border-gray-300 bg-gray-100 cursor-not-allowed"
+            />
+            <p *ngIf="showError(field.name)" class="mt-1 text-xs text-red-600">
+                {{ getMsg(field.name, field.label) }}
+            </p>
         </div>
-      </div>
     </form>
-  </div>
-</div>
+    <div dialog-footer class="col-span-1 md:col-span-2 flex justify-end space-x-3 pt-2 mt-4">
+        <button type="button" (click)="close()" class="rounded-lg bg-gray-300 hover:bg-gray-400 px-4 py-2 text-sm font-medium">Cancel</button>
+        <button
+            type="submit"
+            form="addFormPart"
+            [disabled]="formAdd.invalid"
+            class="rounded-lg bg-[#DEE33E] hover:bg-yellow-200 px-4 py-2 text-sm font-medium text-black disabled:opacity-60"
+        >
+            Save
+        </button>
+    </div>
+</app-common-dialog>

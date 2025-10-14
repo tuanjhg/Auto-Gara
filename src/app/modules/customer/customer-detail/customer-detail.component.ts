@@ -18,7 +18,7 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
     @Input() id: number;
     @Output() closed = new EventEmitter<boolean>();
     customerSelected: CustomerApiItem;
-    form: FormGroup;
+    customerForm: FormGroup;
     isEditMode: boolean = false;
     customerUpdateRequest: Customer;
     fields: CustomerField[] = [];
@@ -28,15 +28,15 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
         private customerService: CustomerService,
         private toastrService: ToastrService,
         private formBuilder: FormBuilder,
-        private loadingService: LoadingService,
-    ) {}
+        public loadingService: LoadingService,
+    ) { }
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['id']) {
             this.loadCustomerDetail();
         }
     }
     ngOnInit(): void {
-        this.form = buildFormGroup(this.formBuilder, UpdateCustomerSchema);
+        this.customerForm = buildFormGroup(this.formBuilder, UpdateCustomerSchema);
     }
     loadCustomerDetail(): boolean {
         this.loadingService.show();
@@ -51,7 +51,7 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
                     { label: 'Date of Birth', name: 'date_of_birth', type: 'date', value: this.customerSelected.date_of_birth },
                     { label: 'Status', name: 'is_active', type: 'boolean', value: this.customerSelected.is_active },
                 ];
-                this.form.reset(this.mapCustomerToForm(res), { emitEvent: false });
+                this.customerForm.reset(this.mapCustomerToForm(res), { emitEvent: false });
                 this.loadingService.hide();
             },
             error: (err) => {
@@ -78,11 +78,11 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
         this.isEditMode = false;
     }
     onFormSubmit(): void {
-        if (this.form.invalid) {
+        if (this.customerForm.invalid) {
             return;
         }
         this.customerUpdateRequest = {
-            ...this.form.value,
+            ...this.customerForm.value,
             tenant_id: this.customerSelected.tenant_id
         };
         this.customerService.update(this.id, this.customerUpdateRequest).subscribe({
@@ -92,23 +92,23 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
                 this.loadCustomerDetail();
                 this.closed.emit(true);
             },
-            error: (err) => {
-                this.toastrService.error(getErrorMessage(this.form, err), 'Update failed!');
+            error: (error) => {
+                this.toastrService.error(getErrorMessage(this.customerForm, error), 'Update failed!');
                 this.closed.emit(false);
             },
         });
     }
-    openConfirmModel(): void {
+    openConfirmModal(): void {
         this.openConfirm = true;
     }
     close(): void {
         this.closed.emit(false);
     }
     showError(field: string): boolean {
-        return shouldShowError(this.form.get(field));
+        return shouldShowError(this.customerForm.get(field));
     }
     getErorrMessage(field: string, label: string): string {
-        return getErrorMessage(this.form.get(field), label);
+        return getErrorMessage(this.customerForm.get(field), label);
     }
 
     onConfirmDelete(): void {
@@ -118,8 +118,8 @@ export class CustomerDetailComponent implements OnInit, OnChanges {
                 this.openConfirm = false;
                 this.closed.emit();
             },
-            error: (err) => {
-                this.toastrService.error(getErrorMessage(this.form, err), 'Delete failed!');
+            error: (error) => {
+                this.toastrService.error(getErrorMessage(this.customerForm, error), 'Delete failed!');
                 this.openConfirm = false;
             },
         });

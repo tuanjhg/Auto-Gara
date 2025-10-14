@@ -24,6 +24,9 @@ export const UpdateCustomerSchema: FormSchema = {
         validators: [],
     },
     notes: {
-        validators: validationString({ required:true, maxLength: 500 })
-    }
+        validators: validationString({ required: true, maxLength: 500 })
+    },
+    tenant_id: {
+        validators: validationString({ required: true })
+    },
 };
