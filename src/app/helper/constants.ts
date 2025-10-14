@@ -102,7 +102,7 @@ enum EndPoint {
     user = 'user',
     jobsite = 'jobsite',
     search = 'search',
-    order = 'order',
+    order = 'work-orders',
     payment = 'payment',
     news = 'news',
     unit = 'unit',

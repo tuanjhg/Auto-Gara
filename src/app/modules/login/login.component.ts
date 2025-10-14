@@ -5,11 +5,10 @@ import { LoginService } from '@df_services/login.service';
 import { ApiLoginResponse } from 'app/_models/login.model';
 import { LoadingService } from 'app/shared/services/loading.service';
 import { ToastrService } from 'ngx-toastr';
-
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
@@ -43,14 +42,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
   }
 
-  onSubmit(): void {
-    this.submitted = true;
-    if (this.loginForm.invalid) {
-      return;
-    }
-    this.loadingService.show();
-    const { email, password } = this.loginForm.value;
-    this.serverMessage = '';
+    onSubmit(): void {
+        this.submitted = true;
+        if (this.loginForm.invalid) {
+            return;
+        }
+        this.loadingService.show();
+        const { email, password } = this.loginForm.value;
+        this.serverMessage = '';
 
     this.loginService.login(email, password).subscribe({
 

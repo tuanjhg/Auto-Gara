@@ -59,3 +59,4 @@
     </div>
 </div>
 <app-loading *ngIf="loadingService.loading$ | async" class="z-[10000]"></app-loading>
+<app-add-work-order *ngIf="addOpen" (closed)="onAddClosed()"> </app-add-work-order>

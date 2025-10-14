@@ -13,6 +13,11 @@ export interface LoginResponse {
     accessToken: string;
     refreshToken: string;
 }
+export interface UserInfoToken {
+    id: number;
+    email: string;
+    role: string;
+}
 
 export interface ApiLoginResponse {
     data: LoginResponse;
