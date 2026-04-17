@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+buildCommand = "npm run build"
+
+[start]
+startCommand = "node server.js"
+
+[environments.production]
+PORT = "8080"
+NODE_ENV = "production"
